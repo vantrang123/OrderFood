@@ -1,8 +1,9 @@
 package com.trangdv.orderfood.model;
 
 
-public class User {
+import androidx.annotation.NonNull;
 
+public class User {
     private String Name;
     private String Password;
     private String Phone;
@@ -34,5 +35,15 @@ public class User {
 
     public String getPassword() {
         return Password;
+    }
+
+    public void setPassword(String password) {
+        Password = password;
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return getPhone();
     }
 }

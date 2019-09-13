@@ -93,9 +93,6 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 getTextfromEdt();
-                //test
-                /*phonenumber = "0974929187";
-                password = "1203";*/
 
                 if (phonenumber.equals("")==false && password.equals("")==false) {
                     authLogin();
@@ -119,8 +116,6 @@ public class LoginActivity extends AppCompatActivity {
                     User user = dataSnapshot.child(phonenumber).getValue(User.class);
                     user.setPhone(phonenumber);
 
-                    /*String pass = user.getPassword().toString();
-                    Toast.makeText(LoginActivity.this, pass, Toast.LENGTH_SHORT).show();*/
 
                     if (user.getPassword().equals(password)) {
                         intoHome(user);

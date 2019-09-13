@@ -2,30 +2,45 @@ package com.trangdv.orderfood.ui;
 
 import android.os.Bundle;
 
-import androidx.fragment.app.FragmentManager;
 import androidx.core.view.GravityCompat;
 import androidx.appcompat.app.ActionBarDrawerToggle;
+
 import android.view.MenuItem;
+
 import com.google.android.material.navigation.NavigationView;
+
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+
 import android.view.Menu;
+import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.trangdv.orderfood.R;
+import com.trangdv.orderfood.common.Common;
 
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+
+    FragmentManager fragmentManager;
+
+    private TextView txtUserName;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        fragmentManager = getSupportFragmentManager();
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -34,12 +49,15 @@ public class MainActivity extends AppCompatActivity
         toggle.syncState();
         navigationView.setNavigationItemSelectedListener(this);
 
+        View headerView = navigationView.getHeaderView(0);
+        txtUserName = headerView.findViewById(R.id.tv_username);
+        txtUserName.setText(Common.currentUser.getName());
 
         addHome();
+
     }
 
-    private void addHome() {
-        FragmentManager fragmentManager = getSupportFragmentManager();
+    public void addHome() {
         fragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, new HomeFragment())
                 .commit();
@@ -86,13 +104,23 @@ public class MainActivity extends AppCompatActivity
 
         switch (id) {
             case R.id.nav_home:
-                addHome();
-                Toast.makeText(MainActivity.this, "home", Toast.LENGTH_SHORT).show();
+//                transaction.hide(getSupportFragmentManager().findFragmentById(R.id.fragment_container));
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.fragment_container, new HomeFragment())
+                        .addToBackStack(null)
+                        .commit();
+                Toast.makeText(MainActivity.this, "menu", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.nav_gallery:
-                Toast.makeText(MainActivity.this, "gallery", Toast.LENGTH_SHORT).show();
+//                transaction.hide(getSupportFragmentManager().findFragmentById(R.id.fragment_container));
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.fragment_container, new CartFragment())
+                        .addToBackStack(null)
+                        .commit();
+                Toast.makeText(MainActivity.this, "cart", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.nav_slideshow:
+
                 Toast.makeText(MainActivity.this, "slideshow", Toast.LENGTH_SHORT).show();
                 break;
         }

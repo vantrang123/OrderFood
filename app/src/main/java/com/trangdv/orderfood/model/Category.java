@@ -12,6 +12,10 @@ public class Category {
         Image = image;
     }
 
+    public Category(String name) {
+
+    }
+
     public String getImage() {
         return Image;
     }
