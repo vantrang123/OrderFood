@@ -17,9 +17,8 @@ import com.trangdv.orderfood.utils.SharedPrefs;
 public class SplashActivity extends AppCompatActivity {
 
     protected int TIME_LOADING = 3000;
-    public static final String CHECK = "check";
+    public static final String CHECK_ALREADLY_LOGIN = "check already login";
     private static final String TAG = "SplashActivity";
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,13 +40,11 @@ public class SplashActivity extends AppCompatActivity {
 
     public void onNext() {
         Intent intent;
-        try {
-            SharedPrefs.getInstance().getInstance().get(CHECK, User.class).toString();
-            Log.e(TAG, SharedPrefs.getInstance().getInstance().get(CHECK, User.class).toString());
-            intent = new Intent(SplashActivity.this, MainActivity.class);
-        } catch (NullPointerException e) {
-            Log.e(TAG, "null");
-            intent = new Intent(SplashActivity.this, LoginActivity.class);
+        int value = Integer.valueOf(SharedPrefs.getInstance().get(CHECK_ALREADLY_LOGIN, Integer.class, 0));
+        if (value==0) {
+            intent = new Intent(this, LoginActivity.class);
+        } else {
+            intent = new Intent(this, MainActivity.class);
         }
         startActivity(intent);
         finish();

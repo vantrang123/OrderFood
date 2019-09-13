@@ -24,6 +24,8 @@ import com.google.firebase.database.ValueEventListener;
 import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.common.Common;
 import com.trangdv.orderfood.model.User;
+import com.trangdv.orderfood.utils.SharedPrefs;
+
 
 public class LoginActivity extends AppCompatActivity {
     public static final int REQUEST_CODE = 2019;
@@ -116,8 +118,8 @@ public class LoginActivity extends AppCompatActivity {
                     User user = dataSnapshot.child(phonenumber).getValue(User.class);
                     user.setPhone(phonenumber);
 
-
                     if (user.getPassword().equals(password)) {
+                        SharedPrefs.getInstance().put(SplashActivity.CHECK_ALREADLY_LOGIN, 1);
                         intoHome(user);
                     } else {
                         Toast.makeText(LoginActivity.this, "Wrong Password !", Toast.LENGTH_SHORT).show();

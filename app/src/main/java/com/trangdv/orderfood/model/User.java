@@ -16,6 +16,7 @@ public class User {
         Password = password;
     }
 
+
     public void setPhone(String phone) {
         Phone = phone;
     }
@@ -41,9 +42,4 @@ public class User {
         Password = password;
     }
 
-    @NonNull
-    @Override
-    public String toString() {
-        return getPhone();
-    }
 }

@@ -1,5 +1,6 @@
 package com.trangdv.orderfood.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.core.view.GravityCompat;
@@ -23,6 +24,7 @@ import android.widget.Toast;
 
 import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.common.Common;
+import com.trangdv.orderfood.utils.SharedPrefs;
 
 
 public class MainActivity extends AppCompatActivity
@@ -119,14 +121,16 @@ public class MainActivity extends AppCompatActivity
                         .commit();
                 Toast.makeText(MainActivity.this, "cart", Toast.LENGTH_SHORT).show();
                 break;
-            case R.id.nav_slideshow:
-
-                Toast.makeText(MainActivity.this, "slideshow", Toast.LENGTH_SHORT).show();
-                break;
+            case R.id.nav_exit:
+                SharedPrefs.getInstance().clear();
+                Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+                startActivity(intent);
+                finish();
         }
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
 }
