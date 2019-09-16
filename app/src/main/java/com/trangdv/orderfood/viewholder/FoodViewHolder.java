@@ -29,6 +29,7 @@ public class FoodViewHolder extends RecyclerView.ViewHolder implements View.OnCl
         food_name = itemView.findViewById(R.id.food_name);
         food_price = itemView.findViewById(R.id.food_price);
         food_discount = itemView.findViewById(R.id.food_discount);
+        itemView.setOnClickListener(this);
     }
 
     @Override
