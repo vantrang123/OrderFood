@@ -14,6 +14,8 @@ import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.model.User;
 import com.trangdv.orderfood.utils.SharedPrefs;
 
+import static com.trangdv.orderfood.ui.LoginActivity.SAVE_USER;
+
 public class SplashActivity extends AppCompatActivity {
 
     protected int TIME_LOADING = 3000;
@@ -46,6 +48,7 @@ public class SplashActivity extends AppCompatActivity {
         } else {
             intent = new Intent(this, MainActivity.class);
         }
+
         startActivity(intent);
         finish();
     }

@@ -24,7 +24,10 @@ import android.widget.Toast;
 
 import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.common.Common;
+import com.trangdv.orderfood.model.User;
 import com.trangdv.orderfood.utils.SharedPrefs;
+
+import static com.trangdv.orderfood.ui.LoginActivity.SAVE_USER;
 
 
 public class MainActivity extends AppCompatActivity
@@ -32,7 +35,7 @@ public class MainActivity extends AppCompatActivity
 
 
     FragmentManager fragmentManager;
-
+    Toolbar toolbar;
     private TextView txtUserName;
 
     @Override
@@ -40,7 +43,8 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar = findViewById(R.id.toolbar);
+        toolbar.setTitle("Menu");
         setSupportActionBar(toolbar);
         fragmentManager = getSupportFragmentManager();
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
@@ -51,17 +55,28 @@ public class MainActivity extends AppCompatActivity
         toggle.syncState();
         navigationView.setNavigationItemSelectedListener(this);
 
+        //get user from share pref
+        User user = SharedPrefs.getInstance().get(SAVE_USER, User.class);
+        Common.currentUser = user;
+
         View headerView = navigationView.getHeaderView(0);
         txtUserName = headerView.findViewById(R.id.tv_username);
         txtUserName.setText(Common.currentUser.getName());
 
-        addHome();
+        Home();
 
     }
 
-    public void addHome() {
+    public void Home() {
         fragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, new HomeFragment())
+                .commit();
+    }
+
+    public void Cart() {
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment_container, new CartFragment())
+                .addToBackStack(null)
                 .commit();
     }
 
@@ -85,9 +100,6 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
@@ -107,20 +119,16 @@ public class MainActivity extends AppCompatActivity
         switch (id) {
             case R.id.nav_home:
 //                transaction.hide(getSupportFragmentManager().findFragmentById(R.id.fragment_container));
-                getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.fragment_container, new HomeFragment())
-                        .addToBackStack(null)
-                        .commit();
+                Home();
                 Toast.makeText(MainActivity.this, "menu", Toast.LENGTH_SHORT).show();
                 break;
-            case R.id.nav_gallery:
+
+            case R.id.nav_cart:
 //                transaction.hide(getSupportFragmentManager().findFragmentById(R.id.fragment_container));
-                getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.fragment_container, new CartFragment())
-                        .addToBackStack(null)
-                        .commit();
+                Cart();
                 Toast.makeText(MainActivity.this, "cart", Toast.LENGTH_SHORT).show();
                 break;
+
             case R.id.nav_exit:
                 SharedPrefs.getInstance().clear();
                 Intent intent = new Intent(MainActivity.this, LoginActivity.class);
@@ -132,5 +140,6 @@ public class MainActivity extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
 
 }

@@ -62,7 +62,7 @@ public class HomeFragment extends Fragment {
     private void fetchData() {
         adapter = new FirebaseRecyclerAdapter<Category, MenuViewHolder>(Category.class, R.layout.menu_item, MenuViewHolder.class, category) {
             @Override
-            protected void populateViewHolder(MenuViewHolder menuViewHolder, final Category category, int i) {
+            protected void populateViewHolder(MenuViewHolder menuViewHolder, final Category category, final int i) {
                 menuViewHolder.txtMenuName.setText(category.getName());
                 Picasso.with(getContext())
                         .load(category.getImage())
@@ -74,6 +74,7 @@ public class HomeFragment extends Fragment {
                     public void onClick(View view, int position, boolean isLongClick) {
 
                         Intent intent = new Intent(getActivity(), FoodActivity.class);
+                        intent.putExtra("CategoryId", adapter.getRef(i).getKey());
                         startActivity(intent);
 
                     }

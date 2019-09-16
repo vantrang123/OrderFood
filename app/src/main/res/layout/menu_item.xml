@@ -5,7 +5,6 @@
     android:layout_width="match_parent"
     android:layout_height="100dp"
     android:layout_marginTop="@dimen/dimens_5dp"
-    android:layout_marginLeft="@dimen/dimens_5dp"
     android:elevation="5dp">
 
     <ImageView
@@ -26,7 +25,7 @@
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="@id/item_root"
         app:layout_constraintLeft_toRightOf="@id/menu_img"
-        android:gravity="top"
-        android:layout_marginLeft="@dimen/dimens_16"/>
+        android:layout_marginLeft="@dimen/dimens_10"
+        android:gravity="top" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

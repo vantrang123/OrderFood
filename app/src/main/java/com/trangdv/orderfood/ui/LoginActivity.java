@@ -31,6 +31,7 @@ public class LoginActivity extends AppCompatActivity {
     public static final int REQUEST_CODE = 2019;
     public static final String KEY_PHONENUMBER = "key phonenumber address";
     public static final String KEY_PASSWORD = "key password";
+    public static final String SAVE_USER = "save user";
 
     private TextView dispatch_signup;
     private EditText edt_phonenumber;
@@ -86,7 +87,6 @@ public class LoginActivity extends AppCompatActivity {
 
             setTextintoEdt();
 
-
         }
     }
 
@@ -120,6 +120,9 @@ public class LoginActivity extends AppCompatActivity {
 
                     if (user.getPassword().equals(password)) {
                         SharedPrefs.getInstance().put(SplashActivity.CHECK_ALREADLY_LOGIN, 1);
+
+                        //save user in share pref
+                        SharedPrefs.getInstance().put(SAVE_USER, user);
                         intoHome(user);
                     } else {
                         Toast.makeText(LoginActivity.this, "Wrong Password !", Toast.LENGTH_SHORT).show();
@@ -140,6 +143,7 @@ public class LoginActivity extends AppCompatActivity {
     private void intoHome(User user) {
         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
         Common.currentUser = user;
+
         startActivity(intent);
         finish();
     }

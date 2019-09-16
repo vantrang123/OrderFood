@@ -17,7 +17,7 @@
     <string name="action_search">Search</string>
 
     <string name="menu_home">Menu</string>
-    <string name="menu_gallery">Gallery</string>
+    <string name="menu_cart">Cart</string>
     <string name="menu_exit">Signout</string>
     <string name="menu_tools">Tools</string>
     <string name="menu_share">Share</string>
