@@ -15,13 +15,13 @@
             android:icon="@drawable/ic_menu_cart"
             android:title="@string/menu_cart" />
         <item
+            android:id="@+id/nav_status"
+            android:icon="@drawable/ic_menu_status"
+            android:title="@string/menu_status" />
+        <item
             android:id="@+id/nav_exit"
             android:icon="@drawable/ic_menu_exit"
             android:title="@string/menu_exit" />
-        <item
-            android:id="@+id/nav_tools"
-            android:icon="@drawable/ic_menu_manage"
-            android:title="@string/menu_tools" />
     </group>
 
     <item android:title="Communicate">

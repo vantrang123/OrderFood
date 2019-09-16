@@ -82,6 +82,12 @@ public class MainActivity extends AppCompatActivity
         startActivity(intent);
     }
 
+    public void OrderStatus() {
+        fragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, new OrderStatusFragment())
+                .commit();
+    }
+
 
     @Override
     public void onBackPressed() {
@@ -131,9 +137,15 @@ public class MainActivity extends AppCompatActivity
                 Toast.makeText(MainActivity.this, "cart", Toast.LENGTH_SHORT).show();
                 break;
 
+            case R.id.nav_status:
+                OrderStatus();
+                Toast.makeText(MainActivity.this, "order status", Toast.LENGTH_SHORT).show();
+                break;
+
             case R.id.nav_exit:
                 SharedPrefs.getInstance().clear();
                 Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
                 finish();
         }
