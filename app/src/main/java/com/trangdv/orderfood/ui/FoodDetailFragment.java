@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -22,7 +23,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 import com.trangdv.orderfood.R;
+import com.trangdv.orderfood.database.Database;
 import com.trangdv.orderfood.model.Food;
+import com.trangdv.orderfood.model.Order;
 import com.trangdv.orderfood.viewholder.FoodViewHolder;
 
 public class FoodDetailFragment extends Fragment {
@@ -108,5 +111,20 @@ public class FoodDetailFragment extends Fragment {
         collapsingToolbarLayout = view.findViewById(R.id.collapsing);
         collapsingToolbarLayout.setExpandedTitleTextAppearance(R.style.ExpandedAppbar);
         collapsingToolbarLayout.setCollapsedTitleTextAppearance(R.style.CollapsedAppbar);
+
+        btnCart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new Database(getContext()).addToCart(new Order(
+                        foodId,
+                        currentFood.getName(),
+                        amountButton.getNumber(),
+                        currentFood.getPrice(),
+                        currentFood.getDiscount()
+                ));
+
+                Toast.makeText(getActivity(), R.string.added_to_cart, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }

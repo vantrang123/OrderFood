@@ -36,6 +36,7 @@
         </activity>
 
         <activity android:name=".ui.FoodActivity" />
+        <activity android:name=".ui.Cart" />
     </application>
 
     <uses-permission android:name="android.permission.INTERNET" />

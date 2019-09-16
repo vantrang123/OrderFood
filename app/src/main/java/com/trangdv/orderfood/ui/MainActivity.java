@@ -74,10 +74,12 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void Cart() {
-        getSupportFragmentManager().beginTransaction()
+        /*getSupportFragmentManager().beginTransaction()
                 .replace(R.id.fragment_container, new CartFragment())
                 .addToBackStack(null)
-                .commit();
+                .commit();*/
+        Intent intent = new Intent(this, Cart.class);
+        startActivity(intent);
     }
 
 
