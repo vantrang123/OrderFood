@@ -31,6 +31,14 @@ public class OrderStatusFragment extends Fragment {
     FirebaseDatabase database;
     DatabaseReference requests;
 
+    public static OrderStatusFragment newInstance(String phone) {
+        OrderStatusFragment orderStatus = new OrderStatusFragment();
+        Bundle bundle = new Bundle();
+        bundle.putString("FoodId", phone);
+        orderStatus.setArguments(bundle);
+        return orderStatus;
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {

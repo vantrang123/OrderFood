@@ -14,6 +14,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
@@ -25,6 +26,7 @@ import android.widget.Toast;
 import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.common.Common;
 import com.trangdv.orderfood.model.User;
+import com.trangdv.orderfood.service.ListenOrder;
 import com.trangdv.orderfood.utils.SharedPrefs;
 
 import static com.trangdv.orderfood.ui.LoginActivity.SAVE_USER;
@@ -63,8 +65,20 @@ public class MainActivity extends AppCompatActivity
         txtUserName = headerView.findViewById(R.id.tv_username);
         txtUserName.setText(Common.currentUser.getName());
 
-        Home();
-
+        Intent service = new Intent(MainActivity.this, ListenOrder.class);
+        startService(service);
+        String sFragment = getIntent().getStringExtra("startFragment");
+        if (sFragment != null) {
+            OrderStatus();
+        } else {
+            Home();
+        }
+    }
+    public void replace(Fragment fragment) {
+        fragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, fragment)
+                .addToBackStack(null)
+                .commit();
     }
 
     public void Home() {

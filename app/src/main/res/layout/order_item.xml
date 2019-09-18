@@ -7,6 +7,7 @@
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/dimens_10"
     android:background="@color/colorWhiteSmoke"
+    android:paddingLeft="@dimen/dimens_10"
     android:elevation="@dimen/dimens_5dp">
     <TextView
         android:id="@+id/order_id"
@@ -37,7 +38,7 @@
         app:layout_constraintTop_toBottomOf="@id/order_status"
         app:layout_constraintLeft_toLeftOf="@id/container_order_status"/>
     <TextView
-        android:id="@+id/order_addres"
+        android:id="@+id/order_address"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAllCaps="true"
