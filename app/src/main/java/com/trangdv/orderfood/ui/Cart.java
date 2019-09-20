@@ -1,10 +1,13 @@
 package com.trangdv.orderfood.ui;
 
+import android.Manifest;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
@@ -14,12 +17,25 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.trangdv.orderfood.R;
@@ -34,16 +50,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-class IventoryListThread implements Runnable {
-    DatabaseReference foods = FirebaseDatabase.getInstance().getReference("Foods");
-
-    @Override
-    public void run() {
-
-    }
-}
-
-public class Cart extends AppCompatActivity {
+public class Cart extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener{
+    private GoogleMap mMap;
+    private GoogleApiClient mGoogleApiClient;
+    private LocationRequest mLocationRequest;
+    private final static int PLAY_SERVICES_RESOLUTION_REQUEST=1000;
+    private final static int LOCATION_PERMISSION_REQUEST=1001;
+    private static int UPDATE_INTERVAL=1000;
+    private static int FASTEST_INTERVAL=5000;
+    private static int DISPLACEMENT=10;
 
     FirebaseDatabase database;
     DatabaseReference requests;
@@ -62,6 +77,10 @@ public class Cart extends AppCompatActivity {
     List<Order> cart = new ArrayList<>();
     static List<List<Order>> orderList = new ArrayList<>();
 
+    private Location mLastLocation;
+
+    String latitude = "";
+    String longitude = "";
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,6 +92,20 @@ public class Cart extends AppCompatActivity {
         initView();
 
         loadListFood();
+
+        if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)!= PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)!= PackageManager.PERMISSION_GRANTED)
+        {
+            requestRuntimePermission();
+        }
+        else{
+            if(checkPlayServices()){
+                buildingGoogleApiClient();
+                createLocationRequest();
+            }
+        }
+
+        displayLocation();
     }
 
     private void loadListFood() {
@@ -143,13 +176,24 @@ public class Cart extends AppCompatActivity {
         alertDialog.setPositiveButton("YES", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+
                 Request request = new Request(
                         Common.currentUser.getPhone(),
                         Common.currentUser.getName(),
                         edtAddress.getText().toString(),
                         txtTotalPrice.getText().toString(),
+                        latitude,
+                        longitude,
                         cart
                 );
+
+                /*Request request = new Request(
+                        Common.currentUser.getPhone(),
+                        Common.currentUser.getName(),
+                        edtAddress.getText().toString(),
+                        txtTotalPrice.getText().toString(),
+                        cart
+                );*/
 
                 requests.child(String.valueOf(System.currentTimeMillis()))
                         .setValue(request);
@@ -198,5 +242,110 @@ public class Cart extends AppCompatActivity {
 
         //refresh
         loadListFood();
+    }
+    private void displayLocation() {
+        if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)!= PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)!= PackageManager.PERMISSION_GRANTED)
+        {
+            requestRuntimePermission();
+        }
+        else{
+            mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+            if(mLastLocation!=null){
+                double latitude = mLastLocation.getLatitude();
+                double longitude = mLastLocation.getLongitude();
+
+                this.latitude = String.valueOf(latitude);
+                this.longitude = String.valueOf(longitude);
+
+            }
+            else{
+                //Toast.makeText(this,"Cannot retrieve the location!!",Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    private void requestRuntimePermission() {
+        ActivityCompat.requestPermissions(this,new String[]{
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+        },LOCATION_PERMISSION_REQUEST);
+    }
+
+    private boolean checkPlayServices() {
+        int resultCode = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this);
+        if (resultCode!= ConnectionResult.SUCCESS) {
+            if (GoogleApiAvailability.getInstance().isUserResolvableError(resultCode)) {
+                GoogleApiAvailability.getInstance().getErrorDialog(this, resultCode, PLAY_SERVICES_RESOLUTION_REQUEST);
+            }
+            else {
+                Toast.makeText(this,"This device does not support Maps!!",Toast.LENGTH_LONG).show();
+            }
+        }
+        return true;
+    }
+
+    protected synchronized void buildingGoogleApiClient() {
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API).build();
+
+        mGoogleApiClient.connect();
+
+    }
+
+    private void createLocationRequest() {
+        mLocationRequest = new LocationRequest();
+        mLocationRequest.setInterval(UPDATE_INTERVAL);
+        mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        mLocationRequest.setSmallestDisplacement(DISPLACEMENT);
+    }
+
+    private void startLocationUpdates() {
+        if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)!= PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)!= PackageManager.PERMISSION_GRANTED)
+        {
+            return;
+        }
+
+        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        displayLocation();
+        startLocationUpdates();
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        mGoogleApiClient.connect();
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        checkPlayServices();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if(mGoogleApiClient!=null){
+            mGoogleApiClient.connect();
+        }
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        mLastLocation = location;
+        displayLocation();
     }
 }

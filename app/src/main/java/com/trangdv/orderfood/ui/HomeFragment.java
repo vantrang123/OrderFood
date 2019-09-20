@@ -59,7 +59,7 @@ public class HomeFragment extends Fragment {
         Log.e("HomeFragment", "onDetach: " );
     }
 
-    private void fetchData() {
+    public void fetchData() {
         adapter = new FirebaseRecyclerAdapter<Category, MenuViewHolder>(Category.class, R.layout.menu_item, MenuViewHolder.class, category) {
             @Override
             protected void populateViewHolder(MenuViewHolder menuViewHolder, final Category category, final int i) {

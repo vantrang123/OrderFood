@@ -45,6 +45,7 @@ dependencies {
     implementation 'com.readystatesoftware.sqliteasset:sqliteassethelper:2.0.1'
     implementation 'com.amulyakhare:com.amulyakhare.textdrawable:1.0.1'
     implementation 'com.google.firebase:firebase-messaging:20.0.0'
-    implementation 'com.google.android.gms:play-services:12.0.1'
+    implementation 'com.google.android.gms:play-services-location:17.0.0'
+    implementation 'com.google.android.gms:play-services-maps:17.0.0'
 }
 apply plugin: 'com.google.gms.google-services'

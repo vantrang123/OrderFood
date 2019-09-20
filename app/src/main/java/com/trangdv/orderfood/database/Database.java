@@ -17,8 +17,8 @@ public class Database extends SQLiteAssetHelper {
     private static final String DB_NAME = "OFDB.db";
     private static final int DB_VER = 1;
 
-    public Database(Context context){
-        super(context, DB_NAME,null, DB_VER);
+    public Database(Context context) {
+        super(context, DB_NAME, null, DB_VER);
     }
 
     public List<Order> getCarts() {
@@ -32,20 +32,20 @@ public class Database extends SQLiteAssetHelper {
         Cursor c = qb.query(db, sqlSelect, null, null, null, null, null);
         final List<Order> result = new ArrayList<>();
 
-        if(c.moveToFirst()){
-            do{
+        if (c.moveToFirst()) {
+            do {
                 result.add(new Order(c.getString(c.getColumnIndex("ProductId")),
                         c.getString(c.getColumnIndex("ProductName")),
                         c.getString(c.getColumnIndex("Quantity")),
                         c.getString(c.getColumnIndex("Price")),
                         c.getString(c.getColumnIndex("Discount"))
                 ));
-            }while (c.moveToNext());
+            } while (c.moveToNext());
         }
         return result;
     }
 
-    public void addToCart(Order order){
+    public void addToCart(Order order) {
         SQLiteDatabase db = getReadableDatabase();
         String query = String.format("INSERT INTO OrderDetail(ProductId, ProductName, Quantity, Price, Discount) VALUES('%s','%s','%s','%s','%s');",
                 order.getProductId(),
@@ -57,15 +57,15 @@ public class Database extends SQLiteAssetHelper {
         db.execSQL(query);
     }
 
-    public void removeFromCart(String order){
+    public void removeFromCart(String order) {
 
         SQLiteDatabase db = getReadableDatabase();
 
-        String query = String.format("DELETE FROM OrderDetail WHERE ProductId='"+order+"'");
+        String query = String.format("DELETE FROM OrderDetail WHERE ProductId='" + order + "'");
         db.execSQL(query);
     }
 
-    public void cleanCart(){
+    public void cleanCart() {
         SQLiteDatabase db = getReadableDatabase();
         String query = String.format("DELETE FROM OrderDetail");
         db.execSQL(query);

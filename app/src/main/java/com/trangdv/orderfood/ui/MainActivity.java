@@ -17,6 +17,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.view.Menu;
 import android.view.View;
@@ -39,6 +40,7 @@ public class MainActivity extends AppCompatActivity
     FragmentManager fragmentManager;
     Toolbar toolbar;
     private TextView txtUserName;
+    String sFragment = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,19 +63,22 @@ public class MainActivity extends AppCompatActivity
         User user = SharedPrefs.getInstance().get(SAVE_USER, User.class);
         Common.currentUser = user;
 
-        View headerView = navigationView.getHeaderView(0);
+        final View headerView = navigationView.getHeaderView(0);
         txtUserName = headerView.findViewById(R.id.tv_username);
         txtUserName.setText(Common.currentUser.getName());
 
         Intent service = new Intent(MainActivity.this, ListenOrder.class);
         startService(service);
-        String sFragment = getIntent().getStringExtra("startFragment");
+        sFragment = getIntent().getStringExtra("startFragment");
         if (sFragment != null) {
             OrderStatus();
         } else {
             Home();
         }
+
+
     }
+
     public void replace(Fragment fragment) {
         fragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, fragment)
