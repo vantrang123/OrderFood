@@ -1,6 +1,9 @@
 package com.trangdv.orderfood.ui;
 
+import android.Manifest;
 import android.content.DialogInterface;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -15,10 +18,16 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.trangdv.orderfood.R;
@@ -33,10 +42,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class CartFragment extends Fragment {
+public class CartFragment extends Fragment implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener{
 
     FirebaseDatabase database;
     DatabaseReference requests;
+
+    private GoogleApiClient mGoogleApiClient;
+    private LocationRequest mLocationRequest;
+    private Location mLastLocation;
+    private final static int PLAY_SERVICES_RESOLUTION_REQUEST=1000;
+    private final static int LOCATION_PERMISSION_REQUEST=1001;
+    private static int UPDATE_INTERVAL=1000;
+    private static int FASTEST_INTERVAL=5000;
+    private static int DISPLACEMENT=10;
+
 
     RecyclerView recyclerView;
     RecyclerView.LayoutManager layoutManager;
@@ -49,8 +68,24 @@ public class CartFragment extends Fragment {
     float totalPrice;
     static float total;
 
-    String latitude = "";
-    String longitude = "";
+    String latitude = "16.000";
+    String longitude = "108.000";
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if(ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION)!= PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION)!= PackageManager.PERMISSION_GRANTED)
+        {
+            requestRuntimePermission();
+        }
+        else{
+            if(checkPlayServices()){
+                buildingGoogleApiClient();
+                createLocationRequest();
+            }
+        }
+    }
 
     @Nullable
     @Override
@@ -169,6 +204,7 @@ public class CartFragment extends Fragment {
                 new Database(getActivity().getBaseContext()).cleanCart();
                 Toast.makeText(getActivity(), "Thank you for ordering!", Toast.LENGTH_SHORT).show();
                 dialog.dismiss();
+                loadListFood();
             }
         });
 
@@ -187,5 +223,108 @@ public class CartFragment extends Fragment {
     public void onResume() {
         super.onResume();
         ((MainActivity)getActivity()).navigationView.getMenu().getItem(1).setChecked(true);
+        checkPlayServices();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        if(mGoogleApiClient!=null){
+            mGoogleApiClient.connect();
+        }
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        mGoogleApiClient.connect();
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
+
+
+    //location
+    private void requestRuntimePermission() {
+        ActivityCompat.requestPermissions(getActivity(),new String[]{
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+        },LOCATION_PERMISSION_REQUEST);
+    }
+
+    private boolean checkPlayServices() {
+        int resultCode = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(getActivity());
+        if (resultCode!= ConnectionResult.SUCCESS) {
+            if (GoogleApiAvailability.getInstance().isUserResolvableError(resultCode)) {
+                GoogleApiAvailability.getInstance().getErrorDialog(getActivity(), resultCode, PLAY_SERVICES_RESOLUTION_REQUEST);
+            }
+            else {
+                Toast.makeText(getContext(),"This device does not support Maps!!",Toast.LENGTH_LONG).show();
+            }
+        }
+        return true;
+    }
+
+    protected synchronized void buildingGoogleApiClient() {
+        mGoogleApiClient = new GoogleApiClient.Builder(getContext())
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API).build();
+
+        mGoogleApiClient.connect();
+
+    }
+
+    private void createLocationRequest() {
+        mLocationRequest = new LocationRequest();
+        mLocationRequest.setInterval(UPDATE_INTERVAL);
+        mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        mLocationRequest.setSmallestDisplacement(DISPLACEMENT);
+    }
+
+    private void startLocationUpdates() {
+        if(ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION)!= PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION)!= PackageManager.PERMISSION_GRANTED)
+        {
+            return;
+        }
+
+        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        displayLocation();
+        startLocationUpdates();
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        mLastLocation = location;
+        displayLocation();
+    }
+
+    private void displayLocation() {
+        if(ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION)!= PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION)!= PackageManager.PERMISSION_GRANTED)
+        {
+            requestRuntimePermission();
+        }
+        else{
+            mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+            if(mLastLocation!=null){
+                double latitude = mLastLocation.getLatitude();
+                double longitude = mLastLocation.getLongitude();
+
+                this.latitude = String.valueOf(latitude);
+                this.longitude = String.valueOf(longitude);
+
+            }
+            else{
+                //Toast.makeText(this,"Cannot retrieve the location!!",Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 }
