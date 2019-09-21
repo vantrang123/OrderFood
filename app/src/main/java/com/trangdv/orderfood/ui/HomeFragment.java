@@ -1,11 +1,13 @@
 package com.trangdv.orderfood.ui;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -15,15 +17,21 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.android.material.shape.RoundedCornerTreatment;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Transformation;
 import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.listener.ItemClickListener;
 import com.trangdv.orderfood.model.Category;
 import com.trangdv.orderfood.viewholder.MenuViewHolder;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
+
+import java.util.List;
+
+import jp.wasabeef.picasso.transformations.RoundedCornersTransformation;
 
 public class HomeFragment extends Fragment {
 
@@ -57,7 +65,8 @@ public class HomeFragment extends Fragment {
         category = database.getReference("Categories");
 
         //load menu
-        layoutManager = new LinearLayoutManager(getActivity());
+        //layoutManager = new LinearLayoutManager(getActivity());
+        layoutManager = new GridLayoutManager(getContext(), 2);
         recycler_menu.setLayoutManager(layoutManager);
         fetchData();
 
@@ -86,8 +95,10 @@ public class HomeFragment extends Fragment {
             @Override
             protected void populateViewHolder(MenuViewHolder menuViewHolder, final Category category, final int i) {
                 menuViewHolder.txtMenuName.setText(category.getName());
+
                 Picasso.with(getContext())
                         .load(category.getImage())
+                        .transform(new RoundedCornersTransformation(10, 0))
                         .into(menuViewHolder.imgMenu);
 
                 final Category clickItem = category;
