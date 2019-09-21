@@ -10,17 +10,17 @@ import com.trangdv.orderfood.listener.ItemClickListener;
 
 public class OrderViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-    public TextView txtOrderId, txtOrderStatus, txtOrderPhone, txtOrderAddres;
+    public TextView tvOrderId, tvOrderStatus, tvOrderPhone, tvOrderAddres;
 
     private ItemClickListener itemClickListener;
 
     public OrderViewHolder(View itemView) {
         super(itemView);
 
-        txtOrderAddres = itemView.findViewById(R.id.order_address);
-        txtOrderId = itemView.findViewById(R.id.order_id);
-        txtOrderStatus = itemView.findViewById(R.id.order_status);
-        txtOrderPhone = itemView.findViewById(R.id.order_phone);
+        tvOrderAddres = itemView.findViewById(R.id.order_address);
+        tvOrderId = itemView.findViewById(R.id.order_id);
+        tvOrderStatus = itemView.findViewById(R.id.order_status);
+        tvOrderPhone = itemView.findViewById(R.id.order_phone);
 
         itemView.setOnClickListener(this);
     }
@@ -31,6 +31,6 @@ public class OrderViewHolder extends RecyclerView.ViewHolder implements View.OnC
 
     @Override
     public void onClick(View v) {
-        itemClickListener.onClick(v, getAdapterPosition(),false);
+        itemClickListener.onClick(v, getAdapterPosition(), false);
     }
 }

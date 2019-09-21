@@ -25,7 +25,7 @@ import com.trangdv.orderfood.model.Request;
 import com.trangdv.orderfood.ui.MainActivity;
 import com.trangdv.orderfood.ui.OrderStatusFragment;
 
-public class ListenOrder extends Service implements ChildEventListener{
+public class ListenOrder extends Service implements ChildEventListener {
     public ListenOrder() {
     }
 
@@ -33,6 +33,7 @@ public class ListenOrder extends Service implements ChildEventListener{
     public IBinder onBind(Intent intent) {
         return null;
     }
+
     FirebaseDatabase database;
     DatabaseReference requests;
 
@@ -69,9 +70,9 @@ public class ListenOrder extends Service implements ChildEventListener{
         builder.setAutoCancel(true)
                 .setDefaults(Notification.DEFAULT_VIBRATE)
                 .setWhen(System.currentTimeMillis())
-                .setTicker("trangdv")
+                .setTicker("Thông báo!")
                 .setContentInfo("Your order was update")
-                .setContentText("Order #"+key+"was update status to"+ Common.convertCodeToStatus(request.getStatus()))
+                .setContentText("Order #" + key + "was update status to" + " " + Common.convertCodeToStatus(request.getStatus()))
                 .setContentIntent(contentIntent)
                 .setContentInfo("Info")
                 .setSmallIcon(R.mipmap.ic_launcher);

@@ -8,6 +8,7 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 
 import android.view.MenuItem;
 
+import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.navigation.NavigationView;
 
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -16,8 +17,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.view.Menu;
 import android.view.View;
@@ -41,6 +40,7 @@ public class MainActivity extends AppCompatActivity
     Toolbar toolbar;
     private TextView txtUserName;
     String sFragment = "";
+    NavigationView navigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
         fragmentManager = getSupportFragmentManager();
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView = findViewById(R.id.nav_view);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
@@ -90,20 +90,22 @@ public class MainActivity extends AppCompatActivity
         fragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, new HomeFragment())
                 .commit();
+        navigationView.getMenu().getItem(0).setChecked(true);
     }
 
     public void Cart() {
-        /*getSupportFragmentManager().beginTransaction()
+        AppBarLayout.LayoutParams toolbarLayoutParams = (AppBarLayout.LayoutParams) toolbar.getLayoutParams();
+        toolbarLayoutParams.setScrollFlags(0);
+        fragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, new CartFragment())
                 .addToBackStack(null)
-                .commit();*/
-        Intent intent = new Intent(this, Cart.class);
-        startActivity(intent);
+                .commit();
     }
 
     public void OrderStatus() {
         fragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, new OrderStatusFragment())
+                .addToBackStack(null)
                 .commit();
     }
 
@@ -142,23 +144,33 @@ public class MainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-
         switch (id) {
+
             case R.id.nav_home:
-//                transaction.hide(getSupportFragmentManager().findFragmentById(R.id.fragment_container));
-                Home();
-                Toast.makeText(MainActivity.this, "menu", Toast.LENGTH_SHORT).show();
+                if (item.isChecked()) item.setChecked(false);
+                else {
+                    Home();
+                    Toast.makeText(MainActivity.this, "menu", Toast.LENGTH_SHORT).show();
+                }
+                item.setChecked(true);
                 break;
 
             case R.id.nav_cart:
-//                transaction.hide(getSupportFragmentManager().findFragmentById(R.id.fragment_container));
-                Cart();
-                Toast.makeText(MainActivity.this, "cart", Toast.LENGTH_SHORT).show();
+                if (item.isChecked()) item.setChecked(false);
+                else {
+                    Cart();
+                    Toast.makeText(MainActivity.this, "cart", Toast.LENGTH_SHORT).show();
+                }
+                item.setChecked(true);
                 break;
 
             case R.id.nav_status:
-                OrderStatus();
-                Toast.makeText(MainActivity.this, "order status", Toast.LENGTH_SHORT).show();
+                if (item.isChecked()) item.setChecked(false);
+                else {
+                    OrderStatus();
+                    Toast.makeText(MainActivity.this, "order status", Toast.LENGTH_SHORT).show();
+                }
+                item.setChecked(true);
                 break;
 
             case R.id.nav_exit:
@@ -173,6 +185,4 @@ public class MainActivity extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
-
-
 }

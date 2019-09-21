@@ -16,7 +16,6 @@ import com.amulyakhare.textdrawable.TextDrawable;
 import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.common.Common;
 import com.trangdv.orderfood.model.Order;
-import com.trangdv.orderfood.ui.Cart;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;

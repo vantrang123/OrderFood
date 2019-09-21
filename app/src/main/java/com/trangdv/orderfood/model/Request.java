@@ -13,25 +13,13 @@ public class Request {
     private List<Order> foods;
     private boolean partial = false;
 
-    public Request() {
-    }
-
-    /*public Request(String phone, String name, String address, String total, List<Order> foods) {
-        this.phone = phone;
-        this.name = name;
-        this.address = address;
-        this.total = total;
-        this.foods = foods;
-        this.status="0";
-    }*/
-
     public Request(String phone, String name, String address, String total, String latitude, String longitude, List<Order> foods) {
         this.phone = phone;
         this.name = name;
         this.address = address;
         this.total = total;
         this.foods = foods;
-        this.status="0";
+        this.status = "0";
         this.latitude = latitude;
         this.longitude = longitude;
     }

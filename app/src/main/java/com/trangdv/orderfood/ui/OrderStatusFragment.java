@@ -43,8 +43,8 @@ public class OrderStatusFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_orderstatus, container, false);
-
-        database  = FirebaseDatabase.getInstance();
+        ((MainActivity) getActivity()).getSupportActionBar().setTitle("Order Status");
+        database = FirebaseDatabase.getInstance();
         requests = database.getReference("Requests");
 
         recyclerView = view.findViewById(R.id.listOrders);
@@ -70,10 +70,10 @@ public class OrderStatusFragment extends Fragment {
         ) {
             @Override
             protected void populateViewHolder(OrderViewHolder viewHolder, Request model, int position) {
-                viewHolder.txtOrderId.setText(adapter.getRef(position).getKey());
-                viewHolder.txtOrderStatus.setText(Common.convertCodeToStatus(model.getStatus()));
-                viewHolder.txtOrderAddres.setText(model.getAddress());
-                viewHolder.txtOrderPhone.setText(model.getPhone());
+                viewHolder.tvOrderId.setText(adapter.getRef(position).getKey());
+                viewHolder.tvOrderStatus.setText(Common.convertCodeToStatus(model.getStatus()));
+                viewHolder.tvOrderAddres.setText(model.getAddress());
+                viewHolder.tvOrderPhone.setText(model.getPhone());
 
                 viewHolder.setItemClickListener(new ItemClickListener() {
                     @Override
@@ -84,5 +84,11 @@ public class OrderStatusFragment extends Fragment {
             }
         };
         recyclerView.setAdapter(adapter);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        ((MainActivity)getActivity()).navigationView.getMenu().getItem(2).setChecked(true);
     }
 }

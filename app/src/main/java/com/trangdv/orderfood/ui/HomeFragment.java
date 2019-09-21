@@ -8,6 +8,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -23,6 +24,7 @@ import com.trangdv.orderfood.model.Category;
 import com.trangdv.orderfood.viewholder.MenuViewHolder;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
+
 public class HomeFragment extends Fragment {
 
     FirebaseDatabase database;
@@ -30,14 +32,21 @@ public class HomeFragment extends Fragment {
     RecyclerView recycler_menu;
 
     RecyclerView.LayoutManager layoutManager;
+    SwipeRefreshLayout refreshLayout;
 
     FirebaseRecyclerAdapter<Category, MenuViewHolder> adapter;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        ((MainActivity) getActivity()).getSupportActionBar().setTitle("Menu");
         View view = inflater.inflate(R.layout.fragment_home, container, false);
         recycler_menu = view.findViewById(R.id.rv_menu);
+        refreshLayout = view.findViewById(R.id.swr_menu);
+        refreshLayout.setColorSchemeResources(R.color.colorPrimary,
+                android.R.color.holo_green_dark,
+                android.R.color.holo_orange_dark,
+                android.R.color.holo_blue_dark);
         return view;
     }
 
@@ -51,12 +60,25 @@ public class HomeFragment extends Fragment {
         layoutManager = new LinearLayoutManager(getActivity());
         recycler_menu.setLayoutManager(layoutManager);
         fetchData();
+
+        refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                fetchData();
+            }
+        });
+        refreshLayout.post(new Runnable() {
+            @Override
+            public void run() {
+                fetchData();
+            }
+        });
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        Log.e("HomeFragment", "onDetach: " );
+        Log.e("HomeFragment", "onDetach: ");
     }
 
     public void fetchData() {
@@ -83,7 +105,13 @@ public class HomeFragment extends Fragment {
         };
         recycler_menu.setAdapter(adapter);
 //        recycler_menu.getAdapter().notifyDataSetChanged();
-        Log.e("HomeFragment", "fetchData: "+adapter.getItemCount() );
+        Log.e("HomeFragment", "fetchData: " + adapter.getItemCount());
+        refreshLayout.setRefreshing(false);
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        ((MainActivity) getActivity()).navigationView.getMenu().getItem(0).setChecked(true);
+    }
 }
