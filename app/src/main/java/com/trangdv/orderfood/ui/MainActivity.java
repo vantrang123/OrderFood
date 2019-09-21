@@ -15,7 +15,6 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 import android.view.Menu;
@@ -78,15 +77,20 @@ public class MainActivity extends AppCompatActivity
 
 
     }
-
-    public void replace(Fragment fragment) {
+    /*public void replace(Fragment fragment) {
         fragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, fragment)
                 .addToBackStack(null)
                 .commit();
+    }*/
+
+    private void setScrollBar(int i) {
+        AppBarLayout.LayoutParams toolbarLayoutParams = (AppBarLayout.LayoutParams) toolbar.getLayoutParams();
+        toolbarLayoutParams.setScrollFlags(i);
     }
 
     public void Home() {
+        setScrollBar(1);
         fragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, new HomeFragment())
                 .commit();
@@ -94,8 +98,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void Cart() {
-        AppBarLayout.LayoutParams toolbarLayoutParams = (AppBarLayout.LayoutParams) toolbar.getLayoutParams();
-        toolbarLayoutParams.setScrollFlags(0);
+        setScrollBar(0);
         fragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, new CartFragment())
                 .addToBackStack(null)
@@ -103,6 +106,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void OrderStatus() {
+        setScrollBar(1);
         fragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, new OrderStatusFragment())
                 .addToBackStack(null)
