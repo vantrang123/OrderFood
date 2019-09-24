@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void Home() {
-        setScrollBar(1);
+        //setScrollBar(1);
         fragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, new HomeFragment())
                 .commit();
@@ -106,7 +106,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void OrderStatus() {
-        setScrollBar(1);
+        //setScrollBar(1);
         fragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, new OrderStatusFragment())
                 .addToBackStack(null)
