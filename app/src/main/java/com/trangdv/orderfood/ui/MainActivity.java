@@ -77,12 +77,6 @@ public class MainActivity extends AppCompatActivity
 
 
     }
-    /*public void replace(Fragment fragment) {
-        fragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, fragment)
-                .addToBackStack(null)
-                .commit();
-    }*/
 
     private void setScrollBar(int i) {
         AppBarLayout.LayoutParams toolbarLayoutParams = (AppBarLayout.LayoutParams) toolbar.getLayoutParams();
