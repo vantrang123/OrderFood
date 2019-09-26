@@ -186,15 +186,6 @@ public class Cart extends AppCompatActivity implements GoogleApiClient.Connectio
                         longitude,
                         cart
                 );
-
-                /*Request request = new Request(
-                        Common.currentUser.getPhone(),
-                        Common.currentUser.getName(),
-                        edtAddress.getText().toString(),
-                        txtTotalPrice.getText().toString(),
-                        cart
-                );*/
-
                 requests.child(String.valueOf(System.currentTimeMillis()))
                         .setValue(request);
 
@@ -202,14 +193,6 @@ public class Cart extends AppCompatActivity implements GoogleApiClient.Connectio
                 Toast.makeText(Cart.this, "Thank you for ordering!", Toast.LENGTH_SHORT).show();
                 finish();
 
-
-                if(partial) {
-
-
-
-                }else {
-
-                }
 
             }
         });

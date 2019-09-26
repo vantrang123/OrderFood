@@ -11,7 +11,6 @@ public class Request {
     private String latitude;
     private String longitude;
     private List<Order> foods;
-    private boolean partial = false;
 
     public Request() {
 
@@ -26,14 +25,6 @@ public class Request {
         this.status = "0";
         this.latitude = latitude;
         this.longitude = longitude;
-    }
-
-    public boolean isPartial() {
-        return partial;
-    }
-
-    public void setPartial(boolean partial) {
-        this.partial = partial;
     }
 
     public String getStatus() {
