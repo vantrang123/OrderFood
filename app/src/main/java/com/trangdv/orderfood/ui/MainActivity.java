@@ -6,8 +6,10 @@ import android.os.Bundle;
 import androidx.core.view.GravityCompat;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 
+import android.util.Log;
 import android.view.MenuItem;
 
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.navigation.NavigationView;
 
@@ -22,6 +24,8 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.common.Common;
 import com.trangdv.orderfood.model.User;
@@ -38,7 +42,7 @@ public class MainActivity extends AppCompatActivity
     FragmentManager fragmentManager;
     Toolbar toolbar;
     private TextView txtUserName;
-    String sFragment = "";
+    String sFragment = null;
     NavigationView navigationView;
 
     @Override
@@ -66,9 +70,11 @@ public class MainActivity extends AppCompatActivity
         txtUserName = headerView.findViewById(R.id.tv_username);
         txtUserName.setText(Common.currentUser.getName());
 
-        Intent service = new Intent(MainActivity.this, ListenOrder.class);
+
+
+        /*Intent service = new Intent(MainActivity.this, ListenOrder.class);
         startService(service);
-        sFragment = getIntent().getStringExtra("startFragment");
+        sFragment = getIntent().getStringExtra("startFragment");*/
         if (sFragment != null) {
             OrderStatus();
         } else {
@@ -77,6 +83,8 @@ public class MainActivity extends AppCompatActivity
 
 
     }
+
+
 
     private void setScrollBar(int i) {
         AppBarLayout.LayoutParams toolbarLayoutParams = (AppBarLayout.LayoutParams) toolbar.getLayoutParams();

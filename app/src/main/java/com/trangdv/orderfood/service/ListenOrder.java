@@ -19,6 +19,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.messaging.RemoteMessage;
 import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.common.Common;
 import com.trangdv.orderfood.model.Request;
@@ -60,7 +61,10 @@ public class ListenOrder extends Service implements ChildEventListener {
         Request request = dataSnapshot.getValue(Request.class);
         showNotification(dataSnapshot.getKey(), request);
         //((MainActivity) getBaseContext()).replace(OrderStatusFragment.newInstance(request.getPhone()));
+
     }
+
+
 
     private void showNotification(String key, Request request) {
         Intent intent = new Intent(getBaseContext(), MainActivity.class);
@@ -71,7 +75,7 @@ public class ListenOrder extends Service implements ChildEventListener {
                 .setDefaults(Notification.DEFAULT_VIBRATE)
                 .setWhen(System.currentTimeMillis())
                 .setTicker("Thông báo!")
-                .setContentInfo("Your order was update")
+                .setContentInfo("Order đã được cập nhật")
                 .setContentText("Order #" + key + "was update status to" + " " + Common.convertCodeToStatus(request.getStatus()))
                 .setContentIntent(contentIntent)
                 .setContentInfo("Info")
