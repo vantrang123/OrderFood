@@ -65,22 +65,26 @@ public class SignupActivity extends AppCompatActivity {
     }
 
     private void createUser() {
+
         table_user.addValueEventListener(new ValueEventListener() {
+            int i = 0;
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
                 //check if user not exist in database
-                if (dataSnapshot.child(phonenumber).exists()) {
+                // bien i để tránh kiểm tra lại dữ liệu khi đã tạo tài khoản.
+                if (dataSnapshot.child(phonenumber).exists()&&i==0) {
                     User user = dataSnapshot.child(phonenumber).getValue(User.class);
                     Toast.makeText(SignupActivity.this, "Phone number already registered !", Toast.LENGTH_SHORT).show();
                 }
-                else {
+                else if (!dataSnapshot.child(phonenumber).exists()){
+                    i++;
                     User user = new User(name, password);
                     table_user.child(phonenumber).setValue(user);
                     Toast.makeText(SignupActivity.this, "Sign Up Successfully !", Toast.LENGTH_SHORT).show();
                     sendResult();
-                    //finish();
                 }
+
             }
 
             @Override
