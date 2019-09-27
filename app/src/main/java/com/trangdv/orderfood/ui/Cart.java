@@ -331,4 +331,9 @@ public class Cart extends AppCompatActivity implements GoogleApiClient.Connectio
         mLastLocation = location;
         displayLocation();
     }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+    }
 }

@@ -6,6 +6,7 @@ import android.os.Bundle;
 import androidx.core.view.GravityCompat;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 
+import android.os.Handler;
 import android.view.MenuItem;
 
 import com.google.android.material.appbar.AppBarLayout;
@@ -40,6 +41,15 @@ public class MainActivity extends AppCompatActivity
     private TextView txtUserName;
     String sFragment = "";
     NavigationView navigationView;
+
+    boolean doubleBackToExitPressedOnce = false;
+    Handler mExitHandler = new Handler();
+    Runnable mExitRunnable = new Runnable() {
+        @Override
+        public void run() {
+            doubleBackToExitPressedOnce = false;
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,12 +120,49 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        /*DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else if (doubleBackToExitPressedOnce){
+            mExitHandler.removeCallbacks(mExitRunnable);
+            mExitRunnable = null;
+            super.onBackPressed();
+
+        } else if (!doubleBackToExitPressedOnce) {
+            doubleBackToExitPressedOnce = true;
+            Toast.makeText(this, "Nhấn BACK lần nữa để thoát", Toast.LENGTH_SHORT).show();
+            mExitHandler.postDelayed(mExitRunnable, 2000);
+        }*/
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            super.onBackPressed();
+            if (doubleBackToExitPressedOnce) {
+                if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
+                    finishAffinity();
+                    System.exit(0);
+                } else {
+                    getSupportFragmentManager().popBackStackImmediate();
+                }
+                return;
+            }
+
+            if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
+                this.doubleBackToExitPressedOnce = true;
+                Toast.makeText(this, "Please click BACK again to exit", Toast.LENGTH_SHORT).show();
+
+                new Handler().postDelayed(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        doubleBackToExitPressedOnce = false;
+                    }
+                }, 2000);
+            } else {
+                getSupportFragmentManager().popBackStackImmediate();
+            }
         }
+
     }
 
     @Override
