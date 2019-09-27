@@ -17,14 +17,19 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.shape.RoundedCornerTreatment;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Transformation;
 import com.trangdv.orderfood.R;
+import com.trangdv.orderfood.common.Common;
 import com.trangdv.orderfood.listener.ItemClickListener;
 import com.trangdv.orderfood.model.Category;
+import com.trangdv.orderfood.model.Token;
 import com.trangdv.orderfood.viewholder.MenuViewHolder;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
@@ -63,6 +68,17 @@ public class HomeFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         database = FirebaseDatabase.getInstance();
         category = database.getReference("Categories");
+
+        // token
+        FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener( getActivity(),  new OnSuccessListener<InstanceIdResult>() {
+            @Override
+            public void onSuccess(InstanceIdResult instanceIdResult) {
+                String newToken = instanceIdResult.getToken();
+                Log.e("newToken",newToken);
+
+                updateTokenShipper(newToken);
+            }
+        });
 
         //load menu
         //layoutManager = new LinearLayoutManager(getActivity());
@@ -118,6 +134,13 @@ public class HomeFragment extends Fragment {
 //        recycler_menu.getAdapter().notifyDataSetChanged();
         Log.e("HomeFragment", "fetchData: " + adapter.getItemCount());
         refreshLayout.setRefreshing(false);
+    }
+
+    private void updateTokenShipper(String token) {
+
+        DatabaseReference tokens = database.getReference("Tokens");
+        Token data = new Token(token, false);
+        tokens.child(Common.currentUser.getPhone()).setValue(data);
     }
 
     @Override

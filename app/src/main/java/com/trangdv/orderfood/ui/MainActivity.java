@@ -7,6 +7,7 @@ import androidx.core.view.GravityCompat;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 
 import android.os.Handler;
+
 import android.view.MenuItem;
 
 import com.google.android.material.appbar.AppBarLayout;
@@ -26,7 +27,6 @@ import android.widget.Toast;
 import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.common.Common;
 import com.trangdv.orderfood.model.User;
-import com.trangdv.orderfood.service.ListenOrder;
 import com.trangdv.orderfood.utils.SharedPrefs;
 
 import static com.trangdv.orderfood.ui.LoginActivity.SAVE_USER;
@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity
     FragmentManager fragmentManager;
     Toolbar toolbar;
     private TextView txtUserName;
-    String sFragment = "";
+    String sFragment = null;
     NavigationView navigationView;
 
     boolean doubleBackToExitPressedOnce = false;
@@ -76,9 +76,11 @@ public class MainActivity extends AppCompatActivity
         txtUserName = headerView.findViewById(R.id.tv_username);
         txtUserName.setText(Common.currentUser.getName());
 
-        Intent service = new Intent(MainActivity.this, ListenOrder.class);
+
+
+        /*Intent service = new Intent(MainActivity.this, ListenOrder.class);
         startService(service);
-        sFragment = getIntent().getStringExtra("startFragment");
+        sFragment = getIntent().getStringExtra("startFragment");*/
         if (sFragment != null) {
             OrderStatus();
         } else {
@@ -87,6 +89,8 @@ public class MainActivity extends AppCompatActivity
 
 
     }
+
+
 
     private void setScrollBar(int i) {
         AppBarLayout.LayoutParams toolbarLayoutParams = (AppBarLayout.LayoutParams) toolbar.getLayoutParams();

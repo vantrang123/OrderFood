@@ -57,7 +57,7 @@ public class SignupActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 getTextfromEdt();
-                if (name.equals("")==false && phonenumber.equals("")==false && password.equals("")==false) {
+                if (name.equals("") == false && phonenumber.equals("") == false && password.equals("") == false) {
                     createUser();
                 }
             }
@@ -68,16 +68,16 @@ public class SignupActivity extends AppCompatActivity {
 
         table_user.addValueEventListener(new ValueEventListener() {
             int i = 0;
+
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
                 //check if user not exist in database
                 // bien i để tránh kiểm tra lại dữ liệu khi đã tạo tài khoản.
-                if (dataSnapshot.child(phonenumber).exists()&&i==0) {
+                if (dataSnapshot.child(phonenumber).exists() && i == 0) {
                     User user = dataSnapshot.child(phonenumber).getValue(User.class);
                     Toast.makeText(SignupActivity.this, "Phone number already registered !", Toast.LENGTH_SHORT).show();
-                }
-                else if (!dataSnapshot.child(phonenumber).exists()){
+                } else if (!dataSnapshot.child(phonenumber).exists()) {
                     i++;
                     User user = new User(name, password);
                     table_user.child(phonenumber).setValue(user);
