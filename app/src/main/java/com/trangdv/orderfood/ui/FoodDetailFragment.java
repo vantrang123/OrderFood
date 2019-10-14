@@ -10,6 +10,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 
 import com.cepheuen.elegantnumberbutton.view.ElegantNumberButton;
@@ -38,6 +39,7 @@ public class FoodDetailFragment extends Fragment {
     FirebaseDatabase database;
     DatabaseReference foods;
     Food currentFood;
+    Toolbar toolbar;
 
     String foodId = "";
 
@@ -55,6 +57,15 @@ public class FoodDetailFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_food_detail, container, false);
+        this.toolbar = ((FoodActivity) getActivity()).toolbar;
+        toolbar.setTitle("Food Detail");
+        ((FoodActivity) getActivity()).setSupportActionBar(toolbar);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ((FoodActivity) getActivity()).fragmentManager.popBackStack();
+            }
+        });
         initView(view);
         return view;
     }
@@ -71,9 +82,6 @@ public class FoodDetailFragment extends Fragment {
         if (!foodId.isEmpty()) {
             getDetailFood(foodId);
         }
-
-
-
     }
 
     private void getDetailFood(String foodId) {

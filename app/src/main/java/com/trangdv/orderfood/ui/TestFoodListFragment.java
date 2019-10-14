@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -36,12 +37,24 @@ public class TestFoodListFragment extends Fragment implements FoodListAdapter.It
     //FirebaseRecyclerAdapter<Food, FoodViewHolder> adapter;
     List<String> foodIds = new ArrayList<>();
     List<Food> foods = new ArrayList<>();
+    Toolbar toolbar;
+
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_food_list, container, false);
         recycler_food = view.findViewById(R.id.rv_food);
+
+        this.toolbar = ((FoodActivity) getActivity()).toolbar;
+        ((FoodActivity) getActivity()).setSupportActionBar(toolbar);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ((FoodActivity) getActivity()).finish();
+            }
+        });
+
         return view;
     }
 

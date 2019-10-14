@@ -37,7 +37,8 @@
         <activity
             android:name=".ui.LoginActivity"
             android:theme="@style/AppTheme"></activity>
-        <activity android:name=".ui.FoodActivity" />
+        <activity android:name=".ui.FoodActivity"
+            android:theme="@style/AppTheme"/>
         <activity android:name=".ui.CartFragment" />
 
         <service
