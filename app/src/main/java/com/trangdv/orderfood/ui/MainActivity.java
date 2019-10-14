@@ -98,7 +98,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void Home() {
-        //setScrollBar(1);
+        //setScrollBar(1); 
         setScrollBar(SCROLL_FLAG_SCROLL|SCROLL_FLAG_ENTER_ALWAYS);
         fragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, new HomeFragment())
