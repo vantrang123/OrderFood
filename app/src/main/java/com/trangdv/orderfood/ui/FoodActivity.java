@@ -26,8 +26,11 @@ public class FoodActivity extends AppCompatActivity {
         setContentView(R.layout.activity_food);
         fragmentManager = getSupportFragmentManager();
 
-        fragmentManager.beginTransaction()
+        /*fragmentManager.beginTransaction()
                 .replace(R.id.fragment_container_food, new FoodListFragment())
+                .commit();*/
+        fragmentManager.beginTransaction()
+                .replace(R.id.fragment_container_food, new TestFoodListFragment())
                 .commit();
     }
 
