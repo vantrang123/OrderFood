@@ -6,6 +6,8 @@ import android.os.Bundle;
 import androidx.core.view.GravityCompat;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 
+import android.os.Handler;
+
 import android.view.MenuItem;
 
 import com.google.android.material.appbar.AppBarLayout;
@@ -25,7 +27,6 @@ import android.widget.Toast;
 import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.common.Common;
 import com.trangdv.orderfood.model.User;
-import com.trangdv.orderfood.service.ListenOrder;
 import com.trangdv.orderfood.utils.SharedPrefs;
 
 import static com.trangdv.orderfood.ui.LoginActivity.SAVE_USER;
@@ -38,8 +39,17 @@ public class MainActivity extends AppCompatActivity
     FragmentManager fragmentManager;
     Toolbar toolbar;
     private TextView txtUserName;
-    String sFragment = "";
+    String sFragment = null;
     NavigationView navigationView;
+
+    boolean doubleBackToExitPressedOnce = false;
+    Handler mExitHandler = new Handler();
+    Runnable mExitRunnable = new Runnable() {
+        @Override
+        public void run() {
+            doubleBackToExitPressedOnce = false;
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,9 +76,11 @@ public class MainActivity extends AppCompatActivity
         txtUserName = headerView.findViewById(R.id.tv_username);
         txtUserName.setText(Common.currentUser.getName());
 
-        Intent service = new Intent(MainActivity.this, ListenOrder.class);
+
+
+        /*Intent service = new Intent(MainActivity.this, ListenOrder.class);
         startService(service);
-        sFragment = getIntent().getStringExtra("startFragment");
+        sFragment = getIntent().getStringExtra("startFragment");*/
         if (sFragment != null) {
             OrderStatus();
         } else {
@@ -78,13 +90,16 @@ public class MainActivity extends AppCompatActivity
 
     }
 
+
+
     private void setScrollBar(int i) {
         AppBarLayout.LayoutParams toolbarLayoutParams = (AppBarLayout.LayoutParams) toolbar.getLayoutParams();
         toolbarLayoutParams.setScrollFlags(i);
     }
 
     public void Home() {
-        //setScrollBar(1);
+        //setScrollBar(1); 
+        setScrollBar(SCROLL_FLAG_SCROLL|SCROLL_FLAG_ENTER_ALWAYS);
         fragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, new HomeFragment())
                 .commit();
@@ -110,12 +125,49 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        /*DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else if (doubleBackToExitPressedOnce){
+            mExitHandler.removeCallbacks(mExitRunnable);
+            mExitRunnable = null;
+            super.onBackPressed();
+
+        } else if (!doubleBackToExitPressedOnce) {
+            doubleBackToExitPressedOnce = true;
+            Toast.makeText(this, "Nhấn BACK lần nữa để thoát", Toast.LENGTH_SHORT).show();
+            mExitHandler.postDelayed(mExitRunnable, 2000);
+        }*/
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            super.onBackPressed();
+            if (doubleBackToExitPressedOnce) {
+                if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
+                    finishAffinity();
+                    System.exit(0);
+                } else {
+                    getSupportFragmentManager().popBackStackImmediate();
+                }
+                return;
+            }
+
+            if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
+                this.doubleBackToExitPressedOnce = true;
+                Toast.makeText(this, "Please click BACK again to exit", Toast.LENGTH_SHORT).show();
+
+                new Handler().postDelayed(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        doubleBackToExitPressedOnce = false;
+                    }
+                }, 2000);
+            } else {
+                getSupportFragmentManager().popBackStackImmediate();
+            }
         }
+
     }
 
     @Override
