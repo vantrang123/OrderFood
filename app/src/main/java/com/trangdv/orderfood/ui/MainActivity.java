@@ -98,7 +98,7 @@ public class MainActivity extends AppCompatActivity
                 .addToBackStack(null)
                 .commit();
     }
-
+    setScrollBar(SCROLL_FLAG_SCROLL|SCROLL_FLAG_ENTER_ALWAYS);
     public void OrderStatus() {
         //setScrollBar(1);
         fragmentManager.beginTransaction()
