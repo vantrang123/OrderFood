@@ -91,7 +91,7 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         ((MainActivity) getActivity()).getSupportActionBar().setTitle("Cart");
-        View view = inflater.inflate(R.layout.activity_cart, container, false);
+        View view = inflater.inflate(R.layout.fragment_cart, container, false);
 
         database = FirebaseDatabase.getInstance();
         requests = database.getReference("Requests");
