@@ -30,6 +30,8 @@ import com.trangdv.orderfood.common.Common;
 import com.trangdv.orderfood.model.User;
 import com.trangdv.orderfood.utils.SharedPrefs;
 
+import static com.google.android.material.appbar.AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS;
+import static com.google.android.material.appbar.AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL;
 import static com.trangdv.orderfood.ui.LoginActivity.SAVE_USER;
 
 
@@ -91,7 +93,6 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-
     private void setScrollBar(int i) {
         AppBarLayout.LayoutParams toolbarLayoutParams = (AppBarLayout.LayoutParams) toolbar.getLayoutParams();
         toolbarLayoutParams.setScrollFlags(i);
@@ -99,6 +100,7 @@ public class MainActivity extends AppCompatActivity
 
     public void Home() {
         //setScrollBar(1);
+        setScrollBar(SCROLL_FLAG_SCROLL|SCROLL_FLAG_ENTER_ALWAYS);
         fragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, new HomeFragment())
                 .commit();
