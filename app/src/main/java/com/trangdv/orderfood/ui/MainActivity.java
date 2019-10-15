@@ -17,6 +17,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 import android.view.Menu;
@@ -91,7 +92,6 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-
     private void setScrollBar(int i) {
         AppBarLayout.LayoutParams toolbarLayoutParams = (AppBarLayout.LayoutParams) toolbar.getLayoutParams();
         toolbarLayoutParams.setScrollFlags(i);
@@ -137,36 +137,32 @@ public class MainActivity extends AppCompatActivity
             Toast.makeText(this, "Nhấn BACK lần nữa để thoát", Toast.LENGTH_SHORT).show();
             mExitHandler.postDelayed(mExitRunnable, 2000);
         }*/
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-        } else {
-            if (doubleBackToExitPressedOnce) {
-                if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
-                    finishAffinity();
-                    System.exit(0);
-                } else {
-                    getSupportFragmentManager().popBackStackImmediate();
-                }
-                return;
-            }
-
-            if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
-                this.doubleBackToExitPressedOnce = true;
-                Toast.makeText(this, "Please click BACK again to exit", Toast.LENGTH_SHORT).show();
-
-                new Handler().postDelayed(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        doubleBackToExitPressedOnce = false;
-                    }
-                }, 2000);
-            } else {
-                getSupportFragmentManager().popBackStackImmediate();
-            }
+        } else if (doubleBackToExitPressedOnce) {
+            finishAffinity();
+            System.exit(0);
+            return;
         }
 
+        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
+
+        if (!(fragment instanceof HomeFragment)) {
+            getSupportFragmentManager().popBackStackImmediate();
+
+        } else {
+            this.doubleBackToExitPressedOnce = true;
+            Toast.makeText(this, "Please click BACK again to exit", Toast.LENGTH_SHORT).show();
+
+            new Handler().postDelayed(new Runnable() {
+
+                @Override
+                public void run() {
+                    doubleBackToExitPressedOnce = false;
+                }
+            }, 2000);
+        }
     }
 
     @Override
@@ -234,4 +230,6 @@ public class MainActivity extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
+
 }

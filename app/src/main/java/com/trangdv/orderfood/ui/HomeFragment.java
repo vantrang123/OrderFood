@@ -148,4 +148,6 @@ public class HomeFragment extends Fragment {
         super.onResume();
         ((MainActivity) getActivity()).navigationView.getMenu().getItem(0).setChecked(true);
     }
+
+
 }
