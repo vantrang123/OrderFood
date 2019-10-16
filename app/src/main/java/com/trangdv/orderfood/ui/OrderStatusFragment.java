@@ -89,6 +89,6 @@ public class OrderStatusFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        ((MainActivity)getActivity()).navigationView.getMenu().getItem(2).setChecked(true);
+        ((MainActivity) getActivity()).navigationView.getMenu().getItem(2).setChecked(true);
     }
 }

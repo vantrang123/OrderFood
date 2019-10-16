@@ -24,7 +24,6 @@ import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.common.Common;
 import com.trangdv.orderfood.model.Request;
 import com.trangdv.orderfood.ui.MainActivity;
-import com.trangdv.orderfood.ui.OrderStatusFragment;
 
 public class ListenOrder extends Service implements ChildEventListener {
     public ListenOrder() {

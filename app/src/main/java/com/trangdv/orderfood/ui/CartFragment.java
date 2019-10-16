@@ -42,7 +42,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class CartFragment extends Fragment implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener{
+public class CartFragment extends Fragment implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener {
 
     FirebaseDatabase database;
     DatabaseReference requests;
@@ -50,11 +50,11 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
     private Location mLastLocation;
-    private final static int PLAY_SERVICES_RESOLUTION_REQUEST=1000;
-    private final static int LOCATION_PERMISSION_REQUEST=1001;
-    private static int UPDATE_INTERVAL=1000;
-    private static int FASTEST_INTERVAL=5000;
-    private static int DISPLACEMENT=10;
+    private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 1000;
+    private final static int LOCATION_PERMISSION_REQUEST = 1001;
+    private static int UPDATE_INTERVAL = 1000;
+    private static int FASTEST_INTERVAL = 5000;
+    private static int DISPLACEMENT = 10;
 
 
     RecyclerView recyclerView;
@@ -74,13 +74,11 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if(ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION)!= PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION)!= PackageManager.PERMISSION_GRANTED)
-        {
+        if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             requestRuntimePermission();
-        }
-        else{
-            if(checkPlayServices()){
+        } else {
+            if (checkPlayServices()) {
                 buildingGoogleApiClient();
                 createLocationRequest();
             }
@@ -219,17 +217,18 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
         alertDialog.show();
 
     }
+
     @Override
     public void onResume() {
         super.onResume();
-        ((MainActivity)getActivity()).navigationView.getMenu().getItem(1).setChecked(true);
+        ((MainActivity) getActivity()).navigationView.getMenu().getItem(1).setChecked(true);
         checkPlayServices();
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        if(mGoogleApiClient!=null){
+        if (mGoogleApiClient != null) {
             mGoogleApiClient.connect();
         }
     }
@@ -247,20 +246,19 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
 
     //location
     private void requestRuntimePermission() {
-        ActivityCompat.requestPermissions(getActivity(),new String[]{
+        ActivityCompat.requestPermissions(getActivity(), new String[]{
                 Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION
-        },LOCATION_PERMISSION_REQUEST);
+        }, LOCATION_PERMISSION_REQUEST);
     }
 
     private boolean checkPlayServices() {
         int resultCode = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(getActivity());
-        if (resultCode!= ConnectionResult.SUCCESS) {
+        if (resultCode != ConnectionResult.SUCCESS) {
             if (GoogleApiAvailability.getInstance().isUserResolvableError(resultCode)) {
                 GoogleApiAvailability.getInstance().getErrorDialog(getActivity(), resultCode, PLAY_SERVICES_RESOLUTION_REQUEST);
-            }
-            else {
-                Toast.makeText(getContext(),"This device does not support Maps!!",Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(getContext(), "This device does not support Maps!!", Toast.LENGTH_LONG).show();
             }
         }
         return true;
@@ -285,9 +283,8 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
     }
 
     private void startLocationUpdates() {
-        if(ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION)!= PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION)!= PackageManager.PERMISSION_GRANTED)
-        {
+        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
 
@@ -307,22 +304,19 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
     }
 
     private void displayLocation() {
-        if(ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION)!= PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION)!= PackageManager.PERMISSION_GRANTED)
-        {
+        if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             requestRuntimePermission();
-        }
-        else{
+        } else {
             mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-            if(mLastLocation!=null){
+            if (mLastLocation != null) {
                 double latitude = mLastLocation.getLatitude();
                 double longitude = mLastLocation.getLongitude();
 
                 this.latitude = String.valueOf(latitude);
                 this.longitude = String.valueOf(longitude);
 
-            }
-            else{
+            } else {
                 //Toast.makeText(this,"Cannot retrieve the location!!",Toast.LENGTH_SHORT).show();
             }
         }

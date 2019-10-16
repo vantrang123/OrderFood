@@ -78,12 +78,10 @@ public class FoodListAdapter extends RecyclerView.Adapter<FoodListAdapter.ViewHo
                 }
             });
 
-
         }
     }
 
-
-    public interface ItemListener{
+    public interface ItemListener {
         void dispatchToFoodDetail(int position);
     }
 }

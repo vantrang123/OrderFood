@@ -1,8 +1,6 @@
 package com.trangdv.orderfood.ui;
 
-import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,7 +27,7 @@ public class TestFoodListFragment extends Fragment implements FoodListAdapter.It
     private static final String TAG = "TestFoodListFragment";
     FirebaseDatabase database;
     DatabaseReference foodList;
-    RecyclerView recycler_food;
+    RecyclerView rvListFood;
     RecyclerView.LayoutManager layoutManager;
     FoodListAdapter foodListAdapter;
     String categoryId = "";
@@ -44,7 +42,7 @@ public class TestFoodListFragment extends Fragment implements FoodListAdapter.It
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_food_list, container, false);
-        recycler_food = view.findViewById(R.id.rv_food);
+        rvListFood = view.findViewById(R.id.rv_food);
 
         this.toolbar = ((FoodActivity) getActivity()).toolbar;
         ((FoodActivity) getActivity()).setSupportActionBar(toolbar);
@@ -78,7 +76,7 @@ public class TestFoodListFragment extends Fragment implements FoodListAdapter.It
 
     private void initView() {
         layoutManager = new LinearLayoutManager(getActivity());
-        recycler_food.setLayoutManager(layoutManager);
+        rvListFood.setLayoutManager(layoutManager);
     }
 
     private void fetchData(String categoryId) {
@@ -104,7 +102,7 @@ public class TestFoodListFragment extends Fragment implements FoodListAdapter.It
                 });
             }
         };
-        recycler_food.setAdapter(adapter);*/
+        rvListFood.setAdapter(adapter);*/
         foodList.orderByChild("menuId").equalTo(categoryId).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -143,7 +141,7 @@ public class TestFoodListFragment extends Fragment implements FoodListAdapter.It
 
     private void viewData(List<Food> foodList) {
         foodListAdapter = new FoodListAdapter(getContext(), foodList, this);
-        recycler_food.setAdapter(foodListAdapter);
+        rvListFood.setAdapter(foodListAdapter);
 
     }
 

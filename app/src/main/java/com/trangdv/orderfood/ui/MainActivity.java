@@ -46,13 +46,7 @@ public class MainActivity extends AppCompatActivity
     NavigationView navigationView;
 
     boolean doubleBackToExitPressedOnce = false;
-    Handler mExitHandler = new Handler();
-    Runnable mExitRunnable = new Runnable() {
-        @Override
-        public void run() {
-            doubleBackToExitPressedOnce = false;
-        }
-    };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,8 +72,6 @@ public class MainActivity extends AppCompatActivity
         final View headerView = navigationView.getHeaderView(0);
         txtUserName = headerView.findViewById(R.id.tv_username);
         txtUserName.setText(Common.currentUser.getName());
-
-
 
         /*Intent service = new Intent(MainActivity.this, ListenOrder.class);
         startService(service);
@@ -118,10 +110,12 @@ public class MainActivity extends AppCompatActivity
     public void OrderStatus() {
         //setScrollBar(1);
         fragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, new OrderStatusFragment())
+                //.replace(R.id.fragment_container, new OrderStatusFragment())
+                .replace(R.id.fragment_container, new TestOrderStatusFragment())
                 .addToBackStack(null)
                 .commit();
     }
+
 
 
     @Override
