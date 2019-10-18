@@ -72,7 +72,7 @@ public class SignupActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
-                //check if user not exist in database
+                //check if user not exist in firebaseDatabase
                 // bien i để tránh kiểm tra lại dữ liệu khi đã tạo tài khoản.
                 if (dataSnapshot.child(phonenumber).exists() && i == 0) {
                     User user = dataSnapshot.child(phonenumber).getValue(User.class);

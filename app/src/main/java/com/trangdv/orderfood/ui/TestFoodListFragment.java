@@ -11,19 +11,20 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.trangdv.orderfood.R;
-import com.trangdv.orderfood.adapter.FoodListAdapter;
+import com.trangdv.orderfood.adapters.FoodListAdapter;
 import com.trangdv.orderfood.model.Food;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class TestFoodListFragment extends Fragment implements FoodListAdapter.ItemListener{
+public class TestFoodListFragment extends Fragment implements FoodListAdapter.ItemListener {
     private static final String TAG = "TestFoodListFragment";
     FirebaseDatabase database;
     DatabaseReference foodList;

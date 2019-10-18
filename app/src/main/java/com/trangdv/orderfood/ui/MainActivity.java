@@ -109,6 +109,7 @@ public class MainActivity extends AppCompatActivity
 
     public void OrderStatus() {
         //setScrollBar(1);
+        setScrollBar(SCROLL_FLAG_SCROLL|SCROLL_FLAG_ENTER_ALWAYS);
         fragmentManager.beginTransaction()
                 //.replace(R.id.fragment_container, new OrderStatusFragment())
                 .replace(R.id.fragment_container, new TestOrderStatusFragment())
@@ -200,7 +201,7 @@ public class MainActivity extends AppCompatActivity
                 if (item.isChecked()) item.setChecked(false);
                 else {
                     Cart();
-                    Toast.makeText(MainActivity.this, "cart", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "carts", Toast.LENGTH_SHORT).show();
                 }
                 item.setChecked(true);
                 break;

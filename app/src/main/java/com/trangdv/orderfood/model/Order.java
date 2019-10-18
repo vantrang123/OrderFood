@@ -1,21 +1,26 @@
 package com.trangdv.orderfood.model;
 
+import android.os.StrictMode;
+
 public class Order {
     private String ProductId;
     private String ProductName;
     private String Quanlity;
     private String Price;
     private String Discount;
+    private String Image;
 
     public Order() {
     }
 
-    public Order(String productId, String productName, String quanlity, String price, String discount) {
+    public Order(String productId, String productName, String quanlity, String price, String discount, String image) {
         ProductId = productId;
         ProductName = productName;
         Quanlity = quanlity;
         Price = price;
         Discount = discount;
+        Image = image;
+
     }
 
     public String getProductId() {
@@ -56,5 +61,13 @@ public class Order {
 
     public void setDiscount(String discount) {
         Discount = discount;
+    }
+
+    public String getImage() {
+        return Image;
+    }
+
+    public void setImage(String image) {
+        Image = image;
     }
 }

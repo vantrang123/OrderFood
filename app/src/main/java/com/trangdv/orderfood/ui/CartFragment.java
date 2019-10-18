@@ -3,8 +3,10 @@ package com.trangdv.orderfood.ui;
 import android.Manifest;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -18,8 +20,10 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -28,24 +32,27 @@ import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.common.Common;
 import com.trangdv.orderfood.database.Database;
+import com.trangdv.orderfood.helper.RecyclerItemTouchHelper;
 import com.trangdv.orderfood.model.Order;
 import com.trangdv.orderfood.model.Request;
-import com.trangdv.orderfood.viewholder.CartAdapter;
+import com.trangdv.orderfood.adapters.CartAdapter;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class CartFragment extends Fragment implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener {
+public class CartFragment extends Fragment implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener, RecyclerItemTouchHelper.RecyclerItemTouchHelperListener {
 
-    FirebaseDatabase database;
+    FirebaseDatabase firebaseDatabase;
     DatabaseReference requests;
+
 
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
@@ -56,11 +63,13 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
     private static int FASTEST_INTERVAL = 5000;
     private static int DISPLACEMENT = 10;
 
+    private ConstraintLayout constraintLayout;
+
 
     RecyclerView recyclerView;
     RecyclerView.LayoutManager layoutManager;
     CartAdapter adapter;
-    List<Order> cart = new ArrayList<>();
+    List<Order> carts = new ArrayList<>();
     static List<List<Order>> orderList = new ArrayList<>();
 
     TextView tvTotalPrice;
@@ -91,8 +100,10 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
         ((MainActivity) getActivity()).getSupportActionBar().setTitle("Cart");
         View view = inflater.inflate(R.layout.fragment_cart, container, false);
 
-        database = FirebaseDatabase.getInstance();
-        requests = database.getReference("Requests");
+        constraintLayout = view.findViewById(R.id.container_cart);
+
+        firebaseDatabase = FirebaseDatabase.getInstance();
+        requests = firebaseDatabase.getReference("Requests");
         initView(view);
 
         return view;
@@ -104,6 +115,9 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
         layoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(layoutManager);
         loadListFood();
+
+        ItemTouchHelper.SimpleCallback itemTouchHelperCallback = new RecyclerItemTouchHelper(0, ItemTouchHelper.LEFT, this);
+        new ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(recyclerView);
     }
 
     @Override
@@ -114,9 +128,9 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
     }
 
     private void deleteCart(int position) {
-        cart.remove(position);
+        carts.remove(position);
         new Database(getActivity()).cleanCart();
-        for (Order item : cart)
+        for (Order item : carts)
             new Database(getActivity()).addToCart(item);
 
         //refresh
@@ -132,7 +146,7 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
         btnPlace.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (cart.size() > 0) {
+                if (carts.size() > 0) {
 
                     showAlertDialog();
                 } else {
@@ -142,18 +156,19 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
         });
     }
 
+
     private void loadListFood() {
-        cart = new Database(getActivity()).getCarts();
-        orderList.add(cart);
-        adapter = new CartAdapter(cart, getActivity());
+        carts = new Database(getActivity()).getCarts();
+        orderList.add(carts);
+        adapter = new CartAdapter(carts, getActivity());
         adapter.notifyDataSetChanged();
         recyclerView.setAdapter(adapter);
 
         //Calculate total price
         total = 0;
-        for (Order order : cart)
+        for (Order order : carts)
             total += (float) (Integer.parseInt(order.getPrice())) * (Integer.parseInt(order.getQuanlity()));
-        Locale locale = new Locale("en", "US");
+        Locale locale = new Locale("vi", "VN");
         NumberFormat fmt = NumberFormat.getCurrencyInstance(locale);
 
         //
@@ -193,7 +208,7 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
                         tvTotalPrice.getText().toString(),
                         latitude,
                         longitude,
-                        cart
+                        carts
                 );
 
                 requests.child(String.valueOf(System.currentTimeMillis()))
@@ -321,4 +336,29 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
             }
         }
     }
+
+    @Override
+    public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction, int position) {
+        String name = carts.get(viewHolder.getAdapterPosition()).getProductName();
+        final String productId = carts.get(position).getProductId();
+        final Order deletedItem = carts.get(viewHolder.getAdapterPosition());
+        final int deletedIndex = viewHolder.getAdapterPosition();
+
+        new Database(getActivity()).removeFromCart(productId);
+        adapter.removeItem(position);
+
+        Snackbar snackbar = Snackbar
+                .make(constraintLayout, name + " removed from carts!", Snackbar.LENGTH_LONG);
+        snackbar.setAction("UNDO", new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                new Database(getActivity()).addToCart(deletedItem);
+                adapter.restoreItem(deletedItem, deletedIndex);
+            }
+        });
+        snackbar.setActionTextColor(Color.YELLOW);
+        snackbar.show();
+
+    }
+
 }

@@ -128,7 +128,8 @@ public class FoodDetailFragment extends Fragment {
                         currentFood.getName(),
                         amountButton.getNumber(),
                         currentFood.getPrice(),
-                        currentFood.getDiscount()
+                        currentFood.getDiscount(),
+                        currentFood.getImage()
                 ));
 
                 Toast.makeText(getActivity(), R.string.added_to_cart, Toast.LENGTH_SHORT).show();

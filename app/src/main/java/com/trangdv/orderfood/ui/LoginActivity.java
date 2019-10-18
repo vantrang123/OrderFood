@@ -113,7 +113,7 @@ public class LoginActivity extends AppCompatActivity {
         table_user.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                //check if user not exist in database
+                //check if user not exist in firebaseDatabase
                 if (dataSnapshot.child(phonenumber).exists()) {
                     User user = dataSnapshot.child(phonenumber).getValue(User.class);
                     user.setPhone(phonenumber);

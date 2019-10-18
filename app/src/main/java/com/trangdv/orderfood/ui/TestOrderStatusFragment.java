@@ -17,15 +17,14 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.trangdv.orderfood.R;
-import com.trangdv.orderfood.adapter.FoodListAdapter;
-import com.trangdv.orderfood.adapter.OrderStatusAdapter;
+import com.trangdv.orderfood.adapters.OrderStatusAdapter;
 import com.trangdv.orderfood.common.Common;
 import com.trangdv.orderfood.model.Request;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class TestOrderStatusFragment extends Fragment implements OrderStatusAdapter.ItemListener{
+public class TestOrderStatusFragment extends Fragment implements OrderStatusAdapter.ItemListener {
     FirebaseDatabase database;
     DatabaseReference requests;
     OrderStatusAdapter orderStatusAdapter;

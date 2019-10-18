@@ -10,4 +10,10 @@
     <dimen name="dimens_90dp">90dp</dimen>
     <dimen name="dimens_12sp">12dp</dimen>
     <dimen name="dimens_20sp">20sp</dimen>
+
+    //
+    <dimen name="activity_padding_horizontal">16dp</dimen>
+    <dimen name="padd_10">10dp</dimen>
+    <dimen name="ic_delete">30dp</dimen>
+    <dimen name="thumbnail">90dp</dimen>
 </resources>

@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.google.android.material.appbar.AppBarLayout;
 import com.trangdv.orderfood.R;
 
 import com.trangdv.orderfood.model.Food;
@@ -39,6 +40,9 @@ public class FoodActivity extends AppCompatActivity {
             }
         });
 
+        AppBarLayout.LayoutParams toolbarLayoutParams = (AppBarLayout.LayoutParams) toolbar.getLayoutParams();
+        toolbarLayoutParams.setScrollFlags(0);
+
         fragmentManager = getSupportFragmentManager();
         /*fragmentManager.beginTransaction()
                 .replace(R.id.fragment_container_food, new FoodListFragment())
@@ -46,6 +50,8 @@ public class FoodActivity extends AppCompatActivity {
         fragmentManager.beginTransaction()
                 .replace(R.id.fragment_container_food, new TestFoodListFragment())
                 .commit();
+
+
     }
 
 
