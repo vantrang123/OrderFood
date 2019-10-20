@@ -7,8 +7,10 @@ import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -32,6 +34,7 @@ import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -48,11 +51,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class CartFragment extends Fragment implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener, RecyclerItemTouchHelper.RecyclerItemTouchHelperListener {
+public class CartFragment extends Fragment implements GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener,
+        RecyclerItemTouchHelper.RecyclerItemTouchHelperListener, CartAdapter.ItemListener {
 
     FirebaseDatabase firebaseDatabase;
     DatabaseReference requests;
-
 
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
@@ -83,8 +87,10 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(getActivity(),
+                Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             requestRuntimePermission();
         } else {
             if (checkPlayServices()) {
@@ -96,15 +102,16 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         ((MainActivity) getActivity()).getSupportActionBar().setTitle("Cart");
         View view = inflater.inflate(R.layout.fragment_cart, container, false);
-
         constraintLayout = view.findViewById(R.id.container_cart);
 
         firebaseDatabase = FirebaseDatabase.getInstance();
         requests = firebaseDatabase.getReference("Requests");
         initView(view);
+
 
         return view;
     }
@@ -116,9 +123,12 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
         recyclerView.setLayoutManager(layoutManager);
         loadListFood();
 
-        ItemTouchHelper.SimpleCallback itemTouchHelperCallback = new RecyclerItemTouchHelper(0, ItemTouchHelper.LEFT, this);
+        ItemTouchHelper.SimpleCallback itemTouchHelperCallback = new RecyclerItemTouchHelper(0,
+                ItemTouchHelper.LEFT, this);
         new ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(recyclerView);
+
     }
+
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
@@ -160,7 +170,7 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
     private void loadListFood() {
         carts = new Database(getActivity()).getCarts();
         orderList.add(carts);
-        adapter = new CartAdapter(carts, getActivity());
+        adapter = new CartAdapter(carts, getActivity(), this);
         adapter.notifyDataSetChanged();
         recyclerView.setAdapter(adapter);
 
@@ -360,5 +370,14 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
         snackbar.show();
 
     }
+
+    @Override
+    public void showDialogOptions(int position) {
+//        Toast.makeText(getActivity(), "ok!", Toast.LENGTH_SHORT).show();
+        ((View) constraintLayout.getParent()).setBackgroundColor(getResources().getColor(R.color.bg));
+
+        ((MainActivity) getActivity()).showBottomSheet();
+    }
+
 
 }

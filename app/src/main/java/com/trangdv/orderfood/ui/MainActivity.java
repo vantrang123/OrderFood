@@ -8,9 +8,11 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 
 import android.os.Handler;
 
+import android.view.GestureDetector;
 import android.view.MenuItem;
 
 import com.google.android.material.appbar.AppBarLayout;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.navigation.NavigationView;
 
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -21,6 +23,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 import android.view.Menu;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -44,6 +47,9 @@ public class MainActivity extends AppCompatActivity
     private TextView txtUserName;
     String sFragment = null;
     NavigationView navigationView;
+
+    BottomSheetBehavior mBottomSheetBehavior;
+    GestureDetector mGestureDetector;
 
     boolean doubleBackToExitPressedOnce = false;
 
@@ -82,7 +88,46 @@ public class MainActivity extends AppCompatActivity
             Home();
         }
 
+        View bottomSheet = findViewById(R.id.layout_bottomSheetBehavior);
+        mBottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
+        mBottomSheetBehavior.setPeekHeight(0);
+        TextView tvCancel = bottomSheet.findViewById(R.id.tv_cancel);
+        tvCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
 
+            }
+        });
+        initGestureDetector();
+
+
+    }
+
+    public void showBottomSheet() {
+        if (mBottomSheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
+            mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+        }
+    }
+
+    private void initGestureDetector() {
+        mGestureDetector = new GestureDetector(this,
+                new GestureDetector.SimpleOnGestureListener() {
+                    @Override
+                    public boolean onSingleTapConfirmed(MotionEvent e) {
+                        if (mBottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
+                            mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                            return true;
+                        }
+                        return super.onSingleTapConfirmed(e);
+                    }
+                });
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        mGestureDetector.onTouchEvent(event);
+        return super.onTouchEvent(event);
     }
 
     private void setScrollBar(int i) {
@@ -134,6 +179,10 @@ public class MainActivity extends AppCompatActivity
             Toast.makeText(this, "Nhấn BACK lần nữa để thoát", Toast.LENGTH_SHORT).show();
             mExitHandler.postDelayed(mExitRunnable, 2000);
         }*/
+        if (mBottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED){
+            mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        }
+
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
@@ -160,6 +209,8 @@ public class MainActivity extends AppCompatActivity
                 }
             }, 2000);
         }
+
+
     }
 
     @Override

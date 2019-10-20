@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -17,6 +18,7 @@ import com.squareup.picasso.Picasso;
 import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.listener.OnDatabaseChangedListeners;
 import com.trangdv.orderfood.model.Order;
+import com.trangdv.orderfood.ui.MainActivity;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -28,10 +30,12 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> im
     private List<Order> listData = new ArrayList<>();
     private Context context;
     public RelativeLayout viewBackground, viewForeground;
+    ItemListener listener;
 
-    public CartAdapter(List<Order> listData, Context context) {
+    public CartAdapter(List<Order> listData, Context context, ItemListener listener) {
         this.listData = listData;
         this.context = context;
+        this.listener = listener;
     }
 
     @NonNull
@@ -55,6 +59,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> im
         Picasso.with(context)
                 .load(listData.get(position).getImage())
                 .into(holder.img_cart_image);
+
     }
 
     @Override
@@ -95,6 +100,13 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> im
             viewBackground = itemView.findViewById(R.id.view_background);
             viewForeground = itemView.findViewById(R.id.view_foreground);
 
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    listener.showDialogOptions(getLayoutPosition());
+                }
+            });
+
             /*itemView.setOnCreateContextMenuListener(this);*/
         }
 
@@ -118,5 +130,9 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> im
         listData.add(position, item);
         // notify item added by position
         notifyItemInserted(position);
+    }
+
+    public interface ItemListener {
+        void showDialogOptions(int position);
     }
 }
