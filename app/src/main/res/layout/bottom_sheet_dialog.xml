@@ -5,7 +5,6 @@
     android:id="@+id/layout_bottomSheetBehavior"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#ddd"
     app:behavior_hideable="true"
     app:behavior_peekHeight="0dp"
     app:layout_behavior="@string/bottom_sheet_behavior">
@@ -31,8 +30,8 @@
                 android:layout_marginLeft="10dp"
                 android:layout_marginRight="10dp"
                 android:gravity="center"
-                android:text="Chụp ảnh"
-                android:textColor="@color/black"
+                android:text="Chi tiết"
+                android:textColor="@color/light_blue"
                 android:textSize="17sp"/>
 
             <View
@@ -47,8 +46,8 @@
                 android:layout_marginLeft="10dp"
                 android:layout_marginRight="10dp"
                 android:gravity="center"
-                android:text="Mở album"
-                android:textColor="@color/black"
+                android:text="Xóa"
+                android:textColor="@color/red"
                 android:textSize="17sp"/>
         </LinearLayout>
 

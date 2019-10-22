@@ -374,7 +374,6 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
     @Override
     public void showDialogOptions(int position) {
 //        Toast.makeText(getActivity(), "ok!", Toast.LENGTH_SHORT).show();
-        ((View) constraintLayout.getParent()).setBackgroundColor(getResources().getColor(R.color.bg));
 
         ((MainActivity) getActivity()).showBottomSheet();
     }

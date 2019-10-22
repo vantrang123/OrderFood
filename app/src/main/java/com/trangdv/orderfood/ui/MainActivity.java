@@ -41,18 +41,13 @@ import static com.trangdv.orderfood.ui.LoginActivity.SAVE_USER;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-
     FragmentManager fragmentManager;
     Toolbar toolbar;
     private TextView txtUserName;
     String sFragment = null;
     NavigationView navigationView;
 
-    BottomSheetBehavior mBottomSheetBehavior;
-    GestureDetector mGestureDetector;
-
     boolean doubleBackToExitPressedOnce = false;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,46 +83,10 @@ public class MainActivity extends AppCompatActivity
             Home();
         }
 
-        View bottomSheet = findViewById(R.id.layout_bottomSheetBehavior);
-        mBottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
-        mBottomSheetBehavior.setPeekHeight(0);
-        TextView tvCancel = bottomSheet.findViewById(R.id.tv_cancel);
-        tvCancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-
-            }
-        });
-        initGestureDetector();
-
-
     }
 
     public void showBottomSheet() {
-        if (mBottomSheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
-            mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-        }
-    }
-
-    private void initGestureDetector() {
-        mGestureDetector = new GestureDetector(this,
-                new GestureDetector.SimpleOnGestureListener() {
-                    @Override
-                    public boolean onSingleTapConfirmed(MotionEvent e) {
-                        if (mBottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
-                            mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-                            return true;
-                        }
-                        return super.onSingleTapConfirmed(e);
-                    }
-                });
-    }
-
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        mGestureDetector.onTouchEvent(event);
-        return super.onTouchEvent(event);
+        new ClickItemCartDialog().show(getSupportFragmentManager(), "dialog");
     }
 
     private void setScrollBar(int i) {
@@ -137,7 +96,7 @@ public class MainActivity extends AppCompatActivity
 
     public void Home() {
         //setScrollBar(1);
-        setScrollBar(SCROLL_FLAG_SCROLL|SCROLL_FLAG_ENTER_ALWAYS);
+        setScrollBar(SCROLL_FLAG_SCROLL | SCROLL_FLAG_ENTER_ALWAYS);
         fragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, new HomeFragment())
                 .commit();
@@ -154,7 +113,7 @@ public class MainActivity extends AppCompatActivity
 
     public void OrderStatus() {
         //setScrollBar(1);
-        setScrollBar(SCROLL_FLAG_SCROLL|SCROLL_FLAG_ENTER_ALWAYS);
+        setScrollBar(SCROLL_FLAG_SCROLL | SCROLL_FLAG_ENTER_ALWAYS);
         fragmentManager.beginTransaction()
                 //.replace(R.id.fragment_container, new OrderStatusFragment())
                 .replace(R.id.fragment_container, new TestOrderStatusFragment())
@@ -163,26 +122,8 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-
     @Override
     public void onBackPressed() {
-        /*DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else if (doubleBackToExitPressedOnce){
-            mExitHandler.removeCallbacks(mExitRunnable);
-            mExitRunnable = null;
-            super.onBackPressed();
-
-        } else if (!doubleBackToExitPressedOnce) {
-            doubleBackToExitPressedOnce = true;
-            Toast.makeText(this, "Nhấn BACK lần nữa để thoát", Toast.LENGTH_SHORT).show();
-            mExitHandler.postDelayed(mExitRunnable, 2000);
-        }*/
-        if (mBottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED){
-            mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-        }
-
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
@@ -209,7 +150,6 @@ public class MainActivity extends AppCompatActivity
                 }
             }, 2000);
         }
-
 
     }
 
