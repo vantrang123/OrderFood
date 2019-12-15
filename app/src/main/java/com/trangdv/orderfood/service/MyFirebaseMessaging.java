@@ -17,7 +17,7 @@ import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.common.Common;
 import com.trangdv.orderfood.helper.NotificationHelper;
 import com.trangdv.orderfood.ui.MainActivity;
-import com.trangdv.orderfood.ui.TestOrderStatusFragment;
+import com.trangdv.orderfood.ui.OrderStatusFragment;
 
 import java.util.Random;
 
@@ -37,7 +37,7 @@ public class MyFirebaseMessaging extends FirebaseMessagingService {
         String content = notification.getBody();
 
         //Intent intent = new Intent(this, OrderStatusFragment.class);
-        Intent intent = new Intent(this, TestOrderStatusFragment.class);
+        Intent intent = new Intent(this, OrderStatusFragment.class);
         intent.putExtra(Common.PHONE_TEXT, Common.currentUser.getPhone());
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT);

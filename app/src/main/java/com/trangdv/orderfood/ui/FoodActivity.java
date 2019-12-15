@@ -1,10 +1,8 @@
 package com.trangdv.orderfood.ui;
 
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.View;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -48,7 +46,7 @@ public class FoodActivity extends AppCompatActivity {
                 .replace(R.id.fragment_container_food, new FoodListFragment())
                 .commit();*/
         fragmentManager.beginTransaction()
-                .replace(R.id.fragment_container_food, new TestFoodListFragment())
+                .replace(R.id.fragment_container_food, new FoodListFragment())
                 .commit();
 
 

@@ -11,25 +11,29 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.trangdv.orderfood.R;
+import com.trangdv.orderfood.adapters.OrderStatusAdapter;
 import com.trangdv.orderfood.common.Common;
-import com.trangdv.orderfood.listener.ItemClickListener;
 import com.trangdv.orderfood.model.Request;
-import com.trangdv.orderfood.viewholder.OrderViewHolder;
 
-public class OrderStatusFragment extends Fragment {
+import java.util.ArrayList;
+import java.util.List;
 
-    public RecyclerView recyclerView;
-    public RecyclerView.LayoutManager layoutManager;
-
-    FirebaseRecyclerAdapter<Request, OrderViewHolder> adapter;
-
-    //Firebase
+public class OrderStatusFragment extends Fragment implements OrderStatusAdapter.ItemListener {
     FirebaseDatabase database;
     DatabaseReference requests;
+    OrderStatusAdapter orderStatusAdapter;
+    public RecyclerView rvListOrder;
+    public RecyclerView.LayoutManager layoutManager;
+
+    List<String> listIds = new ArrayList<>();
+    List<Request> listRequests = new ArrayList<>();
+    String requestId;
 
     public static OrderStatusFragment newInstance(String phone) {
         OrderStatusFragment orderStatus = new OrderStatusFragment();
@@ -47,8 +51,8 @@ public class OrderStatusFragment extends Fragment {
         database = FirebaseDatabase.getInstance();
         requests = database.getReference("Requests");
 
-        recyclerView = view.findViewById(R.id.listOrders);
-
+        rvListOrder = view.findViewById(R.id.listOrders);
+        initView();
         return view;
     }
 
@@ -56,39 +60,50 @@ public class OrderStatusFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         layoutManager = new LinearLayoutManager(getActivity());
-        recyclerView.setLayoutManager(layoutManager);
+        rvListOrder.setLayoutManager(layoutManager);
         loadOrders(Common.currentUser.getPhone());
     }
 
+    private void initView() {
+        layoutManager = new LinearLayoutManager(getActivity());
+        rvListOrder.setLayoutManager(layoutManager);
+    }
+
     private void loadOrders(String phone) {
-        adapter = new FirebaseRecyclerAdapter<Request, OrderViewHolder>(
-                Request.class,
-                R.layout.order_item,
-                OrderViewHolder.class,
-                requests.orderByChild("phone")
-                        .equalTo(phone)
-        ) {
+        requests.orderByChild("phone").equalTo(phone).addValueEventListener(new ValueEventListener() {
             @Override
-            protected void populateViewHolder(OrderViewHolder viewHolder, Request model, int position) {
-                viewHolder.tvOrderId.setText(adapter.getRef(position).getKey());
-                viewHolder.tvOrderStatus.setText(Common.convertCodeToStatus(model.getStatus()));
-                viewHolder.tvOrderAddres.setText(model.getAddress());
-                viewHolder.tvOrderPhone.setText(model.getPhone());
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot dsp : dataSnapshot.getChildren()) {
+                    requestId = dsp.getKey();
+                    listIds.add(requestId);
+                    Request request = dsp.getValue(Request.class);
+                    listRequests.add(request);
+                }
+                viewData(listRequests, listIds);
 
-                viewHolder.setItemClickListener(new ItemClickListener() {
-                    @Override
-                    public void onClick(View view, int position, boolean isLongClik) {
-
-                    }
-                });
             }
-        };
-        recyclerView.setAdapter(adapter);
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void viewData(List<Request> listRequests, List<String> listIds) {
+        orderStatusAdapter = new OrderStatusAdapter(getContext(), listRequests, listIds, this);
+        rvListOrder.setAdapter(orderStatusAdapter);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        ((MainActivity) getActivity()).navigationView.getMenu().getItem(2).setChecked(true);
+        listIds.clear();
+        listRequests.clear();
+    }
+
+    @Override
+    public void dispatchToOrderDetail(int position) {
+
     }
 }

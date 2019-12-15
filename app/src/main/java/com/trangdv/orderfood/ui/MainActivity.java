@@ -8,11 +8,9 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 
 import android.os.Handler;
 
-import android.view.GestureDetector;
 import android.view.MenuItem;
 
 import com.google.android.material.appbar.AppBarLayout;
-import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.navigation.NavigationView;
 
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -23,7 +21,6 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 import android.view.Menu;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -116,7 +113,7 @@ public class MainActivity extends AppCompatActivity
         setScrollBar(SCROLL_FLAG_SCROLL | SCROLL_FLAG_ENTER_ALWAYS);
         fragmentManager.beginTransaction()
                 //.replace(R.id.fragment_container, new OrderStatusFragment())
-                .replace(R.id.fragment_container, new TestOrderStatusFragment())
+                .replace(R.id.fragment_container, new OrderStatusFragment())
                 .addToBackStack(null)
                 .commit();
     }
