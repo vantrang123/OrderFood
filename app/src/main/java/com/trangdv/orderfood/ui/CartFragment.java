@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -36,20 +37,32 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.common.Common;
 import com.trangdv.orderfood.database.Database;
 import com.trangdv.orderfood.helper.RecyclerItemTouchHelper;
+import com.trangdv.orderfood.model.MyResponse;
+import com.trangdv.orderfood.model.Notification;
 import com.trangdv.orderfood.model.Order;
 import com.trangdv.orderfood.model.Request;
 import com.trangdv.orderfood.adapters.CartAdapter;
+import com.trangdv.orderfood.model.Sender;
+import com.trangdv.orderfood.model.Token;
+import com.trangdv.orderfood.remote.APIService;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class CartFragment extends Fragment implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener,
@@ -57,6 +70,8 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
 
     FirebaseDatabase firebaseDatabase;
     DatabaseReference requests;
+
+    APIService mService;
 
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
@@ -127,6 +142,7 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
                 ItemTouchHelper.LEFT, this);
         new ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(recyclerView);
 
+        mService = Common.getFCMClient();
     }
 
 
@@ -228,6 +244,10 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
                 Toast.makeText(getActivity(), "Thank you for ordering!", Toast.LENGTH_SHORT).show();
                 dialog.dismiss();
                 loadListFood();
+
+
+                sendOrderStatusToServer();
+
             }
         });
 
@@ -267,6 +287,48 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
     }
+
+    private void sendOrderStatusToServer() {
+
+        DatabaseReference tokens = firebaseDatabase.getReference("Tokens");
+        tokens.child("0935335198")
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.exists()) {
+                            Token token = dataSnapshot.getValue(Token.class);
+
+                            //make raw payload
+                            Notification notification = new Notification("OrderFood", "Đơn hàng mới !");
+                            Sender content = new Sender(token.getToken(), notification);
+
+                            mService.sendNotification(content).enqueue(new Callback<MyResponse>() {
+                                @Override
+                                public void onResponse(Call<MyResponse> call, Response<MyResponse> response) {
+                                    if (response.body().success == 1) {
+                                        Toast.makeText(getContext(), getString(R.string.order_was_updated), Toast.LENGTH_SHORT).show();
+                                    } else {
+                                        Toast.makeText(getContext(), getString(R.string.order_was_updated_but_failed_to_send_notification)
+                                                , Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+
+                                @Override
+                                public void onFailure(Call<MyResponse> call, Throwable t) {
+                                    Log.e("ERROR", t.getMessage());
+
+                                }
+                            });
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+    }
+
 
 
     //location

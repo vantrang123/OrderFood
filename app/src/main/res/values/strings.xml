@@ -25,4 +25,7 @@
 
     <string name="added_to_cart">Added to Cart</string>
     <string name="delete">DELETE</string>
+    <string name="order_was_updated">Đặt hàng thành công!</string>
+    <string name="order_was_updated_but_failed_to_send_notification">Đặt hàng thành công nhưng không gửi được thông báo!</string>
+
 </resources>
