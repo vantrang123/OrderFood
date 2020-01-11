@@ -2,6 +2,7 @@ package com.trangdv.orderfood.ui;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -17,6 +18,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.request.transition.Transition;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.shape.RoundedCornerTreatment;
 import com.google.firebase.database.DatabaseReference;
@@ -109,13 +117,37 @@ public class HomeFragment extends Fragment {
     public void fetchData() {
         adapter = new FirebaseRecyclerAdapter<Category, MenuViewHolder>(Category.class, R.layout.menu_item, MenuViewHolder.class, category) {
             @Override
-            protected void populateViewHolder(MenuViewHolder menuViewHolder, final Category category, final int i) {
+            protected void populateViewHolder(final MenuViewHolder menuViewHolder, final Category category, final int i) {
                 menuViewHolder.txtMenuName.setText(category.getName());
 
-                Picasso.with(getContext())
-                        .load(category.getImage())
-                        .transform(new RoundedCornersTransformation(10, 0))
-                        .into(menuViewHolder.imgMenu);
+//                Picasso.with(getContext())
+//                        .load(category.getImage())
+//                        .transform(new RoundedCornersTransformation(10, 0))
+//                        .into(menuViewHolder.imgMenu);
+
+                if (category.getBitmapImage() == null) {
+                    Glide.with(getContext())
+                            .asBitmap()
+                            .load(category.getImage())
+                            .fitCenter()
+                            .centerCrop()
+                            .listener(new RequestListener<Bitmap>() {
+                                @Override
+                                public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Bitmap> target, boolean isFirstResource) {
+                                    return false;
+                                }
+
+                                @Override
+                                public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
+                                    category.setBitmapImage(resource);
+                                    return false;
+                                }
+                            })
+                            .into(menuViewHolder.imgMenu);
+
+                } else {
+                    menuViewHolder.imgMenu.setImageBitmap(category.getBitmapImage());
+                }
 
                 final Category clickItem = category;
                 menuViewHolder.setItemClickListener(new ItemClickListener() {
