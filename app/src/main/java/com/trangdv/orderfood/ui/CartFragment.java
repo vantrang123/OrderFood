@@ -41,6 +41,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.common.Common;
@@ -290,8 +291,9 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
 
     private void sendOrderStatusToServer() {
 
-        DatabaseReference tokens = firebaseDatabase.getReference("Tokens");
-        tokens.child("0935335198")
+        /*DatabaseReference tokens = firebaseDatabase.getReference("Tokens");
+
+        tokens.child("0912")
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -326,7 +328,46 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
                     public void onCancelled(DatabaseError databaseError) {
 
                     }
-                });
+                });*/
+
+        DatabaseReference tokens = FirebaseDatabase.getInstance().getReference("Tokens");
+        //get all node with isServerToken is true
+        Query data = tokens.orderByChild("serverToken").equalTo(true);
+        data.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for(DataSnapshot postSnapShot:dataSnapshot.getChildren()) {
+                    Token serverToken = postSnapShot.getValue(Token.class);
+
+                    //make raw payload
+                    Notification notification = new Notification("OrderFood", "Đơn hàng mới !");
+                    Sender content = new Sender(serverToken.getToken(), notification);
+
+                    mService.sendNotification(content).enqueue(new Callback<MyResponse>() {
+                        @Override
+                        public void onResponse(Call<MyResponse> call, Response<MyResponse> response) {
+                            if (response.body().success == 1) {
+                                Toast.makeText(getContext(), getString(R.string.order_was_updated), Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(getContext(), getString(R.string.order_was_updated_but_failed_to_send_notification)
+                                        , Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<MyResponse> call, Throwable t) {
+                            Log.e("ERROR", t.getMessage());
+
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
 
 

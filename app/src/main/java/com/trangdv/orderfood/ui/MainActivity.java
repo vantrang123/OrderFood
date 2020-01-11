@@ -1,6 +1,10 @@
 package com.trangdv.orderfood.ui;
 
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 
 import androidx.core.view.GravityCompat;
@@ -25,6 +29,7 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.common.Common;
 import com.trangdv.orderfood.model.User;
@@ -45,6 +50,9 @@ public class MainActivity extends AppCompatActivity
     NavigationView navigationView;
 
     boolean doubleBackToExitPressedOnce = false;
+
+    public static boolean activityVisible; // Variable that will check the
+                                           // current activity state
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,10 +82,20 @@ public class MainActivity extends AppCompatActivity
         /*Intent service = new Intent(MainActivity.this, ListenOrder.class);
         startService(service);
         sFragment = getIntent().getStringExtra("startFragment");*/
-        if (sFragment != null) {
-            OrderStatus();
+//        if (sFragment != null) {
+//            OrderStatus();
+//        } else {
+//            Home();
+//        }
+
+        // At activity startup we manually check the internet status and change
+        // the text status
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+        if (networkInfo != null && networkInfo.isConnected()) {
+            changeTextStatus(true);
         } else {
-            Home();
+            changeTextStatus(false);
         }
 
     }
@@ -116,6 +134,32 @@ public class MainActivity extends AppCompatActivity
                 .replace(R.id.fragment_container, new OrderStatusFragment())
                 .addToBackStack(null)
                 .commit();
+    }
+
+    public static boolean isActivityVisible() {
+        return activityVisible; // return true or false
+    }
+
+    public static void activityResumed() {
+        activityVisible = true;// this will set true when activity resumed
+
+    }
+
+    public static void activityPaused() {
+        activityVisible = false;// this will set false when activity paused
+
+    }
+
+    // Method to change the text status
+    public void changeTextStatus(boolean isConnected) {
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+
+        // Change status according to boolean value
+        if (isConnected) {
+            Home();
+        } else {
+            Snackbar.make(drawer, "Không có internet, vui lòng thử lại sau", Snackbar.LENGTH_LONG).show();
+        }
     }
 
 
@@ -216,5 +260,17 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
 
+        activityPaused();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        activityResumed();
+    }
 }

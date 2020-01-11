@@ -1,8 +1,11 @@
 package com.trangdv.orderfood.model;
 
+import android.graphics.Bitmap;
+
 public class Category {
     private String Name;
     private String Image;
+    private Bitmap bitmapImage;
 
     public Category() {
     }
@@ -30,5 +33,13 @@ public class Category {
 
     public void setName(String name) {
         Name = name;
+    }
+
+    public void setBitmapImage(Bitmap bitmapImage) {
+        this.bitmapImage = bitmapImage;
+    }
+
+    public Bitmap getBitmapImage() {
+        return bitmapImage;
     }
 }
