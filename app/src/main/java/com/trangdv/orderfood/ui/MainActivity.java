@@ -26,12 +26,14 @@ import androidx.fragment.app.FragmentManager;
 
 import android.view.Menu;
 import android.view.View;
+import android.view.Window;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.common.Common;
+import com.trangdv.orderfood.model.Order;
 import com.trangdv.orderfood.model.User;
 import com.trangdv.orderfood.utils.SharedPrefs;
 
@@ -58,7 +60,6 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         toolbar = findViewById(R.id.toolbar);
         toolbar.setTitle("Menu");
         setSupportActionBar(toolbar);
@@ -100,11 +101,11 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    public void showBottomSheet() {
-        new ClickItemCartDialog().show(getSupportFragmentManager(), "dialog");
+    public void showBottomSheet(int position, Order order) {
+        new ClickItemCartDialog(position, order).show(getSupportFragmentManager(), "dialog");
     }
 
-    private void setScrollBar(int i) {
+    public void setScrollBar(int i) {
         AppBarLayout.LayoutParams toolbarLayoutParams = (AppBarLayout.LayoutParams) toolbar.getLayoutParams();
         toolbarLayoutParams.setScrollFlags(i);
     }
@@ -160,6 +161,17 @@ public class MainActivity extends AppCompatActivity
         } else {
             Snackbar.make(drawer, "Không có internet, vui lòng thử lại sau", Snackbar.LENGTH_LONG).show();
         }
+    }
+
+    public Fragment getFragmentCurrent() {
+        return getSupportFragmentManager().findFragmentById(R.id.fragment_container);
+    }
+
+    void replace(Fragment fragment) {
+        fragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, fragment)
+                .addToBackStack(null)
+                .commit();
     }
 
 

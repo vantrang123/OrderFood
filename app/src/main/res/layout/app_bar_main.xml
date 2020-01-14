@@ -17,7 +17,7 @@
               android:layout_width="match_parent"
               android:layout_height="?attr/actionBarSize"
               app:titleTextAppearance="@style/TextAppearance.AppCompat.Medium"
-              android:background="?attr/colorPrimary"
+              android:background="@drawable/side_nav_bar"
               app:popupTheme="@style/AppTheme.PopupOverlay"
               app:layout_scrollFlags="scroll|enterAlways"/>
     </com.google.android.material.appbar.AppBarLayout>

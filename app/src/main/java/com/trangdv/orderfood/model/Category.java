@@ -6,6 +6,7 @@ public class Category {
     private String Name;
     private String Image;
     private Bitmap bitmapImage;
+    private String key;
 
     public Category() {
     }
@@ -41,5 +42,13 @@ public class Category {
 
     public Bitmap getBitmapImage() {
         return bitmapImage;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    public String getKey() {
+        return key;
     }
 }

@@ -1,6 +1,7 @@
 package com.trangdv.orderfood.adapters;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,11 +12,18 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.amulyakhare.textdrawable.TextDrawable;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.squareup.picasso.Picasso;
 import com.trangdv.orderfood.R;
+import com.trangdv.orderfood.database.Database;
 import com.trangdv.orderfood.listener.OnDatabaseChangedListeners;
 import com.trangdv.orderfood.model.Order;
 import com.trangdv.orderfood.ui.MainActivity;
@@ -47,7 +55,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> im
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
         TextDrawable drawable = TextDrawable.builder().buildRound("" + listData.get(position).getQuanlity(), Color.RED);
         holder.img_cart_count.setImageDrawable(drawable);
 
@@ -56,10 +64,35 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> im
         int price = (Integer.parseInt(listData.get(position).getPrice())) * (Integer.parseInt(listData.get(position).getQuanlity()));
         holder.tv_price.setText(fmt.format(price));
         holder.tv_cart_name.setText(listData.get(position).getProductName());
-        Picasso.with(context)
+        /*Picasso.with(context)
                 .load(listData.get(position).getImage())
+                .into(holder.img_cart_image);*/
+        Glide.with(context)
+                .asBitmap()
+                .centerCrop()
+                .fitCenter()
+                .load(listData.get(position).getImage())
+                .listener(new RequestListener<Bitmap>() {
+                    @Override
+                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Bitmap> target, boolean isFirstResource) {
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
+                        holder.img_cart_image.setImageBitmap(resource);
+                        return false;
+                    }
+                })
                 .into(holder.img_cart_image);
 
+
+        holder.viewForeground.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                listener.showDialogOptions(position, listData.get(position));
+            }
+        });
     }
 
     @Override
@@ -90,7 +123,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> im
 
         public RelativeLayout viewBackground, viewForeground;
 
-        public ViewHolder(@NonNull View itemView) {
+        public ViewHolder(@NonNull final View itemView) {
             super(itemView);
             img_cart_image = itemView.findViewById(R.id.thumbnail);
             tv_cart_name = itemView.findViewById(R.id.cart_item_name);
@@ -100,20 +133,12 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> im
             viewBackground = itemView.findViewById(R.id.view_background);
             viewForeground = itemView.findViewById(R.id.view_foreground);
 
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    listener.showDialogOptions(getLayoutPosition());
-                }
-            });
-
-            /*itemView.setOnCreateContextMenuListener(this);*/
         }
 
         /*@Override
         public void onCreateContextMenu(ContextMenu contextMenu, View view, ContextMenu.ContextMenuInfo contextMenuInfo) {
             contextMenu.setHeaderTitle(Common.DELETE);
-            contextMenu.add(0, 0, getAdapterPosition(), Common.DELETE);
+            contextMenu.add(0, 0, gaddToCartetAdapterPosition(), Common.DELETE);
         }*/
 
     }
@@ -133,6 +158,6 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> im
     }
 
     public interface ItemListener {
-        void showDialogOptions(int position);
+        void showDialogOptions(int position, Order order);
     }
 }

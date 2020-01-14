@@ -21,35 +21,16 @@ public class FoodActivity extends AppCompatActivity {
 
     FirebaseRecyclerAdapter<Food, FoodViewHolder> adapter;
     FragmentManager fragmentManager;
-    Toolbar toolbar;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_food);
-        toolbar = findViewById(R.id.toolbar);
-        toolbar.setTitle("Food");
-        toolbar.setNavigationIcon(getResources().getDrawable(R.drawable.ic_back, getTheme()));
-        setSupportActionBar(toolbar);
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                finish();
-            }
-        });
-
-        AppBarLayout.LayoutParams toolbarLayoutParams = (AppBarLayout.LayoutParams) toolbar.getLayoutParams();
-        toolbarLayoutParams.setScrollFlags(0);
 
         fragmentManager = getSupportFragmentManager();
-        /*fragmentManager.beginTransaction()
-                .replace(R.id.fragment_container_food, new FoodListFragment())
-                .commit();*/
         fragmentManager.beginTransaction()
                 .replace(R.id.fragment_container_food, new FoodListFragment())
                 .commit();
-
-
     }
 
 

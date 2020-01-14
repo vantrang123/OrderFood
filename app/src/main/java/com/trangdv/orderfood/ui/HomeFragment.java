@@ -27,13 +27,17 @@ import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.shape.RoundedCornerTreatment;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Transformation;
 import com.trangdv.orderfood.R;
+import com.trangdv.orderfood.adapters.MenuAdapter;
 import com.trangdv.orderfood.common.Common;
 import com.trangdv.orderfood.listener.ItemClickListener;
 import com.trangdv.orderfood.model.Category;
@@ -42,11 +46,12 @@ import com.trangdv.orderfood.viewholder.MenuViewHolder;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import jp.wasabeef.picasso.transformations.RoundedCornersTransformation;
 
-public class HomeFragment extends Fragment {
+public class HomeFragment extends Fragment implements MenuAdapter.ItemListener {
 
     FirebaseDatabase database;
     DatabaseReference category;
@@ -56,6 +61,8 @@ public class HomeFragment extends Fragment {
     SwipeRefreshLayout refreshLayout;
 
     FirebaseRecyclerAdapter<Category, MenuViewHolder> adapter;
+    MenuAdapter menuAdapter;
+    List<Category> categories = new ArrayList<>();
 
     @Nullable
     @Override
@@ -89,10 +96,10 @@ public class HomeFragment extends Fragment {
         });
 
         //load menu
-        //layoutManager = new LinearLayoutManager(getActivity());
         layoutManager = new GridLayoutManager(getContext(), 2);
         recycler_menu.setLayoutManager(layoutManager);
-        fetchData();
+        menuAdapter = new MenuAdapter(getContext(),categories, this);
+        recycler_menu.setAdapter(menuAdapter);
 
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -115,56 +122,25 @@ public class HomeFragment extends Fragment {
     }
 
     public void fetchData() {
-        adapter = new FirebaseRecyclerAdapter<Category, MenuViewHolder>(Category.class, R.layout.menu_item, MenuViewHolder.class, category) {
+        categories.clear();
+
+        category.addValueEventListener(new ValueEventListener() {
             @Override
-            protected void populateViewHolder(final MenuViewHolder menuViewHolder, final Category category, final int i) {
-                menuViewHolder.txtMenuName.setText(category.getName());
-
-//                Picasso.with(getContext())
-//                        .load(category.getImage())
-//                        .transform(new RoundedCornersTransformation(10, 0))
-//                        .into(menuViewHolder.imgMenu);
-
-                if (category.getBitmapImage() == null) {
-                    Glide.with(getContext())
-                            .asBitmap()
-                            .load(category.getImage())
-                            .fitCenter()
-                            .centerCrop()
-                            .listener(new RequestListener<Bitmap>() {
-                                @Override
-                                public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Bitmap> target, boolean isFirstResource) {
-                                    return false;
-                                }
-
-                                @Override
-                                public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
-                                    category.setBitmapImage(resource);
-                                    return false;
-                                }
-                            })
-                            .into(menuViewHolder.imgMenu);
-
-                } else {
-                    menuViewHolder.imgMenu.setImageBitmap(category.getBitmapImage());
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot dsp : dataSnapshot.getChildren()) {
+                    Category category = dsp.getValue(Category.class);
+                    category.setKey(dsp.getKey());
+                    categories.add(category);
                 }
-
-                final Category clickItem = category;
-                menuViewHolder.setItemClickListener(new ItemClickListener() {
-                    @Override
-                    public void onClick(View view, int position, boolean isLongClick) {
-
-                        Intent intent = new Intent(getActivity(), FoodActivity.class);
-                        intent.putExtra("CategoryId", adapter.getRef(i).getKey());
-                        startActivity(intent);
-
-                    }
-                });
+                menuAdapter.notifyDataSetChanged();
             }
-        };
-        recycler_menu.setAdapter(adapter);
-//        recycler_menu.getAdapter().notifyDataSetChanged();
-        Log.e("HomeFragment", "fetchData: " + adapter.getItemCount());
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
         refreshLayout.setRefreshing(false);
     }
 
@@ -182,4 +158,11 @@ public class HomeFragment extends Fragment {
     }
 
 
+    @Override
+    public void dispatchToFoodList(int position) {
+        Intent intent = new Intent(getActivity(), FoodActivity.class);
+        intent.putExtra("CategoryId", categories.get(position).getKey());
+        intent.putExtra("CategoryName", categories.get(position).getName());
+        startActivity(intent);
+    }
 }

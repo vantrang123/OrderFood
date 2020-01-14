@@ -2,6 +2,7 @@ package com.trangdv.orderfood.ui;
 
 import android.Manifest;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
@@ -90,6 +91,7 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
     RecyclerView.LayoutManager layoutManager;
     CartAdapter adapter;
     List<Order> carts = new ArrayList<>();
+    Order deletedItem;
     static List<List<Order>> orderList = new ArrayList<>();
 
     TextView tvTotalPrice;
@@ -128,7 +130,6 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
         requests = firebaseDatabase.getReference("Requests");
         initView(view);
 
-
         return view;
     }
 
@@ -161,7 +162,7 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
             new Database(getActivity()).addToCart(item);
 
         //refresh
-        loadListFood();
+        adapter.notifyItemRemoved(position);
     }
 
     private void initView(View view) {
@@ -188,9 +189,13 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
         carts = new Database(getActivity()).getCarts();
         orderList.add(carts);
         adapter = new CartAdapter(carts, getActivity(), this);
-        adapter.notifyDataSetChanged();
         recyclerView.setAdapter(adapter);
+        adapter.notifyDataSetChanged();
 
+        changeStatus();
+    }
+
+    private void changeStatus() {
         //Calculate total price
         total = 0;
         for (Order order : carts)
@@ -204,13 +209,12 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
         total += tax + profit;
 
         totalPrice = total;
-
         tvTotalPrice.setText(fmt.format(total));
     }
 
 
     private void showAlertDialog() {
-        AlertDialog.Builder alertDialog = new AlertDialog.Builder(getActivity(), R.style.AlertDialogCustom);
+        final AlertDialog.Builder alertDialog = new AlertDialog.Builder(getActivity(), R.style.AlertDialogCustom);
         alertDialog.setTitle("One more step!");
         alertDialog.setMessage("Enter your address");
 
@@ -244,9 +248,10 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
                 new Database(getActivity().getBaseContext()).cleanCart();
                 Toast.makeText(getActivity(), "Thank you for ordering!", Toast.LENGTH_SHORT).show();
                 dialog.dismiss();
-                loadListFood();
-
-
+//                loadListFood();
+                carts.clear();
+                adapter.notifyDataSetChanged();
+                changeStatus();
                 sendOrderStatusToServer();
 
             }
@@ -268,7 +273,9 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
     public void onResume() {
         super.onResume();
         ((MainActivity) getActivity()).navigationView.getMenu().getItem(1).setChecked(true);
+        ((MainActivity)getActivity()).setScrollBar(0);
         checkPlayServices();
+        loadListFood();
     }
 
     @Override
@@ -290,45 +297,6 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
     }
 
     private void sendOrderStatusToServer() {
-
-        /*DatabaseReference tokens = firebaseDatabase.getReference("Tokens");
-
-        tokens.child("0912")
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        if (dataSnapshot.exists()) {
-                            Token token = dataSnapshot.getValue(Token.class);
-
-                            //make raw payload
-                            Notification notification = new Notification("OrderFood", "Đơn hàng mới !");
-                            Sender content = new Sender(token.getToken(), notification);
-
-                            mService.sendNotification(content).enqueue(new Callback<MyResponse>() {
-                                @Override
-                                public void onResponse(Call<MyResponse> call, Response<MyResponse> response) {
-                                    if (response.body().success == 1) {
-                                        Toast.makeText(getContext(), getString(R.string.order_was_updated), Toast.LENGTH_SHORT).show();
-                                    } else {
-                                        Toast.makeText(getContext(), getString(R.string.order_was_updated_but_failed_to_send_notification)
-                                                , Toast.LENGTH_SHORT).show();
-                                    }
-                                }
-
-                                @Override
-                                public void onFailure(Call<MyResponse> call, Throwable t) {
-                                    Log.e("ERROR", t.getMessage());
-
-                                }
-                            });
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                });*/
 
         DatabaseReference tokens = FirebaseDatabase.getInstance().getReference("Tokens");
         //get all node with isServerToken is true
@@ -454,32 +422,37 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
     public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction, int position) {
         String name = carts.get(viewHolder.getAdapterPosition()).getProductName();
         final String productId = carts.get(position).getProductId();
-        final Order deletedItem = carts.get(viewHolder.getAdapterPosition());
-        final int deletedIndex = viewHolder.getAdapterPosition();
+        deletedItem = carts.get(viewHolder.getAdapterPosition());
 
-        new Database(getActivity()).removeFromCart(productId);
-        adapter.removeItem(position);
+        removeItem(position, productId);
 
+        showUndoDelete(name, position, deletedItem);
+    }
+
+    public void showUndoDelete(String name, final int i, final Order deletedItem) {
         Snackbar snackbar = Snackbar
-                .make(constraintLayout, name + " removed from carts!", Snackbar.LENGTH_LONG);
+                .make(constraintLayout, name + " removed from carts!", Snackbar.LENGTH_SHORT);
         snackbar.setAction("UNDO", new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 new Database(getActivity()).addToCart(deletedItem);
-                adapter.restoreItem(deletedItem, deletedIndex);
+                adapter.restoreItem(deletedItem, i);
+                changeStatus();
             }
         });
         snackbar.setActionTextColor(Color.YELLOW);
         snackbar.show();
+    }
 
+    public void removeItem(int position, String productId) {
+        new Database(getActivity()).removeFromCart(productId);
+        adapter.removeItem(position);
+        changeStatus();
     }
 
     @Override
-    public void showDialogOptions(int position) {
-//        Toast.makeText(getActivity(), "ok!", Toast.LENGTH_SHORT).show();
-
-        ((MainActivity) getActivity()).showBottomSheet();
+    public void showDialogOptions(int position, Order order) {
+        ((MainActivity) getActivity()).showBottomSheet(position, order);
     }
-
 
 }

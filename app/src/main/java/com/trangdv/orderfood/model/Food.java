@@ -1,7 +1,10 @@
 package com.trangdv.orderfood.model;
 
+import android.graphics.Bitmap;
+
 public class Food {
-    private String Name, Image, Description, Price, Discount, MenuId, FoodId, AvailabilityFlag;
+    private String Name, Image, Description, Price, Discount, MenuId, FoodId, AvailabilityFlag, key;
+    private Bitmap bitmapImage;
 
     public Food() {
     }
@@ -81,5 +84,21 @@ public class Food {
 
     public void setAvailabilityFlag(String availabilityFlag) {
         AvailabilityFlag = availabilityFlag;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public void setBitmapImage(Bitmap bitmapImage) {
+        this.bitmapImage = bitmapImage;
+    }
+
+    public Bitmap getBitmapImage() {
+        return bitmapImage;
     }
 }

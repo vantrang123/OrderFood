@@ -1,6 +1,9 @@
 package com.trangdv.orderfood.model;
 
+import android.graphics.Bitmap;
 import android.os.StrictMode;
+
+import java.io.Serializable;
 
 public class Order {
     private String ProductId;

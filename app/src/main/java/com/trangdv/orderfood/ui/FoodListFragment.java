@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.appbar.AppBarLayout;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -20,9 +21,13 @@ import com.google.firebase.database.ValueEventListener;
 import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.adapters.FoodListAdapter;
 import com.trangdv.orderfood.model.Food;
+import com.trangdv.orderfood.ui.fooddetail.FoodDetailFragment;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.google.android.material.appbar.AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS;
+import static com.google.android.material.appbar.AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL;
 
 public class FoodListFragment extends Fragment implements FoodListAdapter.ItemListener {
     private static final String TAG = "FoodListFragment";
@@ -32,9 +37,7 @@ public class FoodListFragment extends Fragment implements FoodListAdapter.ItemLi
     RecyclerView.LayoutManager layoutManager;
     FoodListAdapter foodListAdapter;
     String categoryId = "";
-    String foodId;
-    //FirebaseRecyclerAdapter<Food, FoodViewHolder> adapter;
-    List<String> foodIds = new ArrayList<>();
+    String categoryName = "";
     List<Food> foods = new ArrayList<>();
     Toolbar toolbar;
 
@@ -45,14 +48,25 @@ public class FoodListFragment extends Fragment implements FoodListAdapter.ItemLi
         View view = inflater.inflate(R.layout.fragment_food_list, container, false);
         rvListFood = view.findViewById(R.id.rv_food);
 
-        this.toolbar = ((FoodActivity) getActivity()).toolbar;
+        toolbar = view.findViewById(R.id.toolbar);
+
+        if (getActivity().getIntent() != null) {
+            categoryId = getActivity().getIntent().getStringExtra("CategoryId");
+            categoryName = getActivity().getIntent().getStringExtra("CategoryName");
+            toolbar.setTitle(categoryName);
+        }
+
+        toolbar.setNavigationIcon(getResources().getDrawable(R.drawable.ic_back, getActivity().getTheme()));
         ((FoodActivity) getActivity()).setSupportActionBar(toolbar);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ((FoodActivity) getActivity()).finish();
+                getActivity().onBackPressed();
             }
         });
+
+        AppBarLayout.LayoutParams toolbarLayoutParams = (AppBarLayout.LayoutParams) toolbar.getLayoutParams();
+        toolbarLayoutParams.setScrollFlags(SCROLL_FLAG_SCROLL | SCROLL_FLAG_ENTER_ALWAYS);
 
         return view;
     }
@@ -66,13 +80,13 @@ public class FoodListFragment extends Fragment implements FoodListAdapter.ItemLi
 
         initView();
 
-        if (getActivity().getIntent() != null) {
-            categoryId = getActivity().getIntent().getStringExtra("CategoryId");
-        }
-        if (!categoryId.isEmpty() && categoryId != null) {
-            fetchData(categoryId);
 
+        if (categoryId != null) {
+            fetchData(categoryId);
         }
+
+        foodListAdapter = new FoodListAdapter(getContext(), foods, this);
+        rvListFood.setAdapter(foodListAdapter);
     }
 
     private void initView() {
@@ -81,40 +95,17 @@ public class FoodListFragment extends Fragment implements FoodListAdapter.ItemLi
     }
 
     private void fetchData(String categoryId) {
-        /*adapter = new FirebaseRecyclerAdapter<Food, FoodViewHolder>(Food.class,
-                R.layout.food_item,
-                FoodViewHolder.class,
-                foodList.orderByChild("menuId").equalTo(categoryId)) {
-            @Override
-            protected void populateViewHolder(FoodViewHolder foodViewHolder, final Food food,final int i) {
-                foodViewHolder.food_name.setText("Name: " + food.getName());
-                foodViewHolder.food_price.setText("Price: " + food.getPrice());
-                foodViewHolder.food_discount.setText("Discount: " + food.getDiscount());
-                Picasso.with(getContext())
-                        .load(food.getImage())
-                        .into(foodViewHolder.food_image);
+        foods.clear();
 
-                foodViewHolder.setItemClickListener(new ItemClickListener() {
-                    @Override
-                    public void onClick(View view, int position, boolean isLongClick) {
-                        //Toast.makeText(getContext(), adapter.getRef(i).getKey(), Toast.LENGTH_SHORT).show();
-                        ((FoodActivity) getActivity()).replace(FoodDetailFragment.newInstance(adapter.getRef(i).getKey()));
-                    }
-                });
-            }
-        };
-        rvListFood.setAdapter(adapter);*/
         foodList.orderByChild("menuId").equalTo(categoryId).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for (DataSnapshot dsp : dataSnapshot.getChildren()) {
-                    foodId = dsp.getKey();
-                    foodIds.add(foodId);
                     Food food = dsp.getValue(Food.class);
+                    food.setKey(dsp.getKey());
                     foods.add(food);
                 }
-                viewData(foods);
-
+                foodListAdapter.notifyDataSetChanged();
             }
 
             @Override
@@ -122,39 +113,17 @@ public class FoodListFragment extends Fragment implements FoodListAdapter.ItemLi
 
             }
         });
-        /*foodList.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                //List<String> lst = new ArrayList<String>();
-
-                for (DataSnapshot dsp : dataSnapshot.getChildren()) {
-                    Food food = dsp.getValue(Food.class);
-                    foods.add(food);
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });*/
-    }
-
-    private void viewData(List<Food> foodList) {
-        foodListAdapter = new FoodListAdapter(getContext(), foodList, this);
-        rvListFood.setAdapter(foodListAdapter);
 
     }
 
     @Override
     public void dispatchToFoodDetail(int position) {
-        ((FoodActivity) getActivity()).replace(FoodDetailFragment.newInstance(foodIds.get(position)));
+        ((FoodActivity) getActivity()).replace(FoodDetailFragment.newInstance(foods.get(position).getKey()));
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        foodIds.clear();
         foods.clear();
     }
 }

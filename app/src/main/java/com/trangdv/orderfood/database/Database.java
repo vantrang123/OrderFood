@@ -50,6 +50,33 @@ public class Database extends SQLiteAssetHelper {
         return result;
     }
 
+    public Order getItem(String productId) {
+        SQLiteDatabase db = getReadableDatabase();
+        SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
+
+        String[] sqlSelect = {"ProductName", "ProductId", "Quantity", "Price", "Discount", "Image"};
+        String sqlTable = "OrderDetail";
+
+        qb.setTables(sqlTable);
+        Cursor c = qb.query(db, sqlSelect, null, null, null, null, null);
+        Order order = null;
+        if (c.moveToFirst()) {
+            while (!c.getString(c.getColumnIndex("ProductId")).equals(productId)) {
+                c.moveToNext();
+            }
+            order = new Order(c.getString(c.getColumnIndex("ProductId")),
+                    c.getString(c.getColumnIndex("ProductName")),
+                    c.getString(c.getColumnIndex("Quantity")),
+                    c.getString(c.getColumnIndex("Price")),
+                    c.getString(c.getColumnIndex("Discount")),
+                    c.getString(c.getColumnIndex("Image"))
+            );
+        }
+
+        db.close();
+        return order;
+    }
+
     public void addToCart(Order order) {
         SQLiteDatabase db = getReadableDatabase();
         String query = String.format("INSERT INTO OrderDetail(ProductId, ProductName, Quantity, Price, Discount, Image) VALUES('%s','%s','%s','%s','%s','%s');",
@@ -73,6 +100,23 @@ public class Database extends SQLiteAssetHelper {
 
     }
 
+    public boolean IsProductExist(String id) {
+        SQLiteDatabase db = getReadableDatabase();
+
+        String query = String.format("SELECT * FROM OrderDetail WHERE ProductId='" + id + "'");
+        Cursor cursor = db.rawQuery(query, null);
+        if (cursor.getCount() > 0) {
+            return true;
+        }
+        return false;
+    }
+
+    public void updateCart(String id, String value) {
+        SQLiteDatabase db = getWritableDatabase();
+        String query = String.format("UPDATE OrderDetail SET Quantity='" + value + "' WHERE ProductId='" + id + "'");
+        db.execSQL(query);
+        db.close();
+    }
 
     public void cleanCart() {
         SQLiteDatabase db = getReadableDatabase();

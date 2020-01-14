@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/bg_bottom_line"
+    android:layout_marginLeft="@dimen/dimens_5dp"
+    android:layout_marginRight="@dimen/dimens_5dp"
     android:orientation="vertical">
 
     <RelativeLayout
@@ -37,7 +38,7 @@
         android:id="@+id/view_foreground"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/colorWhite">
+        android:background="@drawable/bg_bottom_line">
 
         <ImageView
             android:id="@+id/thumbnail"
