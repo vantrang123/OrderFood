@@ -16,7 +16,7 @@ import com.trangdv.orderfood.model.Order;
 import com.trangdv.orderfood.ui.fooddetail.FoodDetailActivity;
 import com.trangdv.orderfood.ui.fooddetail.FoodDetailFragment;
 
-public class ClickItemCartDialog extends BottomSheetDialogFragment implements View.OnClickListener{
+public class ClickItemCartDialog extends BottomSheetDialogFragment implements View.OnClickListener {
     private BottomSheetBehavior behavior;
     private TextView tvCancel;
     private TextView tvDelete;

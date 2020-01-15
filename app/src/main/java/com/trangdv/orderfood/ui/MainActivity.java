@@ -1,7 +1,9 @@
 package com.trangdv.orderfood.ui;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -35,6 +37,7 @@ import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.common.Common;
 import com.trangdv.orderfood.model.Order;
 import com.trangdv.orderfood.model.User;
+import com.trangdv.orderfood.receiver.InternetConnector;
 import com.trangdv.orderfood.utils.SharedPrefs;
 
 import static com.google.android.material.appbar.AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS;
@@ -42,7 +45,7 @@ import static com.google.android.material.appbar.AppBarLayout.LayoutParams.SCROL
 import static com.trangdv.orderfood.ui.LoginActivity.SAVE_USER;
 
 
-public class MainActivity extends AppCompatActivity
+public class MainActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     FragmentManager fragmentManager;
@@ -52,9 +55,6 @@ public class MainActivity extends AppCompatActivity
     NavigationView navigationView;
 
     boolean doubleBackToExitPressedOnce = false;
-
-    public static boolean activityVisible; // Variable that will check the
-                                           // current activity state
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,21 +88,16 @@ public class MainActivity extends AppCompatActivity
 //        } else {
 //            Home();
 //        }
-
-        // At activity startup we manually check the internet status and change
-        // the text status
-        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-        if (networkInfo != null && networkInfo.isConnected()) {
-            changeTextStatus(true);
-        } else {
-            changeTextStatus(false);
-        }
+        Home();
 
     }
 
     public void showBottomSheet(int position, Order order) {
         new ClickItemCartDialog(position, order).show(getSupportFragmentManager(), "dialog");
+    }
+
+    public void showInternetStatus(String status) {
+        Snackbar.make(findViewById(R.id.drawer_layout), status, Snackbar.LENGTH_INDEFINITE);
     }
 
     public void setScrollBar(int i) {
@@ -137,31 +132,6 @@ public class MainActivity extends AppCompatActivity
                 .commit();
     }
 
-    public static boolean isActivityVisible() {
-        return activityVisible; // return true or false
-    }
-
-    public static void activityResumed() {
-        activityVisible = true;// this will set true when activity resumed
-
-    }
-
-    public static void activityPaused() {
-        activityVisible = false;// this will set false when activity paused
-
-    }
-
-    // Method to change the text status
-    public void changeTextStatus(boolean isConnected) {
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
-
-        // Change status according to boolean value
-        if (isConnected) {
-            Home();
-        } else {
-            Snackbar.make(drawer, "Không có internet, vui lòng thử lại sau", Snackbar.LENGTH_LONG).show();
-        }
-    }
 
     public Fragment getFragmentCurrent() {
         return getSupportFragmentManager().findFragmentById(R.id.fragment_container);
@@ -275,14 +245,10 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onPause() {
         super.onPause();
-
-        activityPaused();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-
-        activityResumed();
     }
 }

@@ -16,7 +16,8 @@
     <color name="gray">#F4F4F4</color>
     <color name="black">#000000</color>
     <color name="red">#FF0000</color>
-    <color name="bg">#ddd</color>
+    <color name="bg">#dddddd</color>
     <color name="transparent">#00000000</color>
     <color name="colorPressed">#E0E0E0</color>
+    <color name="colorGreen">#33ff33</color>
 </resources>

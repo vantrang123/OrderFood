@@ -55,7 +55,7 @@
         app:layout_constraintLeft_toRightOf="@id/food_img" />
 
     <ImageView
-        android:id="@+id/ivHeart"
+        android:id="@+id/iv_heart"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="@dimen/dimens_5dp"

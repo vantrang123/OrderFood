@@ -246,7 +246,6 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
                         .setValue(request);
 
                 new Database(getActivity().getBaseContext()).cleanCart();
-                Toast.makeText(getActivity(), "Thank you for ordering!", Toast.LENGTH_SHORT).show();
                 dialog.dismiss();
 //                loadListFood();
                 carts.clear();

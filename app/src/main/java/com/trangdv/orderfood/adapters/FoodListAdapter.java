@@ -19,7 +19,6 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
-import com.squareup.picasso.Picasso;
 import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.model.Food;
 
@@ -105,7 +104,7 @@ public class FoodListAdapter extends RecyclerView.Adapter<FoodListAdapter.ViewHo
             tvNameFood = itemView.findViewById(R.id.food_name);
             tvPriceFood = itemView.findViewById(R.id.food_price);
             tvDiscountFood = itemView.findViewById(R.id.food_discount);
-            ivLike = itemView.findViewById(R.id.ivHeart);
+            ivLike = itemView.findViewById(R.id.iv_heart);
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
