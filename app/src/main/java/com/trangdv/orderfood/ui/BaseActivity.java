@@ -13,13 +13,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.snackbar.Snackbar;
 import com.trangdv.orderfood.receiver.InternetConnector;
 
-public class BaseActivity extends AppCompatActivity {
+public class BaseActivity extends AppCompatActivity implements InternetConnector.BroadcastListener {
     private BroadcastReceiver InternetReceiver = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        InternetReceiver = new InternetConnector();
+        InternetReceiver = new InternetConnector(this);
     }
 
     public void broadcastIntent() {
@@ -38,4 +38,8 @@ public class BaseActivity extends AppCompatActivity {
         unregisterReceiver(InternetReceiver);
     }
 
+    @Override
+    public void updateUI(String status) {
+
+    }
 }

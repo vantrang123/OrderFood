@@ -14,9 +14,11 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 
 import android.os.Handler;
 
+import android.view.GestureDetector;
 import android.view.MenuItem;
 
 import com.google.android.material.appbar.AppBarLayout;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.navigation.NavigationView;
 
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -27,6 +29,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 import android.view.Menu;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.widget.TextView;
@@ -45,16 +48,20 @@ import static com.google.android.material.appbar.AppBarLayout.LayoutParams.SCROL
 import static com.trangdv.orderfood.ui.LoginActivity.SAVE_USER;
 
 
-public class MainActivity extends BaseActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends AppCompatActivity
+        implements NavigationView.OnNavigationItemSelectedListener, InternetConnector.BroadcastListener {
 
     FragmentManager fragmentManager;
     Toolbar toolbar;
     private TextView txtUserName;
+    private TextView tvStatus;
     String sFragment = null;
     NavigationView navigationView;
+    BottomSheetBehavior mBottomSheetBehavior;
+    GestureDetector mGestureDetector;
 
     boolean doubleBackToExitPressedOnce = false;
+    private BroadcastReceiver InternetReceiver = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,16 +95,63 @@ public class MainActivity extends BaseActivity
 //        } else {
 //            Home();
 //        }
+
+        View bottomSheet = findViewById(R.id.nsv_internet_notify);
+        tvStatus = findViewById(R.id.tv_status_internet);
+        mBottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
+        mBottomSheetBehavior.setPeekHeight(0);
+        initGestureDetector();
+
+        InternetReceiver = new InternetConnector(this);
+        broadcastIntent();
         Home();
 
+    }
+
+    private void initGestureDetector() {
+        mGestureDetector = new GestureDetector(this,
+                new GestureDetector.SimpleOnGestureListener() {
+                    @Override
+                    public boolean onSingleTapConfirmed(MotionEvent e) {
+                        if (mBottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
+                            mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                            return true;
+                        }
+                        return super.onSingleTapConfirmed(e);
+                    }
+                });
     }
 
     public void showBottomSheet(int position, Order order) {
         new ClickItemCartDialog(position, order).show(getSupportFragmentManager(), "dialog");
     }
 
-    public void showInternetStatus(String status) {
-        Snackbar.make(findViewById(R.id.drawer_layout), status, Snackbar.LENGTH_INDEFINITE);
+    public void showInternetStatus(final String status) {
+        if (mBottomSheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED && !status.equals("Quay lại trực tuyến")) {
+            mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+            changeStatus(status);
+        } else if (mBottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
+            changeStatus(status);
+        }
+    }
+
+    private void changeStatus(String status) {
+        tvStatus.setText(status);
+        if (status.equals("Quay lại trực tuyến")) {
+            tvStatus.setBackgroundColor(getResources().getColor(R.color.colorGreen));
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    closeBottomSheet();
+                }
+            }, 2000);
+        } else {
+            tvStatus.setBackgroundColor(getResources().getColor(R.color.description));
+        }
+    }
+
+    private void closeBottomSheet() {
+        mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
     }
 
     public void setScrollBar(int i) {
@@ -242,13 +296,35 @@ public class MainActivity extends BaseActivity
         return true;
     }
 
+    public void broadcastIntent() {
+        registerReceiver(InternetReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+//        broadcastIntent();
+    }
+
     @Override
     protected void onPause() {
         super.onPause();
+//        unregisterReceiver(InternetReceiver);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(InternetReceiver);
+    }
+
+    @Override
+    public void updateUI(String status) {
+        showInternetStatus(status);
     }
 }

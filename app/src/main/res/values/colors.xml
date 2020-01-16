@@ -19,5 +19,5 @@
     <color name="bg">#dddddd</color>
     <color name="transparent">#00000000</color>
     <color name="colorPressed">#E0E0E0</color>
-    <color name="colorGreen">#33ff33</color>
+    <color name="colorGreen">#07da63</color>
 </resources>

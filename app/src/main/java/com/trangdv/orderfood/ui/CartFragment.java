@@ -245,12 +245,11 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
                 requests.child(String.valueOf(System.currentTimeMillis()))
                         .setValue(request);
 
-                new Database(getActivity().getBaseContext()).cleanCart();
                 dialog.dismiss();
-//                loadListFood();
+                /*new Database(getActivity().getBaseContext()).cleanCart();
                 carts.clear();
                 adapter.notifyDataSetChanged();
-                changeStatus();
+                changeStatus();*/
                 sendOrderStatusToServer();
 
             }
@@ -303,6 +302,10 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
         data.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                new Database(getActivity().getBaseContext()).cleanCart();
+                carts.clear();
+                adapter.notifyDataSetChanged();
+                changeStatus();
                 for(DataSnapshot postSnapShot:dataSnapshot.getChildren()) {
                     Token serverToken = postSnapShot.getValue(Token.class);
 
@@ -314,6 +317,7 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
                         @Override
                         public void onResponse(Call<MyResponse> call, Response<MyResponse> response) {
                             if (response.body().success == 1) {
+                                new Database(getActivity().getBaseContext()).cleanCart();
                                 Toast.makeText(getContext(), getString(R.string.order_was_updated), Toast.LENGTH_SHORT).show();
                             } else {
                                 Toast.makeText(getContext(), getString(R.string.order_was_updated_but_failed_to_send_notification)

@@ -3,13 +3,16 @@ package com.trangdv.orderfood.receiver;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.widget.Toast;
 
-import com.trangdv.orderfood.ui.BaseActivity;
-import com.trangdv.orderfood.ui.MainActivity;
 import com.trangdv.orderfood.utils.NetworkUtil;
 
 public class InternetConnector extends BroadcastReceiver {
+    private BroadcastListener listener;
+
+    public InternetConnector(BroadcastListener listener) {
+        this.listener = listener;
+    }
+
     @Override
     public void onReceive(Context context, Intent intent) {
         String status = NetworkUtil.getConnectivityStatusString(context);
@@ -17,11 +20,11 @@ public class InternetConnector extends BroadcastReceiver {
             status="No Internet Connection";
         }
 //        Toast.makeText(context, status, Toast.LENGTH_LONG).show();
+//        new MainActivity().showInternetStatus(status);
+        listener.updateUI(status);
+    }
 
-        try {
-            new MainActivity().showInternetStatus(status);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    public interface BroadcastListener {
+        void updateUI(String status);
     }
 }

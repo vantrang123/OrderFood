@@ -122,11 +122,10 @@ public class HomeFragment extends Fragment implements MenuAdapter.ItemListener {
     }
 
     public void fetchData() {
-        categories.clear();
-
         category.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                categories.clear();
                 for (DataSnapshot dsp : dataSnapshot.getChildren()) {
                     Category category = dsp.getValue(Category.class);
                     category.setKey(dsp.getKey());
