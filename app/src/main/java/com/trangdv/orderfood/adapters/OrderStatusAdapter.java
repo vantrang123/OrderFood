@@ -40,7 +40,7 @@ public class OrderStatusAdapter extends RecyclerView.Adapter<OrderStatusAdapter.
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         mInflater = LayoutInflater.from(parent.getContext());
-        View view = mInflater.inflate(R.layout.order_item, parent, false);
+        View view = mInflater.inflate(R.layout.item_order, parent, false);
         return new ViewHolder(view);
     }
 

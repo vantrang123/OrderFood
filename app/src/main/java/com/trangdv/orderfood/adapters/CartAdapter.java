@@ -9,7 +9,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -21,12 +20,9 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
-import com.squareup.picasso.Picasso;
 import com.trangdv.orderfood.R;
-import com.trangdv.orderfood.database.Database;
 import com.trangdv.orderfood.listener.OnDatabaseChangedListeners;
 import com.trangdv.orderfood.model.Order;
-import com.trangdv.orderfood.ui.MainActivity;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -50,7 +46,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> im
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(context);
-        View itemView = inflater.inflate(R.layout.cart_list_item, parent, false);
+        View itemView = inflater.inflate(R.layout.item_cart, parent, false);
         return new ViewHolder(itemView);
     }
 
@@ -125,7 +121,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> im
 
         public ViewHolder(@NonNull final View itemView) {
             super(itemView);
-            img_cart_image = itemView.findViewById(R.id.thumbnail);
+            img_cart_image = itemView.findViewById(R.id.iv_cart_image);
             tv_cart_name = itemView.findViewById(R.id.cart_item_name);
             tv_price = itemView.findViewById(R.id.cart_item_price);
             img_cart_count = itemView.findViewById(R.id.cart_item_count);

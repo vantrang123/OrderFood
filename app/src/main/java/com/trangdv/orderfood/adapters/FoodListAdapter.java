@@ -47,7 +47,7 @@ public class FoodListAdapter extends RecyclerView.Adapter<FoodListAdapter.ViewHo
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         mInflater = LayoutInflater.from(parent.getContext());
-        View view = mInflater.inflate(R.layout.food_item, parent, false);
+        View view = mInflater.inflate(R.layout.item_food, parent, false);
         return new ViewHolder(view);
     }
 
@@ -100,7 +100,7 @@ public class FoodListAdapter extends RecyclerView.Adapter<FoodListAdapter.ViewHo
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            imgFood = itemView.findViewById(R.id.food_img);
+            imgFood = itemView.findViewById(R.id.iv_food_image);
             tvNameFood = itemView.findViewById(R.id.food_name);
             tvPriceFood = itemView.findViewById(R.id.food_price);
             tvDiscountFood = itemView.findViewById(R.id.food_discount);
