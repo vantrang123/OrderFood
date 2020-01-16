@@ -78,6 +78,7 @@ public class FoodListFragment extends Fragment implements FoodListAdapter.ItemLi
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        mShimmerViewContainer.startShimmerAnimation();
 
         database = FirebaseDatabase.getInstance();
         foodList = database.getReference("Foods");

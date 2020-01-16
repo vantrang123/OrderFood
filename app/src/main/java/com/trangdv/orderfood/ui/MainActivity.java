@@ -208,26 +208,25 @@ public class MainActivity extends AppCompatActivity
             finishAffinity();
             System.exit(0);
             return;
-        }
-
-        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
-
-        if (!(fragment instanceof HomeFragment)) {
-            getSupportFragmentManager().popBackStackImmediate();
-
         } else {
-            this.doubleBackToExitPressedOnce = true;
-            Toast.makeText(this, "Please click BACK again to exit", Toast.LENGTH_SHORT).show();
+            Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
 
-            new Handler().postDelayed(new Runnable() {
+            if (!(fragment instanceof HomeFragment)) {
+                getSupportFragmentManager().popBackStackImmediate();
 
-                @Override
-                public void run() {
-                    doubleBackToExitPressedOnce = false;
-                }
-            }, 2000);
+            } else {
+                this.doubleBackToExitPressedOnce = true;
+                Toast.makeText(this, "Please click BACK again to exit", Toast.LENGTH_SHORT).show();
+
+                new Handler().postDelayed(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        doubleBackToExitPressedOnce = false;
+                    }
+                }, 2000);
+            }
         }
-
     }
 
     @Override
