@@ -104,6 +104,7 @@ public class FoodDetailFragment extends Fragment {
                             .load(currentFood.getImage())
                             .fitCenter()
                             .centerCrop()
+                            .placeholder(R.drawable.image_default)
                             .listener(new RequestListener<Bitmap>() {
                                 @Override
                                 public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Bitmap> target, boolean isFirstResource) {

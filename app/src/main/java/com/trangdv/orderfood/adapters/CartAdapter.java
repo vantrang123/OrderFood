@@ -67,6 +67,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> im
                 .asBitmap()
                 .centerCrop()
                 .fitCenter()
+                .placeholder(R.drawable.image_default)
                 .load(listData.get(position).getImage())
                 .listener(new RequestListener<Bitmap>() {
                     @Override

@@ -51,7 +51,8 @@
                 android:id="@+id/iv_cart_image"
                 android:layout_width="@dimen/thumbnail"
                 android:layout_height="@dimen/thumbnail"
-                android:scaleType="centerCrop" />
+                android:scaleType="centerCrop"
+                android:src="@drawable/image_default"/>
         </androidx.cardview.widget.CardView>
 
 

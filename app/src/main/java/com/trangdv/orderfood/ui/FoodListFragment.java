@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.facebook.shimmer.ShimmerFrameLayout;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -41,6 +42,8 @@ public class FoodListFragment extends Fragment implements FoodListAdapter.ItemLi
     List<Food> foods = new ArrayList<>();
     Toolbar toolbar;
 
+    private ShimmerFrameLayout mShimmerViewContainer;
+
 
     @Nullable
     @Override
@@ -49,6 +52,7 @@ public class FoodListFragment extends Fragment implements FoodListAdapter.ItemLi
         rvListFood = view.findViewById(R.id.rv_food);
 
         toolbar = view.findViewById(R.id.toolbar);
+        mShimmerViewContainer = view.findViewById(R.id.shimmer_view_container);
 
         if (getActivity().getIntent() != null) {
             categoryId = getActivity().getIntent().getStringExtra("CategoryId");
@@ -106,6 +110,9 @@ public class FoodListFragment extends Fragment implements FoodListAdapter.ItemLi
                     foods.add(food);
                 }
                 foodListAdapter.notifyDataSetChanged();
+                //
+                mShimmerViewContainer.stopShimmerAnimation();
+                mShimmerViewContainer.setVisibility(View.GONE);
             }
 
             @Override
@@ -124,6 +131,13 @@ public class FoodListFragment extends Fragment implements FoodListAdapter.ItemLi
     @Override
     public void onResume() {
         super.onResume();
-        foods.clear();
+//        foods.clear();
+        mShimmerViewContainer.startShimmerAnimation();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mShimmerViewContainer.stopShimmerAnimation();
     }
 }

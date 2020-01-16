@@ -47,7 +47,7 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.ViewHolder> {
         bindView(holder, position);
     }
 
-    private void bindView(ViewHolder holder, final int i) {
+    private void bindView(final ViewHolder holder, final int i) {
         holder.tvMenuName.setText(categories.get(i).getName());
 
         if (categories.get(i).getBitmapImage() == null) {
@@ -56,6 +56,7 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.ViewHolder> {
                     .load(categories.get(i).getImage())
                     .fitCenter()
                     .centerCrop()
+                    .placeholder(R.drawable.image_default)
                     .listener(new RequestListener<Bitmap>() {
                         @Override
                         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Bitmap> target, boolean isFirstResource) {
