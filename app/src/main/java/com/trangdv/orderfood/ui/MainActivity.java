@@ -59,9 +59,13 @@ public class MainActivity extends AppCompatActivity
     NavigationView navigationView;
     BottomSheetBehavior mBottomSheetBehavior;
     GestureDetector mGestureDetector;
+    HomeFragment homeFragment;
+    CartFragment cartFragment;
+    OrderStatusFragment orderStatusFragment;
 
     boolean doubleBackToExitPressedOnce = false;
     private BroadcastReceiver InternetReceiver = null;
+    private int subscreensOnTheStack = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,6 +99,9 @@ public class MainActivity extends AppCompatActivity
 //        } else {
 //            Home();
 //        }
+        homeFragment = new HomeFragment();
+        orderStatusFragment = new OrderStatusFragment();
+        cartFragment = new CartFragment();
 
         View bottomSheet = findViewById(R.id.nsv_internet_notify);
         tvStatus = findViewById(R.id.tv_status_internet);
@@ -162,28 +169,31 @@ public class MainActivity extends AppCompatActivity
     public void Home() {
         //setScrollBar(1);
         setScrollBar(SCROLL_FLAG_SCROLL | SCROLL_FLAG_ENTER_ALWAYS);
-        fragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, new HomeFragment())
-                .commit();
+        /*fragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, homeFragment)
+                .commit();*/
+        replace(homeFragment);
         navigationView.getMenu().getItem(0).setChecked(true);
     }
 
     public void Cart() {
         setScrollBar(0);
-        fragmentManager.beginTransaction()
+        /*fragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, new CartFragment())
                 .addToBackStack(null)
-                .commit();
+                .commit();*/
+        replace(cartFragment);
     }
 
     public void OrderStatus() {
         //setScrollBar(1);
-        setScrollBar(SCROLL_FLAG_SCROLL | SCROLL_FLAG_ENTER_ALWAYS);
+        /*setScrollBar(SCROLL_FLAG_SCROLL | SCROLL_FLAG_ENTER_ALWAYS);
         fragmentManager.beginTransaction()
                 //.replace(R.id.fragment_container, new OrderStatusFragment())
                 .replace(R.id.fragment_container, new OrderStatusFragment())
                 .addToBackStack(null)
-                .commit();
+                .commit();*/
+        replace(orderStatusFragment);
     }
 
 
@@ -194,8 +204,8 @@ public class MainActivity extends AppCompatActivity
     void replace(Fragment fragment) {
         fragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, fragment)
-                .addToBackStack(null)
-                .commit();
+                .addToBackStack(null).commit();
+        subscreensOnTheStack++;
     }
 
 
@@ -212,8 +222,10 @@ public class MainActivity extends AppCompatActivity
             Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
 
             if (!(fragment instanceof HomeFragment)) {
-                getSupportFragmentManager().popBackStackImmediate();
-
+                while (subscreensOnTheStack > 0) {
+                    subscreensOnTheStack--;
+                    getSupportFragmentManager().popBackStackImmediate();
+                }
             } else {
                 this.doubleBackToExitPressedOnce = true;
                 Toast.makeText(this, "Please click BACK again to exit", Toast.LENGTH_SHORT).show();
@@ -259,7 +271,7 @@ public class MainActivity extends AppCompatActivity
                 if (item.isChecked()) item.setChecked(false);
                 else {
                     Home();
-                    Toast.makeText(MainActivity.this, "menu", Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(MainActivity.this, "menu", Toast.LENGTH_SHORT).show();
                 }
                 item.setChecked(true);
                 break;
@@ -268,7 +280,7 @@ public class MainActivity extends AppCompatActivity
                 if (item.isChecked()) item.setChecked(false);
                 else {
                     Cart();
-                    Toast.makeText(MainActivity.this, "carts", Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(MainActivity.this, "carts", Toast.LENGTH_SHORT).show();
                 }
                 item.setChecked(true);
                 break;
@@ -277,7 +289,7 @@ public class MainActivity extends AppCompatActivity
                 if (item.isChecked()) item.setChecked(false);
                 else {
                     OrderStatus();
-                    Toast.makeText(MainActivity.this, "order status", Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(MainActivity.this, "order status", Toast.LENGTH_SHORT).show();
                 }
                 item.setChecked(true);
                 break;
