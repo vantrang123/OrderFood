@@ -20,6 +20,7 @@
     <string name="menu_cart">Cart</string>
     <string name="menu_exit">Signout</string>
     <string name="menu_status">Order</string>
+    <string name="menu_favorites">Favorite</string>
     <string name="menu_share">Share</string>
     <string name="menu_send">Send</string>
 

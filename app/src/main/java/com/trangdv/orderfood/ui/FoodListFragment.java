@@ -107,7 +107,7 @@ public class FoodListFragment extends Fragment implements FoodListAdapter.ItemLi
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for (DataSnapshot dsp : dataSnapshot.getChildren()) {
                     Food food = dsp.getValue(Food.class);
-                    food.setKey(dsp.getKey());
+                    food.setFoodId(dsp.getKey());
                     foods.add(food);
                 }
                 foodListAdapter.notifyDataSetChanged();
@@ -126,7 +126,7 @@ public class FoodListFragment extends Fragment implements FoodListAdapter.ItemLi
 
     @Override
     public void dispatchToFoodDetail(int position) {
-        ((FoodActivity) getActivity()).replace(FoodDetailFragment.newInstance(foods.get(position).getKey()));
+        ((FoodActivity) getActivity()).replace(FoodDetailFragment.newInstance(foods.get(position).getFoodId()));
     }
 
     @Override

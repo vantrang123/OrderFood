@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteQueryBuilder;
 
 import com.readystatesoftware.sqliteasset.SQLiteAssetHelper;
 import com.trangdv.orderfood.listener.OnDatabaseChangedListeners;
+import com.trangdv.orderfood.model.Favorites;
 import com.trangdv.orderfood.model.Order;
 
 import java.util.ArrayList;
@@ -124,5 +125,68 @@ public class Database extends SQLiteAssetHelper {
         db.execSQL(query);
         db.close();
 
+    }
+
+    //Favourites
+    public void addToFavourites(Favorites food) {
+
+        SQLiteDatabase db = getReadableDatabase();
+        String query = String.format("INSERT INTO Favorites(" +
+                        "FoodId,FoodName,FoodPrice,FoodMenuId,FoodImage,FoodDescription,UserPhone,FoodDiscount)" +
+                        "VALUES('%s','%s','%s','%s','%s','%s','%s','%s');",
+                food.getFoodId(),
+                food.getFoodName(),
+                food.getFoodPrice(),
+                food.getFoodMenuId(),
+                food.getFoodImage(),
+                food.getFoodDescription(),
+                food.getUserPhone(),
+                food.getFoodDiscount());
+        db.execSQL(query);
+    }
+
+    public void removeFromFavourites(String foodId, String userPhone) {
+        SQLiteDatabase db = getReadableDatabase();
+        String query = String.format("DELETE FROM Favorites WHERE FoodId = '%s' and UserPhone = '%s' ;", foodId, userPhone);
+        db.execSQL(query);
+    }
+
+    public boolean isFavourite(String foodId, String userPhone) {
+        SQLiteDatabase db = getReadableDatabase();
+        String query = String.format("SELECT * FROM Favorites WHERE FoodId = '%s' and UserPhone = '%s' ;", foodId, userPhone);
+        Cursor cursor = db.rawQuery(query, null);
+        if (cursor.getCount() >0) {
+            return true;
+        }
+        return false;
+    }
+
+    public List<Favorites> getAllFavorites(String userPhone) {
+
+        SQLiteDatabase db = getReadableDatabase();
+        SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
+
+        String[] sqlSelect = {"UserPhone","FoodId", "FoodName", "FoodPrice", "FoodDiscount", "FoodMenuId", "FoodImage", "FoodDescription"};
+        String sqlTable = "Favorites";
+
+        qb.setTables(sqlTable);
+        Cursor c = qb.query(db, sqlSelect, "UserPhone=?", new String[]{userPhone}, null, null, null);
+
+        final List<Favorites> result = new ArrayList<>();
+        if (c.moveToFirst()) {
+            do {
+                result.add(new Favorites(
+                        c.getString(c.getColumnIndex("FoodId")),
+                        c.getString(c.getColumnIndex("FoodName")),
+                        c.getString(c.getColumnIndex("FoodPrice")),
+                        c.getString(c.getColumnIndex("FoodMenuId")),
+                        c.getString(c.getColumnIndex("FoodImage")),
+                        c.getString(c.getColumnIndex("FoodDescription")),
+                        c.getString(c.getColumnIndex("UserPhone")),
+                        c.getString(c.getColumnIndex("FoodDiscount"))
+                ));
+            } while (c.moveToNext());
+        }
+        return result;
     }
 }

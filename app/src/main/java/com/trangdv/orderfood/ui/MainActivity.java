@@ -62,6 +62,7 @@ public class MainActivity extends AppCompatActivity
     HomeFragment homeFragment;
     CartFragment cartFragment;
     OrderStatusFragment orderStatusFragment;
+    FavoritesFragment favoritesFragment;
 
     boolean doubleBackToExitPressedOnce = false;
     private BroadcastReceiver InternetReceiver = null;
@@ -102,6 +103,7 @@ public class MainActivity extends AppCompatActivity
         homeFragment = new HomeFragment();
         orderStatusFragment = new OrderStatusFragment();
         cartFragment = new CartFragment();
+        favoritesFragment = new FavoritesFragment();
 
         View bottomSheet = findViewById(R.id.nsv_internet_notify);
         tvStatus = findViewById(R.id.tv_status_internet);
@@ -177,23 +179,30 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void Cart() {
-        setScrollBar(0);
+//        setScrollBar(0);
         /*fragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, new CartFragment())
                 .addToBackStack(null)
                 .commit();*/
+        setScrollBar(SCROLL_FLAG_SCROLL | SCROLL_FLAG_ENTER_ALWAYS);
         replace(cartFragment);
     }
 
     public void OrderStatus() {
-        //setScrollBar(1);
+//        setScrollBar(1);
         /*setScrollBar(SCROLL_FLAG_SCROLL | SCROLL_FLAG_ENTER_ALWAYS);
         fragmentManager.beginTransaction()
                 //.replace(R.id.fragment_container, new OrderStatusFragment())
                 .replace(R.id.fragment_container, new OrderStatusFragment())
                 .addToBackStack(null)
                 .commit();*/
+        setScrollBar(SCROLL_FLAG_SCROLL | SCROLL_FLAG_ENTER_ALWAYS);
         replace(orderStatusFragment);
+    }
+
+    public void Favorite() {
+        setScrollBar(SCROLL_FLAG_SCROLL | SCROLL_FLAG_ENTER_ALWAYS);
+        replace(favoritesFragment);
     }
 
 
@@ -290,6 +299,13 @@ public class MainActivity extends AppCompatActivity
                 else {
                     OrderStatus();
 //                    Toast.makeText(MainActivity.this, "order status", Toast.LENGTH_SHORT).show();
+                }
+                item.setChecked(true);
+                break;
+            case R.id.nav_favorites:
+                if (item.isChecked()) item.setChecked(false);
+                else {
+                    Favorite();
                 }
                 item.setChecked(true);
                 break;

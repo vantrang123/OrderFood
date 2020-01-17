@@ -57,7 +57,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> im
 
         Locale locale = new Locale("vi", "VN");
         NumberFormat fmt = NumberFormat.getCurrencyInstance(locale);
-        int price = (Integer.parseInt(listData.get(position).getPrice())) * (Integer.parseInt(listData.get(position).getQuanlity()));
+        int price = (Integer.parseInt(listData.get(position).getPrice()));
         holder.tv_price.setText(fmt.format(price));
         holder.tv_cart_name.setText(listData.get(position).getProductName());
         /*Picasso.with(context)

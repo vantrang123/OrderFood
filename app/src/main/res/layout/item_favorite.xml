@@ -6,6 +6,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginTop="@dimen/dimens_5dp"
+    android:layout_marginLeft="@dimen/dimens_10"
+    android:layout_marginRight="@dimen/dimens_10"
     android:background="@drawable/bg_bottom_line">
 
     <androidx.cardview.widget.CardView
@@ -67,6 +69,6 @@
         android:padding="@dimen/dimens_5dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        android:src="@drawable/ic_favorite_gray" />
+        android:src="@drawable/ic_favorite_red" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

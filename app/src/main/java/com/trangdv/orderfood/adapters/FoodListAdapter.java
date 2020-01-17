@@ -20,6 +20,9 @@ import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.trangdv.orderfood.R;
+import com.trangdv.orderfood.common.Common;
+import com.trangdv.orderfood.database.Database;
+import com.trangdv.orderfood.model.Favorites;
 import com.trangdv.orderfood.model.Food;
 
 import java.text.NumberFormat;
@@ -35,6 +38,9 @@ public class FoodListAdapter extends RecyclerView.Adapter<FoodListAdapter.ViewHo
     LinearLayoutManager layoutManager;
     ItemListener listener;
 
+    Locale locale;
+    NumberFormat fmt;
+    Database database;
 
     public FoodListAdapter(Context context, List<Food> foods, ItemListener itemListener) {
         super();
@@ -48,13 +54,16 @@ public class FoodListAdapter extends RecyclerView.Adapter<FoodListAdapter.ViewHo
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         mInflater = LayoutInflater.from(parent.getContext());
         View view = mInflater.inflate(R.layout.item_food, parent, false);
+        locale = new Locale("vi", "VN");
+        fmt = NumberFormat.getCurrencyInstance(locale);
+        database = new Database(context);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
-        Locale locale = new Locale("vi", "VN");
-        NumberFormat fmt = NumberFormat.getCurrencyInstance(locale);
+//        Locale locale = new Locale("vi", "VN");
+//        NumberFormat fmt = NumberFormat.getCurrencyInstance(locale);
         int price = (Integer.parseInt(foods.get(position).getPrice()));
 
         holder.tvNameFood.setText("Name: " + foods.get(position).getName());
@@ -85,6 +94,9 @@ public class FoodListAdapter extends RecyclerView.Adapter<FoodListAdapter.ViewHo
             holder.imgFood.setImageBitmap(foods.get(position).getBitmapImage());
         }
 
+        if (database.isFavourite(foods.get(position).getFoodId(), Common.currentUser.getPhone()))
+            holder.ivFavorite.setImageResource(R.drawable.ic_favorite_red);
+
     }
 
     @Override
@@ -97,7 +109,7 @@ public class FoodListAdapter extends RecyclerView.Adapter<FoodListAdapter.ViewHo
         public TextView tvNameFood;
         public TextView tvPriceFood;
         public TextView tvDiscountFood;
-        public ImageView ivLike;
+        public ImageView ivFavorite;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -105,7 +117,7 @@ public class FoodListAdapter extends RecyclerView.Adapter<FoodListAdapter.ViewHo
             tvNameFood = itemView.findViewById(R.id.food_name);
             tvPriceFood = itemView.findViewById(R.id.food_price);
             tvDiscountFood = itemView.findViewById(R.id.food_discount);
-            ivLike = itemView.findViewById(R.id.iv_heart);
+            ivFavorite = itemView.findViewById(R.id.iv_favorite);
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -114,10 +126,31 @@ public class FoodListAdapter extends RecyclerView.Adapter<FoodListAdapter.ViewHo
                 }
             });
 
-            ivLike.setOnClickListener(new View.OnClickListener() {
+            ivFavorite.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Toast.makeText(context, "like", Toast.LENGTH_SHORT).show();
+                    Favorites favorites = new Favorites();
+                    favorites.setFoodId(foods.get(getLayoutPosition()).getFoodId());
+                    favorites.setFoodName(foods.get(getLayoutPosition()).getName());
+                    favorites.setFoodDescription(foods.get(getLayoutPosition()).getDescription());
+                    favorites.setFoodImage(foods.get(getLayoutPosition()).getImage());
+                    favorites.setFoodMenuId(foods.get(getLayoutPosition()).getMenuId());
+                    favorites.setUserPhone(Common.currentUser.getPhone());
+                    favorites.setFoodPrice(foods.get(getLayoutPosition()).getPrice());
+                    favorites.setFoodDiscount(foods.get(getLayoutPosition()).getDiscount());
+
+                    if (!database.isFavourite(foods.get(getLayoutPosition()).getFoodId(), Common.currentUser.getPhone())) {
+
+                        database.addToFavourites(favorites);
+                        ivFavorite.setImageResource(R.drawable.ic_favorite_red);
+                        Toast.makeText(context, "" + foods.get(getLayoutPosition()).getName() +
+                                " was added to Favourites", Toast.LENGTH_SHORT).show();
+                    } else {
+                        database.removeFromFavourites(foods.get(getLayoutPosition()).getFoodId(), Common.currentUser.getPhone());
+                        ivFavorite.setImageResource(R.drawable.ic_favorite_gray);
+                        Toast.makeText(context, "" + foods.get(getLayoutPosition()).getName() +
+                                " was removed from Favourites", Toast.LENGTH_SHORT).show();
+                    }
                 }
             });
 
