@@ -68,6 +68,9 @@ dependencies {
     implementation 'com.zhpan.library:bannerview:2.6.6'
     implementation "androidx.core:core-ktx:+"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+
+    //bottom-navigation
+    implementation project(':bottom-navigation')
 }
 apply plugin: 'com.google.gms.google-services'
 repositories {

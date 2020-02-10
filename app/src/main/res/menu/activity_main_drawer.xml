@@ -8,34 +8,34 @@
         <item
             android:id="@+id/nav_home"
             android:icon="@drawable/ic_menu_food"
-            android:name="@string/menu_home" />
+            android:title="@string/menu_home" />
         <item
             android:id="@+id/nav_cart"
             android:icon="@drawable/ic_menu_cart"
-            android:name="@string/menu_cart" />
+            android:title="@string/menu_cart" />
         <item
             android:id="@+id/nav_status"
             android:icon="@drawable/ic_menu_status"
-            android:name="@string/menu_status" />
+            android:title="@string/menu_status" />
         <item android:id="@+id/nav_favorites"
             android:icon="@drawable/ic_menu_favorite"
-            android:name="@string/menu_favorites" />
+            android:title="@string/menu_favorites" />
         <item
             android:id="@+id/nav_exit"
             android:icon="@drawable/ic_menu_exit"
-            android:name="@string/menu_exit" />
+            android:title="@string/menu_exit" />
     </group>
 
-    <item android:name="Communicate">
+    <item android:title="Communicate">
         <menu>
             <item
                 android:id="@+id/nav_share"
                 android:icon="@drawable/ic_menu_share"
-                android:name="@string/menu_share" />
+                android:title="@string/menu_share" />
             <item
                 android:id="@+id/nav_send"
                 android:icon="@drawable/ic_menu_send"
-                android:name="@string/menu_send" />
+                android:title="@string/menu_send" />
         </menu>
     </item>
 

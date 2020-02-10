@@ -1,12 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/content_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/colorWhite"
+    android:orientation="vertical"
     tools:context=".ui.MainActivity"
     tools:showIn="@layout/app_bar_main">
+
+    <!--<include layout="@layout/nav_top_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>-->
+
+    <it.sephiroth.android.library.bottomnavigation.BottomNavigation
+        android:id="@+id/bottomNavigation"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:bbn_entries="@menu/nav_bottom"
+        app:bbn_badgeProvider="@string/bbn_badgeProvider" />
 
     <FrameLayout
         android:id="@+id/fragment_container"
@@ -14,4 +27,4 @@
         android:layout_height="match_parent"
         />
 
-</RelativeLayout>
+</LinearLayout>

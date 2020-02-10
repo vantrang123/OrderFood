@@ -16,13 +16,16 @@
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_search">Search</string>
 
-    <string name="menu_home">Menu</string>
+    <string name="menu_home">Home</string>
     <string name="menu_cart">Cart</string>
     <string name="menu_exit">Signout</string>
     <string name="menu_status">Order</string>
-    <string name="menu_favorites">Favorite</string>
+    <string name="menu_favorites">Yêu thích</string>
     <string name="menu_share">Share</string>
     <string name="menu_send">Send</string>
+    <string name="menu_my">Tôi</string>
+    <string name="menu_receipt">Đơn hàng</string>
+    <string name="menu_setting">Cài đặt</string>
 
     <string name="added_to_cart">Added to Cart</string>
     <string name="delete">DELETE</string>

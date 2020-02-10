@@ -43,6 +43,8 @@ import com.trangdv.orderfood.model.User;
 import com.trangdv.orderfood.receiver.InternetConnector;
 import com.trangdv.orderfood.utils.SharedPrefs;
 
+import it.sephiroth.android.library.bottomnavigation.BottomNavigation;
+
 import static com.google.android.material.appbar.AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS;
 import static com.google.android.material.appbar.AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL;
 import static com.trangdv.orderfood.ui.LoginActivity.SAVE_USER;
@@ -55,6 +57,7 @@ public class MainActivity extends AppCompatActivity
     Toolbar toolbar;
     private TextView txtUserName;
     private TextView tvStatus;
+    private BottomNavigation mBottomNavigation;
     String sFragment = null;
     NavigationView navigationView;
     BottomSheetBehavior mBottomSheetBehavior;
@@ -72,7 +75,10 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        toolbar = findViewById(R.id.toolbar);
+        findViewById();
+
+        initializeBottomNavigation();
+
         toolbar.setTitle("Menu");
         setSupportActionBar(toolbar);
         fragmentManager = getSupportFragmentManager();
@@ -115,6 +121,40 @@ public class MainActivity extends AppCompatActivity
         broadcastIntent();
         Home();
 
+    }
+
+    private void initializeBottomNavigation() {
+        mBottomNavigation.setDefaultSelectedIndex(0);
+        mBottomNavigation.setMenuItemSelectionListener(new BottomNavigation.OnMenuItemSelectionListener() {
+            @Override
+            public void onMenuItemSelect(int i, int i1, boolean b) {
+                switch (i1) {
+                    case 0:
+                        Home();
+                        break;
+                    case 1:
+                        OrderStatus();
+                        break;
+                    case 2:
+                        Favorite();
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            @Override
+            public void onMenuItemReselect(int i, int i1, boolean b) {
+
+            }
+        });
+    }
+
+
+
+    private void findViewById() {
+        mBottomNavigation = findViewById(R.id.bottomNavigation);
+        toolbar = findViewById(R.id.toolbar);
     }
 
     private void initGestureDetector() {
@@ -235,6 +275,7 @@ public class MainActivity extends AppCompatActivity
                     subscreensOnTheStack--;
                     getSupportFragmentManager().popBackStackImmediate();
                 }
+                mBottomNavigation.setSelectedIndex(0, false);
             } else {
                 this.doubleBackToExitPressedOnce = true;
                 Toast.makeText(this, "Please click BACK again to exit", Toast.LENGTH_SHORT).show();

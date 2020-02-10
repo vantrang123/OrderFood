@@ -20,4 +20,5 @@
     <color name="transparent">#00000000</color>
     <color name="colorPressed">#E0E0E0</color>
     <color name="colorGreen">#07da63</color>
+    <color name="line_color">#DCDCDC</color>
 </resources>
