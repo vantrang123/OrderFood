@@ -1,15 +1,12 @@
 package com.trangdv.orderfood.ui;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
@@ -17,16 +14,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.DataSource;
-import com.bumptech.glide.load.engine.GlideException;
-import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.target.SimpleTarget;
-import com.bumptech.glide.request.target.Target;
-import com.bumptech.glide.request.transition.Transition;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.material.shape.RoundedCornerTreatment;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -34,27 +26,28 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
-import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Transformation;
 import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.adapters.MenuAdapter;
 import com.trangdv.orderfood.common.Common;
-import com.trangdv.orderfood.listener.ItemClickListener;
+import com.trangdv.orderfood.model.BannerData;
 import com.trangdv.orderfood.model.Category;
 import com.trangdv.orderfood.model.Token;
 import com.trangdv.orderfood.viewholder.MenuViewHolder;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.trangdv.orderfood.viewholder.NetViewHolder;
+import com.zhpan.bannerview.BannerViewPager;
+import com.zhpan.bannerview.adapter.OnPageChangeListenerAdapter;
+import com.zhpan.bannerview.constants.IndicatorSlideMode;
+import com.zhpan.bannerview.indicator.IndicatorView;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import jp.wasabeef.picasso.transformations.RoundedCornersTransformation;
-
 public class HomeFragment extends Fragment implements MenuAdapter.ItemListener {
 
     FirebaseDatabase database;
-    DatabaseReference category;
+    DatabaseReference category, banner;
     RecyclerView recycler_menu;
 
     RecyclerView.LayoutManager layoutManager;
@@ -63,6 +56,11 @@ public class HomeFragment extends Fragment implements MenuAdapter.ItemListener {
     FirebaseRecyclerAdapter<Category, MenuViewHolder> adapter;
     MenuAdapter menuAdapter;
     List<Category> categories = new ArrayList<>();
+    BannerViewPager<BannerData, NetViewHolder> mViewPager;
+    List<BannerData> banners = new ArrayList<>();
+    IndicatorView mIndicatorView;
+    RelativeLayout mRlIndicator;
+    TextView mTvTitle;
 
     @Nullable
     @Override
@@ -75,6 +73,12 @@ public class HomeFragment extends Fragment implements MenuAdapter.ItemListener {
                 android.R.color.holo_green_dark,
                 android.R.color.holo_orange_dark,
                 android.R.color.holo_blue_dark);
+        mRlIndicator = view.findViewById(R.id.layout_indicator);
+        mViewPager = view.findViewById(R.id.banner_view);
+        mTvTitle = view.findViewById(R.id.tv_title);
+        mIndicatorView = view.findViewById(R.id.indicator_view);
+
+        initBanner();
         return view;
     }
 
@@ -83,6 +87,7 @@ public class HomeFragment extends Fragment implements MenuAdapter.ItemListener {
         super.onViewCreated(view, savedInstanceState);
         database = FirebaseDatabase.getInstance();
         category = database.getReference("Categories");
+        banner = database.getReference("Banner");
 
         // token
         FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(getActivity(),  new OnSuccessListener<InstanceIdResult>() {
@@ -126,6 +131,7 @@ public class HomeFragment extends Fragment implements MenuAdapter.ItemListener {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 categories.clear();
+
                 for (DataSnapshot dsp : dataSnapshot.getChildren()) {
                     Category category = dsp.getValue(Category.class);
                     category.setKey(dsp.getKey());
@@ -140,7 +146,53 @@ public class HomeFragment extends Fragment implements MenuAdapter.ItemListener {
             }
         });
 
+        banner.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                banners.clear();
+
+                for (DataSnapshot dsp : dataSnapshot.getChildren()) {
+                    BannerData bannerData = dsp.getValue(BannerData.class);
+                    bannerData.setKey(dsp.getKey());
+                    banners.add(bannerData);
+                }
+
+                mViewPager.create(banners);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
         refreshLayout.setRefreshing(false);
+    }
+
+    private void initBanner() {
+        mViewPager
+                .setAutoPlay(true)
+                .setIndicatorSlideMode(IndicatorSlideMode.WORM)
+                .setInterval(5000)
+                .setScrollDuration(1200)
+                .setIndicatorRadius(getResources().getDimensionPixelSize(R.dimen.dp_3))
+                .setIndicatorView(mIndicatorView)
+                .setIndicatorColor(getResources().getColor(R.color.colorOrange), getResources().getColor(R.color.colorPrimary))
+                .setHolderCreator(NetViewHolder::new)
+                .setOnPageChangeListener(new OnPageChangeListenerAdapter() {
+                    @Override
+                    public void onPageSelected(int position) {
+                        super.onPageSelected(position);
+                        BannerData bannerData = mViewPager.getList().get(position);
+                        mTvTitle.setText(bannerData.getName());
+                    }
+                })
+                .setOnPageClickListener(this::onPageClicked);
+    }
+
+    private void onPageClicked(int position) {
+        BannerData bannerData = mViewPager.getList().get(position);
+        Toast.makeText(getContext(), "position:" + position + " " + bannerData.getName(), Toast.LENGTH_SHORT).show();
     }
 
     private void updateTokenShipper(String token) {
@@ -154,6 +206,9 @@ public class HomeFragment extends Fragment implements MenuAdapter.ItemListener {
     public void onResume() {
         super.onResume();
         ((MainActivity) getActivity()).navigationView.getMenu().getItem(0).setChecked(true);
+        if (mViewPager != null) {
+            mViewPager.startLoop();
+        }
     }
 
 
@@ -163,5 +218,13 @@ public class HomeFragment extends Fragment implements MenuAdapter.ItemListener {
         intent.putExtra("CategoryId", categories.get(position).getKey());
         intent.putExtra("CategoryName", categories.get(position).getName());
         startActivity(intent);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mViewPager != null) {
+            mViewPager.stopLoop();
+        }
     }
 }

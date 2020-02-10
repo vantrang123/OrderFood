@@ -22,4 +22,5 @@
     <dimen name="placeholderImage">90dp</dimen>
     <dimen name="placeholderTextHeight">8dp</dimen>
     <dimen name="padding_10">10dp</dimen>
+    <dimen name="dp_3">3dp</dimen>
 </resources>
