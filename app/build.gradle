@@ -71,6 +71,9 @@ dependencies {
 
     //bottom-navigation
     implementation project(':bottom-navigation')
+
+    //firebaseUI
+    implementation 'com.firebaseui:firebase-ui-auth:6.2.0'
 }
 apply plugin: 'com.google.gms.google-services'
 repositories {

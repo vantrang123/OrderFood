@@ -4,7 +4,9 @@
     android:orientation="vertical"
     android:id="@+id/swr_menu"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:paddingLeft="@dimen/dimens_16"
+    android:paddingRight="@dimen/dimens_16">
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
@@ -12,16 +14,22 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:paddingLeft="@dimen/dimens_16"
-            android:paddingRight="@dimen/dimens_16"
+
             android:orientation="vertical">
 
             <include layout="@layout/layout_banner"/>
 
             <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_suggestion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dimens_10"/>
+
+            <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_menu"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dimens_10"/>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 

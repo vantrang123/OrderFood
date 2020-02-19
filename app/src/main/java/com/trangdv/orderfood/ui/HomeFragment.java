@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
@@ -28,9 +29,11 @@ import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
 import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.adapters.MenuAdapter;
+import com.trangdv.orderfood.adapters.SuggestionAdapter;
 import com.trangdv.orderfood.common.Common;
 import com.trangdv.orderfood.model.BannerData;
 import com.trangdv.orderfood.model.Category;
+import com.trangdv.orderfood.model.Suggestion;
 import com.trangdv.orderfood.model.Token;
 import com.trangdv.orderfood.viewholder.MenuViewHolder;
 
@@ -44,18 +47,22 @@ import com.zhpan.bannerview.indicator.IndicatorView;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HomeFragment extends Fragment implements MenuAdapter.ItemListener {
+public class HomeFragment extends Fragment implements MenuAdapter.ItemListener, SuggestionAdapter.ItemListener {
+
 
     FirebaseDatabase database;
-    DatabaseReference category, banner;
-    RecyclerView recycler_menu;
+    DatabaseReference category, banner, suggestion;
+    RecyclerView recycler_menu, recycler_suggestion;
 
     RecyclerView.LayoutManager layoutManager;
+    LinearLayoutManager linearLayoutManager;
     SwipeRefreshLayout refreshLayout;
 
     FirebaseRecyclerAdapter<Category, MenuViewHolder> adapter;
     MenuAdapter menuAdapter;
+    SuggestionAdapter suggestionAdapter;
     List<Category> categories = new ArrayList<>();
+    List<Suggestion> suggestions = new ArrayList<>();
     BannerViewPager<BannerData, NetViewHolder> mViewPager;
     List<BannerData> banners = new ArrayList<>();
     IndicatorView mIndicatorView;
@@ -68,6 +75,7 @@ public class HomeFragment extends Fragment implements MenuAdapter.ItemListener {
         ((MainActivity) getActivity()).getSupportActionBar().setTitle("Menu");
         View view = inflater.inflate(R.layout.fragment_home, container, false);
         recycler_menu = view.findViewById(R.id.rv_menu);
+        recycler_suggestion = view.findViewById(R.id.rv_suggestion);
         refreshLayout = view.findViewById(R.id.swr_menu);
         refreshLayout.setColorSchemeResources(R.color.colorPrimary,
                 android.R.color.holo_green_dark,
@@ -88,6 +96,7 @@ public class HomeFragment extends Fragment implements MenuAdapter.ItemListener {
         database = FirebaseDatabase.getInstance();
         category = database.getReference("Categories");
         banner = database.getReference("Banner");
+        suggestion = database.getReference("Suggestions");
 
         // token
         FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(getActivity(),  new OnSuccessListener<InstanceIdResult>() {
@@ -105,6 +114,12 @@ public class HomeFragment extends Fragment implements MenuAdapter.ItemListener {
         recycler_menu.setLayoutManager(layoutManager);
         menuAdapter = new MenuAdapter(getContext(),categories, this);
         recycler_menu.setAdapter(menuAdapter);
+
+        //suggestion
+        linearLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
+        recycler_suggestion.setLayoutManager(linearLayoutManager);
+        suggestionAdapter = new SuggestionAdapter(getContext(), suggestions, this);
+        recycler_suggestion.setAdapter(suggestionAdapter);
 
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -158,6 +173,25 @@ public class HomeFragment extends Fragment implements MenuAdapter.ItemListener {
                 }
 
                 mViewPager.create(banners);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+        suggestion.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                suggestions.clear();
+
+                for (DataSnapshot dsp : dataSnapshot.getChildren()) {
+                    Suggestion suggestion = dsp.getValue(Suggestion.class);
+                    suggestion.setKey(dsp.getKey());
+                    suggestions.add(suggestion);
+                }
+                suggestionAdapter.notifyDataSetChanged();
             }
 
             @Override
@@ -226,5 +260,10 @@ public class HomeFragment extends Fragment implements MenuAdapter.ItemListener {
         if (mViewPager != null) {
             mViewPager.stopLoop();
         }
+    }
+
+    @Override
+    public void dispatchToFoodDetail(int position) {
+
     }
 }

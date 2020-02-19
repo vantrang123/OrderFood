@@ -29,7 +29,81 @@
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyAbOZJ_CbitLuQ7_yslJtIRpEAtYg4kjKQ"
+          "current_key": "AIzaSyAMbu7bI4vxOiKOR4s6uRE8hS38itCRa9Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "57730312644-42ih3lf3lot35d6oe3v7h6l2djrvn7us.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:57730312644:android:27a2c8d61e4c45c82e1c91",
+        "android_client_info": {
+          "package_name": "com.trangdv.orderfoodserver"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "57730312644-rl2e0p7kicmvuojk8larhj9ad47g6eor.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.trangdv.orderfoodserver",
+            "certificate_hash": "2cddbe26cd597df7bac1d6a2a2a13d66266d1812"
+          }
+        },
+        {
+          "client_id": "57730312644-42ih3lf3lot35d6oe3v7h6l2djrvn7us.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAMbu7bI4vxOiKOR4s6uRE8hS38itCRa9Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "57730312644-42ih3lf3lot35d6oe3v7h6l2djrvn7us.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:57730312644:android:f0f20b8c2aebabd62e1c91",
+        "android_client_info": {
+          "package_name": "com.trangdv.shipperfood"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "57730312644-dkchsb06f39r5hts9a9rbpe6qh392rmo.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.trangdv.shipperfood",
+            "certificate_hash": "2cddbe26cd597df7bac1d6a2a2a13d66266d1812"
+          }
+        },
+        {
+          "client_id": "57730312644-42ih3lf3lot35d6oe3v7h6l2djrvn7us.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAMbu7bI4vxOiKOR4s6uRE8hS38itCRa9Q"
         }
       ],
       "services": {
