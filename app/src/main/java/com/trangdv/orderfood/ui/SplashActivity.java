@@ -58,6 +58,7 @@ public class SplashActivity extends AppCompatActivity {
         } else {
             if (checkPlayServices()) {
                 createLocationRequest();
+                onNext();
             }
         }
     }

@@ -32,4 +32,8 @@
     <string name="order_was_updated">Đặt hàng thành công!</string>
     <string name="order_was_updated_but_failed_to_send_notification">Đặt hàng thành công nhưng không gửi được thông báo!</string>
 
+    <string name="txt_confirm_logout">Bạn có chắc chắn muốn đăng xuất không?</string>
+    <string name="txt_yes">Có</string>
+    <string name="txt_no">Không</string>
+
 </resources>

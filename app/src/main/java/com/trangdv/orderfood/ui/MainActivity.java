@@ -1,12 +1,9 @@
 package com.trangdv.orderfood.ui;
 
 import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Color;
 import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 
 import androidx.core.view.GravityCompat;
@@ -31,11 +28,9 @@ import androidx.fragment.app.FragmentManager;
 import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.Window;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.material.snackbar.Snackbar;
 import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.common.Common;
 import com.trangdv.orderfood.model.Order;
@@ -352,16 +347,21 @@ public class MainActivity extends AppCompatActivity
                 break;
 
             case R.id.nav_exit:
-                SharedPrefs.getInstance().clear();
+                ConfirmLogout();
+                /*SharedPrefs.getInstance().clear();
                 Intent intent = new Intent(MainActivity.this, LoginActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
-                finish();
+                finish();*/
         }
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void ConfirmLogout() {
+        new ConfirmLogoutDialog().show(getSupportFragmentManager(), "confirmlogutdialog");
     }
 
     public void broadcastIntent() {

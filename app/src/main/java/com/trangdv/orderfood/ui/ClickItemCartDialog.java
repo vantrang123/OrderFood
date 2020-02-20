@@ -37,7 +37,6 @@ public class ClickItemCartDialog extends BottomSheetDialogFragment implements Vi
         dialog.setContentView(view);
         behavior = BottomSheetBehavior.from((View) view.getParent());
 
-
         findViewById(view);
         ((View) view.getParent()).setBackgroundColor(getResources().getColor(android.R.color.transparent));
         return dialog;
