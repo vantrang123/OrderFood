@@ -271,7 +271,7 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
     public void onResume() {
         super.onResume();
         ((MainActivity) getActivity()).navigationView.getMenu().getItem(1).setChecked(true);
-        ((MainActivity)getActivity()).setScrollBar(0);
+        ((MainActivity) getActivity()).setScrollBar(0);
         checkPlayServices();
         loadListFood();
     }
@@ -306,7 +306,7 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
                 carts.clear();
                 adapter.notifyDataSetChanged();
                 changeStatus();
-                for(DataSnapshot postSnapShot:dataSnapshot.getChildren()) {
+                for (DataSnapshot postSnapShot : dataSnapshot.getChildren()) {
                     Token serverToken = postSnapShot.getValue(Token.class);
 
                     //make raw payload
@@ -340,7 +340,6 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
             }
         });
     }
-
 
 
     //location
