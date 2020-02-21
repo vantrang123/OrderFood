@@ -23,6 +23,7 @@ import com.google.firebase.auth.PhoneAuthCredential;
 import com.google.firebase.auth.PhoneAuthProvider;
 import com.trangdv.orderfood.R;
 
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 public class VerifyPhoneActivity extends AppCompatActivity {
@@ -40,6 +41,7 @@ public class VerifyPhoneActivity extends AppCompatActivity {
         setContentView(R.layout.activity_verification_code);
 
         mAuth = FirebaseAuth.getInstance();
+        mAuth.setLanguageCode(Locale.getDefault().getLanguage());
 
         progressBar = findViewById(R.id.progressbar);
         editText = findViewById(R.id.editTextCode);
@@ -74,8 +76,15 @@ public class VerifyPhoneActivity extends AppCompatActivity {
     }
 
     private void verifyCode(String code) {
-        PhoneAuthCredential credential = PhoneAuthProvider.getCredential(verificationId, code);
-        signInWithCredential(credential);
+        progressBar.setVisibility(View.VISIBLE);
+        try {
+            PhoneAuthCredential credential = PhoneAuthProvider.getCredential(verificationId, code);
+            signInWithCredential(credential);
+        } catch (Exception e) {
+            progressBar.setVisibility(View.GONE);
+            Toast.makeText(this, "Error, please try later", Toast.LENGTH_SHORT).show();
+        }
+
     }
 
     private void signInWithCredential(PhoneAuthCredential credential) {
@@ -89,7 +98,7 @@ public class VerifyPhoneActivity extends AppCompatActivity {
 //                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 //
 //                            startActivity(intent);
-
+                            progressBar.setVisibility(View.GONE);
                             Toast.makeText(VerifyPhoneActivity.this, "Done", Toast.LENGTH_LONG).show();
                         } else {
                             Toast.makeText(VerifyPhoneActivity.this, task.getException().getMessage(), Toast.LENGTH_LONG).show();
