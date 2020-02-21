@@ -16,6 +16,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.hbb20.CountryCodePicker;
 import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.model.User;
 
@@ -25,10 +26,12 @@ public class SignupActivity extends AppCompatActivity {
     private EditText edt_phonenumber;
     private EditText edt_password;
     private FloatingActionButton fab;
+    private CountryCodePicker countryCodePicker;
 
     private String name;
     private String phonenumber;
     private String password;
+    private String code;
 
     FirebaseDatabase database = FirebaseDatabase.getInstance();
     final DatabaseReference table_user = database.getReference("User");
@@ -45,6 +48,7 @@ public class SignupActivity extends AppCompatActivity {
         edt_username = findViewById(R.id.username_edt);
         edt_phonenumber = findViewById(R.id.phonenumber_edt_signup);
         edt_password = findViewById(R.id.password_edt_signup);
+        countryCodePicker = findViewById(R.id.contry_code_picker);
 
         fab = findViewById(R.id.fab_back_login);
         setClickNext();
@@ -64,7 +68,7 @@ public class SignupActivity extends AppCompatActivity {
     }
 
     private void gotoVerification() {
-        String phoneNumber = "+84" + phonenumber;
+        String phoneNumber = "+" + code + phonenumber;
 
         Intent intent = new Intent(SignupActivity.this, VerifyPhoneActivity.class);
         intent.putExtra("phoneNumber", phoneNumber);
@@ -106,6 +110,7 @@ public class SignupActivity extends AppCompatActivity {
         phonenumber = edt_phonenumber.getText().toString().trim();
         password = edt_password.getText().toString();
         name = edt_username.getText().toString();
+        code = countryCodePicker.getSelectedCountryCode().trim();
 
     }
 
