@@ -38,7 +38,7 @@ public class MyFirebaseMessaging extends FirebaseMessagingService {
 
         //Intent intent = new Intent(this, OrderStatusFragment.class);
         Intent intent = new Intent(this, OrderStatusFragment.class);
-        intent.putExtra(Common.PHONE_TEXT, Common.currentUser.getPhone());
+        intent.putExtra(Common.PHONE_TEXT, Common.currentUser.getUserPhone());
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT);
 

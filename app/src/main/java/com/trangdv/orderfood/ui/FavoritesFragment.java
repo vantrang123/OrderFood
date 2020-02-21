@@ -45,7 +45,7 @@ public class FavoritesFragment extends Fragment implements FavoritesAdapter.Item
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        favoritesAdapter = new FavoritesAdapter(getContext(), new Database(getContext()).getAllFavorites(Common.currentUser.getPhone()), this);
+        favoritesAdapter = new FavoritesAdapter(getContext(), new Database(getContext()).getAllFavorites(Common.currentUser.getUserPhone()), this);
         rvFavorite.setAdapter(favoritesAdapter);
     }
 

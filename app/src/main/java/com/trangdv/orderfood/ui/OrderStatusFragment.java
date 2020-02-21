@@ -61,7 +61,7 @@ public class OrderStatusFragment extends Fragment implements OrderStatusAdapter.
         super.onViewCreated(view, savedInstanceState);
         layoutManager = new LinearLayoutManager(getActivity());
         rvListOrder.setLayoutManager(layoutManager);
-        loadOrders(Common.currentUser.getPhone());
+        loadOrders(Common.currentUser.getUserPhone());
     }
 
     private void initView() {

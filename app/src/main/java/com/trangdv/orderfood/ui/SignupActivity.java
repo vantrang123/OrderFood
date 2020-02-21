@@ -56,15 +56,24 @@ public class SignupActivity extends AppCompatActivity {
             public void onClick(View v) {
                 getTextfromEdt();
                 if (name.equals("") == false && phonenumber.equals("") == false && password.equals("") == false) {
-                    createUser();
+//                    createUser();
+                    gotoVerification();
                 }
             }
         });
     }
 
+    private void gotoVerification() {
+        String phoneNumber = "+84" + phonenumber;
+
+        Intent intent = new Intent(SignupActivity.this, VerifyPhoneActivity.class);
+        intent.putExtra("phoneNumber", phoneNumber);
+        startActivity(intent);
+    }
+
     private void createUser() {
 
-        table_user.addValueEventListener(new ValueEventListener() {
+        /*table_user.addValueEventListener(new ValueEventListener() {
             int i = 0;
 
             @Override
@@ -89,12 +98,12 @@ public class SignupActivity extends AppCompatActivity {
             public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
-        });
+        });*/
 
     }
 
     private void getTextfromEdt() {
-        phonenumber = edt_phonenumber.getText().toString();
+        phonenumber = edt_phonenumber.getText().toString().trim();
         password = edt_password.getText().toString();
         name = edt_username.getText().toString();
 

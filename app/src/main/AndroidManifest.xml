@@ -49,6 +49,8 @@
 
         <activity android:name=".ui.CartFragment" />
 
+        <activity android:name=".ui.VerifyPhoneActivity" />
+
         <service
             android:name=".service.MyFirebaseIdService"
             android:exported="true"

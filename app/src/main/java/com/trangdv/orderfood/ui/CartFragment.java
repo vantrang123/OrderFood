@@ -233,7 +233,7 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
             public void onClick(DialogInterface dialog, int which) {
 
                 Request request = new Request(
-                        Common.currentUser.getPhone(),
+                        Common.currentUser.getUserPhone(),
                         Common.currentUser.getName(),
                         edtAddress.getText().toString(),
                         tvTotalPrice.getText().toString(),

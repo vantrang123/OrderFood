@@ -94,7 +94,7 @@ public class FoodListAdapter extends RecyclerView.Adapter<FoodListAdapter.ViewHo
             holder.imgFood.setImageBitmap(foods.get(position).getBitmapImage());
         }
 
-        if (database.isFavourite(foods.get(position).getFoodId(), Common.currentUser.getPhone()))
+        if (database.isFavourite(foods.get(position).getFoodId(), Common.currentUser.getUserPhone()))
             holder.ivFavorite.setImageResource(R.drawable.ic_favorite_red);
 
     }
@@ -135,18 +135,18 @@ public class FoodListAdapter extends RecyclerView.Adapter<FoodListAdapter.ViewHo
                     favorites.setFoodDescription(foods.get(getLayoutPosition()).getDescription());
                     favorites.setFoodImage(foods.get(getLayoutPosition()).getImage());
                     favorites.setFoodMenuId(foods.get(getLayoutPosition()).getMenuId());
-                    favorites.setUserPhone(Common.currentUser.getPhone());
+                    favorites.setUserPhone(Common.currentUser.getUserPhone());
                     favorites.setFoodPrice(foods.get(getLayoutPosition()).getPrice());
                     favorites.setFoodDiscount(foods.get(getLayoutPosition()).getDiscount());
 
-                    if (!database.isFavourite(foods.get(getLayoutPosition()).getFoodId(), Common.currentUser.getPhone())) {
+                    if (!database.isFavourite(foods.get(getLayoutPosition()).getFoodId(), Common.currentUser.getUserPhone())) {
 
                         database.addToFavourites(favorites);
                         ivFavorite.setImageResource(R.drawable.ic_favorite_red);
                         Toast.makeText(context, "" + foods.get(getLayoutPosition()).getName() +
                                 " was added to Favourites", Toast.LENGTH_SHORT).show();
                     } else {
-                        database.removeFromFavourites(foods.get(getLayoutPosition()).getFoodId(), Common.currentUser.getPhone());
+                        database.removeFromFavourites(foods.get(getLayoutPosition()).getFoodId(), Common.currentUser.getUserPhone());
                         ivFavorite.setImageResource(R.drawable.ic_favorite_gray);
                         Toast.makeText(context, "" + foods.get(getLayoutPosition()).getName() +
                                 " was removed from Favourites", Toast.LENGTH_SHORT).show();

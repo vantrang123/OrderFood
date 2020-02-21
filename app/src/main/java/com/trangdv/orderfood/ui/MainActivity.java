@@ -114,7 +114,7 @@ public class MainActivity extends AppCompatActivity
 
         InternetReceiver = new InternetConnector(this);
         broadcastIntent();
-        Home();
+//        Home();
 
     }
 
@@ -348,6 +348,7 @@ public class MainActivity extends AppCompatActivity
 
             case R.id.nav_exit:
                 ConfirmLogout();
+                break;
                 /*SharedPrefs.getInstance().clear();
                 Intent intent = new Intent(MainActivity.this, LoginActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

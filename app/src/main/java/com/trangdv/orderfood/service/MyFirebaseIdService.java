@@ -45,6 +45,6 @@ public class MyFirebaseIdService extends FirebaseMessagingService {
         Token data = new Token(refreshedToken, false);
         // false because token send from client app
 
-        tokens.child(Common.currentUser.getPhone()).setValue(data);
+        tokens.child(Common.currentUser.getUserPhone()).setValue(data);
     }
 }

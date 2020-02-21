@@ -233,7 +233,7 @@ public class HomeFragment extends Fragment implements MenuAdapter.ItemListener, 
 
         DatabaseReference tokens = database.getReference("Tokens");
         Token data = new Token(token, false);
-        tokens.child(Common.currentUser.getPhone()).setValue(data);
+        tokens.child(Common.currentUser.getUserPhone()).setValue(data);
     }
 
     @Override
