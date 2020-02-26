@@ -92,7 +92,7 @@ public class FoodDetailFragment extends Fragment {
 
                 Locale locale = new Locale("vi", "VN");
                 NumberFormat fmt = NumberFormat.getCurrencyInstance(locale);
-                int price = (Integer.parseInt(currentFood.getPrice()));
+                double price = 0;
 
 
                 if (currentFood.getBitmapImage()==null) {
@@ -174,7 +174,7 @@ public class FoodDetailFragment extends Fragment {
         btnCart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!db.IsProductExist(foodId)) {
+                /*if (!db.IsProductExist(foodId)) {
                     db.addToCart(new Order(
                             foodId,
                             currentFood.getName(),
@@ -190,7 +190,7 @@ public class FoodDetailFragment extends Fragment {
                      db.updateCart(foodId, quantity);
                 }
 
-                Toast.makeText(getActivity(), R.string.added_to_cart, Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), R.string.added_to_cart, Toast.LENGTH_SHORT).show();*/
             }
         });
     }

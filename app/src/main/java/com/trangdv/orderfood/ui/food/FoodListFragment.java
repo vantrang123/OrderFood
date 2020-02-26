@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -21,16 +22,33 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.adapters.FoodListAdapter;
+import com.trangdv.orderfood.common.Common;
 import com.trangdv.orderfood.model.Food;
+import com.trangdv.orderfood.model.eventbus.FoodListEvent;
+import com.trangdv.orderfood.model.eventbus.RestaurantLoadEvent;
+import com.trangdv.orderfood.retrofit.IAnNgonAPI;
+import com.trangdv.orderfood.retrofit.RetrofitClient;
 import com.trangdv.orderfood.ui.fooddetail.FoodDetailFragment;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.schedulers.Schedulers;
 
 import static com.google.android.material.appbar.AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS;
 import static com.google.android.material.appbar.AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL;
 
 public class FoodListFragment extends Fragment implements FoodListAdapter.ItemListener {
+
+    IAnNgonAPI anNgonAPI;
+    CompositeDisposable compositeDisposable = new CompositeDisposable();
+
     private static final String TAG = "FoodListFragment";
     FirebaseDatabase database;
     DatabaseReference foodList;
@@ -80,18 +98,15 @@ public class FoodListFragment extends Fragment implements FoodListAdapter.ItemLi
         super.onViewCreated(view, savedInstanceState);
         mShimmerViewContainer.startShimmerAnimation();
 
-        database = FirebaseDatabase.getInstance();
-        foodList = database.getReference("Foods");
-
+        init();
         initView();
-
-
-        if (categoryId != null) {
-            fetchData(categoryId);
-        }
 
         foodListAdapter = new FoodListAdapter(getContext(), foods, this);
         rvListFood.setAdapter(foodListAdapter);
+    }
+
+    private void init() {
+        anNgonAPI = RetrofitClient.getInstance(Common.API_ANNGON_ENDPOINT).create(IAnNgonAPI.class);
     }
 
     private void initView() {
@@ -99,34 +114,55 @@ public class FoodListFragment extends Fragment implements FoodListAdapter.ItemLi
         rvListFood.setLayoutManager(layoutManager);
     }
 
-    private void fetchData(String categoryId) {
+    private void fetchData(int menuId) {
         foods.clear();
+        compositeDisposable.add(anNgonAPI.getFoodOfMenu(Common.API_KEY, menuId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(foodModel -> {
+                            if (foodModel.isSuccess()) {
+                                foods.addAll(foodModel.getResult());
+                                foodListAdapter.notifyDataSetChanged();
+                            } else {
+                                Toast.makeText(getContext(), "[GET FOOD RESULT]" + foodModel.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                            mShimmerViewContainer.stopShimmerAnimation();
+                            mShimmerViewContainer.setVisibility(View.GONE);
 
-        foodList.orderByChild("menuId").equalTo(categoryId).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for (DataSnapshot dsp : dataSnapshot.getChildren()) {
-                    Food food = dsp.getValue(Food.class);
-                    food.setFoodId(dsp.getKey());
-                    foods.add(food);
-                }
-                foodListAdapter.notifyDataSetChanged();
-                //
-                mShimmerViewContainer.stopShimmerAnimation();
-                mShimmerViewContainer.setVisibility(View.GONE);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
+                        },
+                        throwable -> {
+                            Toast.makeText(getContext(), "[GET FOOD]" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                ));
 
     }
 
     @Override
     public void dispatchToFoodDetail(int position) {
-        ((FoodActivity) getActivity()).replace(FoodDetailFragment.newInstance(foods.get(position).getFoodId()));
+//        ((FoodActivity) getActivity()).replace(FoodDetailFragment.newInstance(foods.get(position)));
+    }
+
+    // listen EventBus
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+    public void loadFoodListByCategory(FoodListEvent event) {
+        if (event.isSuccess()) {
+            toolbar.setTitle(event.getCategory().getName());
+            fetchData(event.getCategory().getId());
+        } else {
+
+        }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onStop() {
+        EventBus.getDefault().unregister(this);
+        super.onStop();
     }
 
     @Override
@@ -140,5 +176,11 @@ public class FoodListFragment extends Fragment implements FoodListAdapter.ItemLi
     public void onPause() {
         super.onPause();
         mShimmerViewContainer.stopShimmerAnimation();
+    }
+
+    @Override
+    public void onDestroy() {
+        compositeDisposable.clear();
+        super.onDestroy();
     }
 }

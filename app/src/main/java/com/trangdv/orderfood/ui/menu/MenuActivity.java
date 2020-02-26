@@ -1,5 +1,6 @@
 package com.trangdv.orderfood.ui.menu;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
@@ -17,9 +18,11 @@ import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.adapters.MenuAdapter;
 import com.trangdv.orderfood.common.Common;
 import com.trangdv.orderfood.model.Category;
+import com.trangdv.orderfood.model.eventbus.FoodListEvent;
 import com.trangdv.orderfood.model.eventbus.MenuItemEvent;
 import com.trangdv.orderfood.retrofit.IAnNgonAPI;
 import com.trangdv.orderfood.retrofit.RetrofitClient;
+import com.trangdv.orderfood.ui.food.FoodActivity;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -121,12 +124,13 @@ public class MenuActivity extends AppCompatActivity implements MenuAdapter.ItemL
                             .subscribe(menuModel -> {
                                 categoryList.addAll(menuModel.getResult());
                                 menuAdapter.notifyDataSetChanged();
+                                mShimmerViewContainer.stopShimmerAnimation();
+                                mShimmerViewContainer.setVisibility(View.GONE);
                             }, throwable -> {
                                 Toast.makeText(this, "[GET CATEGORY]" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
                             })
             );
-            mShimmerViewContainer.stopShimmerAnimation();
-            mShimmerViewContainer.setVisibility(View.GONE);
+
 
         } else {
 
@@ -135,6 +139,7 @@ public class MenuActivity extends AppCompatActivity implements MenuAdapter.ItemL
 
     @Override
     public void dispatchToFoodList(int position) {
-
+        EventBus.getDefault().postSticky(new FoodListEvent(true, categoryList.get(position)));
+        startActivity(new Intent(this, FoodActivity.class));
     }
 }

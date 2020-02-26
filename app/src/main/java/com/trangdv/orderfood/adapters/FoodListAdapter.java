@@ -64,7 +64,8 @@ public class FoodListAdapter extends RecyclerView.Adapter<FoodListAdapter.ViewHo
     public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
 //        Locale locale = new Locale("vi", "VN");
 //        NumberFormat fmt = NumberFormat.getCurrencyInstance(locale);
-        int price = (Integer.parseInt(foods.get(position).getPrice()));
+//        int price = (Integer.parseInt(foods.get(position).getPrice()));
+        double price = foods.get(position).getPrice();
 
         holder.tvNameFood.setText("Name: " + foods.get(position).getName());
         holder.tvPriceFood.setText("Price: " + fmt.format(price));
@@ -94,8 +95,8 @@ public class FoodListAdapter extends RecyclerView.Adapter<FoodListAdapter.ViewHo
             holder.imgFood.setImageBitmap(foods.get(position).getBitmapImage());
         }
 
-        if (database.isFavourite(foods.get(position).getFoodId(), Common.currentUser.getUserPhone()))
-            holder.ivFavorite.setImageResource(R.drawable.ic_favorite_red);
+        /*if (database.isFavourite(foods.get(position).getFoodId(), Common.currentUser.getUserPhone()))
+            holder.ivFavorite.setImageResource(R.drawable.ic_favorite_red);*/
 
     }
 
@@ -129,7 +130,7 @@ public class FoodListAdapter extends RecyclerView.Adapter<FoodListAdapter.ViewHo
             ivFavorite.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Favorites favorites = new Favorites();
+                    /*Favorites favorites = new Favorites();
                     favorites.setFoodId(foods.get(getLayoutPosition()).getFoodId());
                     favorites.setFoodName(foods.get(getLayoutPosition()).getName());
                     favorites.setFoodDescription(foods.get(getLayoutPosition()).getDescription());
@@ -150,7 +151,7 @@ public class FoodListAdapter extends RecyclerView.Adapter<FoodListAdapter.ViewHo
                         ivFavorite.setImageResource(R.drawable.ic_favorite_gray);
                         Toast.makeText(context, "" + foods.get(getLayoutPosition()).getName() +
                                 " was removed from Favourites", Toast.LENGTH_SHORT).show();
-                    }
+                    }*/
                 }
             });
 
