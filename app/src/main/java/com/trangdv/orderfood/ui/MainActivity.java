@@ -31,13 +31,20 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.common.Common;
 import com.trangdv.orderfood.model.Order;
 import com.trangdv.orderfood.model.User;
 import com.trangdv.orderfood.receiver.InternetConnector;
+import com.trangdv.orderfood.retrofit.IAnNgonAPI;
+import com.trangdv.orderfood.retrofit.RetrofitClient;
 import com.trangdv.orderfood.utils.SharedPrefs;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.schedulers.Schedulers;
 import it.sephiroth.android.library.bottomnavigation.BottomNavigation;
 
 import static com.google.android.material.appbar.AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS;
@@ -66,11 +73,17 @@ public class MainActivity extends AppCompatActivity
     private BroadcastReceiver InternetReceiver = null;
     private int subscreensOnTheStack = -1;
 
+    IAnNgonAPI anNgonAPI;
+    CompositeDisposable compositeDisposable = new CompositeDisposable();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        init();
         findViewById();
+
+//        getCurrentUser();
 
         initializeBottomNavigation();
 
@@ -114,8 +127,12 @@ public class MainActivity extends AppCompatActivity
 
         InternetReceiver = new InternetConnector(this);
         broadcastIntent();
-//        Home();
+        Home();
 
+    }
+
+    private void init() {
+        anNgonAPI = RetrofitClient.getInstance(Common.API_ANNGON_ENDPOINT).create(IAnNgonAPI.class);
     }
 
     private void initializeBottomNavigation() {
@@ -388,6 +405,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onDestroy() {
+        compositeDisposable.clear();
         super.onDestroy();
         unregisterReceiver(InternetReceiver);
     }

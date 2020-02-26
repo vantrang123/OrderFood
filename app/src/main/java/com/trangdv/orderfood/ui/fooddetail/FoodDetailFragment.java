@@ -20,7 +20,6 @@ import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.cepheuen.elegantnumberbutton.view.ElegantNumberButton;
-import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.database.DataSnapshot;
@@ -32,8 +31,6 @@ import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.database.Database;
 import com.trangdv.orderfood.model.Food;
 import com.trangdv.orderfood.model.Order;
-import com.trangdv.orderfood.ui.FoodActivity;
-import com.trangdv.orderfood.viewholder.FoodViewHolder;
 
 import java.text.NumberFormat;
 import java.util.Locale;

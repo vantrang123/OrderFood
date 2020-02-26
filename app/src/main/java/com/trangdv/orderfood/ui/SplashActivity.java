@@ -77,8 +77,8 @@ public class SplashActivity extends AppCompatActivity {
 
     public void onNext() {
         Intent intent;
-        int value = Integer.valueOf(SharedPrefs.getInstance().get(CHECK_ALREADLY_LOGIN, Integer.class, 0));
-        if (value == 0) {
+        int value = Integer.valueOf(SharedPrefs.getInstance().get(CHECK_ALREADLY_LOGIN, Integer.class, 1));
+        if (value == 1) {
             intent = new Intent(this, LoginActivity.class);
         } else {
             intent = new Intent(this, MainActivity.class);

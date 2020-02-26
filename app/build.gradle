@@ -84,6 +84,9 @@ dependencies {
 
     // contrycode
     implementation 'com.hbb20:ccp:2.3.7'
+
+    // EventBus
+    implementation 'org.greenrobot:eventbus:3.1.1'
 }
 apply plugin: 'com.google.gms.google-services'
 repositories {

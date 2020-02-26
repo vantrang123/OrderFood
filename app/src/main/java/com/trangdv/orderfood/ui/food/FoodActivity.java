@@ -1,16 +1,13 @@
-package com.trangdv.orderfood.ui;
+package com.trangdv.orderfood.ui.food;
 
 import android.os.Bundle;
-import android.view.View;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
-import com.google.android.material.appbar.AppBarLayout;
 import com.trangdv.orderfood.R;
 
 import com.trangdv.orderfood.model.Food;

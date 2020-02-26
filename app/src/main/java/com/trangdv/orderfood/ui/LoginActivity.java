@@ -3,6 +3,7 @@ package com.trangdv.orderfood.ui;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -11,20 +12,24 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.common.Common;
 import com.trangdv.orderfood.model.User;
+import com.trangdv.orderfood.retrofit.IAnNgonAPI;
+import com.trangdv.orderfood.retrofit.RetrofitClient;
 import com.trangdv.orderfood.utils.SharedPrefs;
+
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.schedulers.Schedulers;
 
 
 public class LoginActivity extends AppCompatActivity {
@@ -32,6 +37,7 @@ public class LoginActivity extends AppCompatActivity {
     public static final String KEY_PHONENUMBER = "key phonenumber address";
     public static final String KEY_PASSWORD = "key password";
     public static final String SAVE_USER = "save user";
+    private static final String TAG = "LoginActivity";
 
     private TextView dispatch_signup;
     private EditText edt_phonenumber;
@@ -44,6 +50,9 @@ public class LoginActivity extends AppCompatActivity {
     FirebaseDatabase database = FirebaseDatabase.getInstance();
     final DatabaseReference table_user = database.getReference("User");
 
+    IAnNgonAPI anNgonAPI;
+    CompositeDisposable compositeDisposable = new CompositeDisposable();
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,7 +62,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void inits() {
-
+        anNgonAPI = RetrofitClient.getInstance(Common.API_ANNGON_ENDPOINT).create(IAnNgonAPI.class);
 
         dispatch_signup = findViewById(R.id.dispatch_signup);
         setClickDispatchSignup();
@@ -68,14 +77,15 @@ public class LoginActivity extends AppCompatActivity {
         dispatch_signup.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DispatchSignup();
+                dispatchSignup();
             }
         });
     }
 
-    private void DispatchSignup() {
+    private void dispatchSignup() {
         Intent intent = new Intent(LoginActivity.this, SignupActivity.class);
-        startActivityForResult(intent, REQUEST_CODE);
+//        startActivityForResult(intent, REQUEST_CODE);
+        startActivity(intent);
     }
 
     @Override
@@ -98,6 +108,7 @@ public class LoginActivity extends AppCompatActivity {
 
                 if (phonenumber.equals("")==false && password.equals("")==false) {
                     authLogin();
+
                 }
 
             }
@@ -116,33 +127,59 @@ public class LoginActivity extends AppCompatActivity {
 //                //check if user not exist in firebaseDatabase
 //                if (dataSnapshot.child(phonenumber).exists()) {
 //                    User user = dataSnapshot.child(phonenumber).getValue(User.class);
-//                    user.setPhone(phonenumber);
-//
-//                    if (user.getPassword().equals(password)) {
-//                        SharedPrefs.getInstance().put(SplashActivity.CHECK_ALREADLY_LOGIN, 1);
-//
-//                        //save user in share pref
-//                        SharedPrefs.getInstance().put(SAVE_USER, user);
-//                        intoHome(user);
-//                    } else {
-//                        Toast.makeText(LoginActivity.this, "Wrong Password !", Toast.LENGTH_SHORT).show();
-//                    }
-//                } else {
-//                    Toast.makeText(LoginActivity.this, "User not exist in Database !", Toast.LENGTH_SHORT).show();
-//                }
-//            }
-//
-//            @Override
-//            public void onCancelled(@NonNull DatabaseError databaseError) {
-//
-//            }
+//           }         user.setPhone(phonenumber);
+////
+////                    if (user.getPassword().equals(password)) {
+////                        SharedPrefs.getInstance().put(SplashActivity.CHECK_ALREADLY_LOGIN, 1);
+////
+////                        //save user in share pref
+////                        SharedPrefs.getInstance().put(SAVE_USER, user);
+////                        intoHome(user);
+////                    } else {
+////                        Toast.makeText(LoginActivity.this, "Wrong Password !", Toast.LENGTH_SHORT).show();
+////                    }
+////                } else {
+////                    Toast.makeText(LoginActivity.this, "User not exist in Database !", Toast.LENGTH_SHORT).show();
+////                }
+////            }
+////
+////            @Override
+////            public void onCancelled(@NonNull DatabaseError databaseError) {
+////
+////
 //        });
 
+            compositeDisposable.add(
+                    anNgonAPI.getUser(Common.API_KEY, "383170518961862")
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(userModel -> {
+                                        if (userModel.isSuccess()) {
+                                            // save curreentUser
+                                            Common.currentUser = userModel.getResult().get(0);
+
+                                            SharedPrefs.getInstance().put(SplashActivity.CHECK_ALREADLY_LOGIN, 2);
+
+                                            //save user in share pref
+                                            SharedPrefs.getInstance().put(SAVE_USER, Common.currentUser);
+
+                                            Toast.makeText(this, "[GET USER API SUCCESS]", Toast.LENGTH_SHORT).show();
+
+                                            gotoMainActivity();
+
+                                        } else {
+                                            Toast.makeText(this, "[GET USER API NOT DATABASE]", Toast.LENGTH_SHORT).show();
+                                        }
+
+                                    },
+                                    throwable -> {
+                                        Toast.makeText(this, "[GET USER API]" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                                    }
+                            ));
     }
 
-    private void intoHome(User user) {
+    private void gotoMainActivity() {
         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-        Common.currentUser = user;
 
         startActivity(intent);
         finish();
@@ -153,6 +190,11 @@ public class LoginActivity extends AppCompatActivity {
         edt_password.setText(password);
     }
 
+    @Override
+    protected void onDestroy() {
+        compositeDisposable.clear();
+        super.onDestroy();
+    }
 
     //
     @Override

@@ -11,6 +11,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.firebase.auth.FirebaseAuth;
 import com.trangdv.orderfood.R;
+import com.trangdv.orderfood.common.Common;
 import com.trangdv.orderfood.utils.SharedPrefs;
 
 public class ConfirmLogoutDialog extends BottomSheetDialogFragment implements View.OnClickListener {
@@ -66,6 +67,8 @@ public class ConfirmLogoutDialog extends BottomSheetDialogFragment implements Vi
     private void onLogout() {
         SharedPrefs.getInstance().clear();
         FirebaseAuth.getInstance().signOut();
+        Common.currentUser = null;
+        Common.currentRestaurant = null;
         Intent intent = new Intent(getContext(), LoginActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);

@@ -3,7 +3,7 @@
     android:layout_height="wrap_content">
 
     <ImageView
-        android:key="@+key/banner_image"
+        android:id="@+id/banner_image"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="centerCrop" />
@@ -16,7 +16,7 @@
         android:gravity="center_vertical">
 
         <TextView
-            android:key="@+key/tv_describe"
+            android:id="@+id/tv_describe"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_gravity="center_vertical"

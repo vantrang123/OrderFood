@@ -3,52 +3,47 @@ package com.trangdv.orderfood.model;
 import android.graphics.Bitmap;
 
 public class Category {
-    private String Name;
-    private String Image;
+    private String name, description, image;
     private Bitmap bitmapImage;
-    private String key;
-
-    public Category() {
-    }
-
-    public Category(String name, String image) {
-        Name = name;
-        Image = image;
-    }
-
-    public Category(String name) {
-
-    }
-
-    public String getImage() {
-        return Image;
-    }
-
-    public void setImage(String image) {
-        Image = image;
-    }
+    private int id;
 
     public String getName() {
-        return Name;
+        return name;
     }
 
     public void setName(String name) {
-        Name = name;
+        this.name = name;
     }
 
-    public void setBitmapImage(Bitmap bitmapImage) {
-        this.bitmapImage = bitmapImage;
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
     }
 
     public Bitmap getBitmapImage() {
         return bitmapImage;
     }
 
-    public void setKey(String key) {
-        this.key = key;
+    public void setBitmapImage(Bitmap bitmapImage) {
+        this.bitmapImage = bitmapImage;
     }
 
-    public String getKey() {
-        return key;
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 }

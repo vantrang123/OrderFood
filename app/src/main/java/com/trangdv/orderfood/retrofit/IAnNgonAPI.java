@@ -1,5 +1,7 @@
 package com.trangdv.orderfood.retrofit;
 
+import com.trangdv.orderfood.model.MenuModel;
+import com.trangdv.orderfood.model.RestaurantModel;
 import com.trangdv.orderfood.model.UpdateUserModel;
 import com.trangdv.orderfood.model.UserModel;
 
@@ -15,6 +17,14 @@ public interface IAnNgonAPI {
     @GET("user")
     Observable<UserModel> getUser(@Query("key") String apiKey,
                                   @Query("fbid") String fbid);
+
+    @GET("restaurant")
+    Observable<RestaurantModel> getRestaurant(@Query("key") String apiKey);
+
+    @GET("menu")
+    Observable<MenuModel> getCategories(@Query("key") String apiKey,
+                                        @Query("restaurantId") int restaurantId);
+
     @POST("user")
     @FormUrlEncoded
     Observable<UpdateUserModel> updateUserInfo(@Field("key") String apiKey,

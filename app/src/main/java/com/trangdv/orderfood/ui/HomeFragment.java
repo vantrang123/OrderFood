@@ -29,12 +29,20 @@ import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
 import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.adapters.MenuAdapter;
+import com.trangdv.orderfood.adapters.RestaurantAdapter;
 import com.trangdv.orderfood.adapters.SuggestionAdapter;
 import com.trangdv.orderfood.common.Common;
 import com.trangdv.orderfood.model.BannerData;
 import com.trangdv.orderfood.model.Category;
+import com.trangdv.orderfood.model.Restaurant;
 import com.trangdv.orderfood.model.Suggestion;
 import com.trangdv.orderfood.model.Token;
+import com.trangdv.orderfood.model.eventbus.MenuItemEvent;
+import com.trangdv.orderfood.model.eventbus.RestaurantLoadEvent;
+import com.trangdv.orderfood.retrofit.IAnNgonAPI;
+import com.trangdv.orderfood.retrofit.RetrofitClient;
+import com.trangdv.orderfood.ui.food.FoodActivity;
+import com.trangdv.orderfood.ui.menu.MenuActivity;
 import com.trangdv.orderfood.viewholder.MenuViewHolder;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
@@ -44,15 +52,25 @@ import com.zhpan.bannerview.adapter.OnPageChangeListenerAdapter;
 import com.zhpan.bannerview.constants.IndicatorSlideMode;
 import com.zhpan.bannerview.indicator.IndicatorView;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
 import java.util.ArrayList;
 import java.util.List;
 
-public class HomeFragment extends Fragment implements MenuAdapter.ItemListener, SuggestionAdapter.ItemListener {
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.schedulers.Schedulers;
 
+public class HomeFragment extends Fragment implements SuggestionAdapter.ItemListener, RestaurantAdapter.ItemListener {
+
+    IAnNgonAPI anNgonAPI;
+    CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     FirebaseDatabase database;
-    DatabaseReference category, banner, suggestion;
-    RecyclerView recycler_menu, recycler_suggestion;
+    DatabaseReference banner, suggestion;
+    RecyclerView recycler_suggestion, recycler_restaurant;
 
     RecyclerView.LayoutManager layoutManager;
     LinearLayoutManager linearLayoutManager;
@@ -61,21 +79,39 @@ public class HomeFragment extends Fragment implements MenuAdapter.ItemListener, 
     FirebaseRecyclerAdapter<Category, MenuViewHolder> adapter;
     MenuAdapter menuAdapter;
     SuggestionAdapter suggestionAdapter;
-    List<Category> categories = new ArrayList<>();
+    RestaurantAdapter restaurantAdapter;
+
     List<Suggestion> suggestions = new ArrayList<>();
+    List<Restaurant> restaurants = new ArrayList<>();
     BannerViewPager<BannerData, NetViewHolder> mViewPager;
     List<BannerData> banners = new ArrayList<>();
     IndicatorView mIndicatorView;
     RelativeLayout mRlIndicator;
     TextView mTvTitle;
+    View layoutRestaurant;
+    View layout_suggestion;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         ((MainActivity) getActivity()).getSupportActionBar().setTitle("Menu");
         View view = inflater.inflate(R.layout.fragment_home, container, false);
-        recycler_menu = view.findViewById(R.id.rv_menu);
+        findViewById(view);
+
+        init();
+
+        initBanner();
+        return view;
+    }
+
+    private void init() {
+        anNgonAPI = RetrofitClient.getInstance(Common.API_ANNGON_ENDPOINT).create(IAnNgonAPI.class);
+    }
+
+    private void findViewById(View view) {
+
         recycler_suggestion = view.findViewById(R.id.rv_suggestion);
+        recycler_restaurant = view.findViewById(R.id.rv_restaurant);
         refreshLayout = view.findViewById(R.id.swr_menu);
         refreshLayout.setColorSchemeResources(R.color.colorPrimary,
                 android.R.color.holo_green_dark,
@@ -85,16 +121,15 @@ public class HomeFragment extends Fragment implements MenuAdapter.ItemListener, 
         mViewPager = view.findViewById(R.id.banner_view);
         mTvTitle = view.findViewById(R.id.tv_title);
         mIndicatorView = view.findViewById(R.id.indicator_view);
-
-        initBanner();
-        return view;
+        layoutRestaurant = view.findViewById(R.id.layout_restaurant);
+        layout_suggestion = view.findViewById(R.id.layout_suggestion);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         database = FirebaseDatabase.getInstance();
-        category = database.getReference("Categories");
+
         banner = database.getReference("Banner");
         suggestion = database.getReference("Suggestions");
 
@@ -105,21 +140,21 @@ public class HomeFragment extends Fragment implements MenuAdapter.ItemListener, 
                 String newToken = instanceIdResult.getToken();
                 Log.e("newToken",newToken);
 
-                updateTokenShipper(newToken);
+//                updateTokenShipper(newToken);
             }
         });
-
-        //load menu
-        layoutManager = new GridLayoutManager(getContext(), 2);
-        recycler_menu.setLayoutManager(layoutManager);
-        menuAdapter = new MenuAdapter(getContext(),categories, this);
-        recycler_menu.setAdapter(menuAdapter);
 
         //suggestion
         linearLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
         recycler_suggestion.setLayoutManager(linearLayoutManager);
         suggestionAdapter = new SuggestionAdapter(getContext(), suggestions, this);
         recycler_suggestion.setAdapter(suggestionAdapter);
+
+        // load restaurant
+        LinearLayoutManager restaurantLayout = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
+        recycler_restaurant.setLayoutManager(restaurantLayout);
+        restaurantAdapter = new RestaurantAdapter(getContext(), restaurants, this);
+        recycler_restaurant.setAdapter(restaurantAdapter);
 
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -142,25 +177,6 @@ public class HomeFragment extends Fragment implements MenuAdapter.ItemListener, 
     }
 
     public void fetchData() {
-        category.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                categories.clear();
-
-                for (DataSnapshot dsp : dataSnapshot.getChildren()) {
-                    Category category = dsp.getValue(Category.class);
-                    category.setKey(dsp.getKey());
-                    categories.add(category);
-                }
-                menuAdapter.notifyDataSetChanged();
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-
         banner.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -192,6 +208,7 @@ public class HomeFragment extends Fragment implements MenuAdapter.ItemListener, 
                     suggestions.add(suggestion);
                 }
                 suggestionAdapter.notifyDataSetChanged();
+                layout_suggestion.setVisibility(View.VISIBLE);
             }
 
             @Override
@@ -200,7 +217,24 @@ public class HomeFragment extends Fragment implements MenuAdapter.ItemListener, 
             }
         });
 
+        fetchRestaurant();
+
         refreshLayout.setRefreshing(false);
+    }
+
+    private void fetchRestaurant() {
+        restaurants.clear();
+        compositeDisposable.add(
+          anNgonAPI.getRestaurant(Common.API_KEY)
+                  .subscribeOn(Schedulers.io())
+                  .observeOn(AndroidSchedulers.mainThread())
+                  .subscribe(restaurantModel -> {
+                              EventBus.getDefault().post(new RestaurantLoadEvent(true, restaurantModel.getResult()));
+                  },
+                          throwable -> {
+                              EventBus.getDefault().post(new RestaurantLoadEvent(false, throwable.getMessage()));
+                          })
+        );
     }
 
     private void initBanner() {
@@ -236,6 +270,25 @@ public class HomeFragment extends Fragment implements MenuAdapter.ItemListener, 
         tokens.child(Common.currentUser.getUserPhone()).setValue(data);
     }
 
+    // listen EventBus
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void processRestaurantLoadEvent(RestaurantLoadEvent event) {
+        if (event.isSuccess()) {
+            restaurants.addAll(event.getRestaurantList());
+            restaurantAdapter.notifyDataSetChanged();
+            layoutRestaurant.setVisibility(View.VISIBLE);
+
+        } else {
+            Toast.makeText(getContext(), "[RESTAURANT LOAD]" + event.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
     @Override
     public void onResume() {
         super.onResume();
@@ -245,13 +298,10 @@ public class HomeFragment extends Fragment implements MenuAdapter.ItemListener, 
         }
     }
 
-
     @Override
-    public void dispatchToFoodList(int position) {
-        Intent intent = new Intent(getActivity(), FoodActivity.class);
-        intent.putExtra("CategoryId", categories.get(position).getKey());
-        intent.putExtra("CategoryName", categories.get(position).getName());
-        startActivity(intent);
+    public void onStop() {
+        EventBus.getDefault().unregister(this);
+        super.onStop();
     }
 
     @Override
@@ -263,7 +313,20 @@ public class HomeFragment extends Fragment implements MenuAdapter.ItemListener, 
     }
 
     @Override
+    public void onDestroy() {
+        compositeDisposable.clear();
+        super.onDestroy();
+    }
+
+    @Override
     public void dispatchToFoodDetail(int position) {
 
+    }
+
+    @Override
+    public void dispatchToMenuList(int position) {
+        Common.currentRestaurant = restaurants.get(position);
+        EventBus.getDefault().postSticky(new MenuItemEvent(true, restaurants.get(position)));
+        getActivity().startActivity(new Intent(getContext(), MenuActivity.class));
     }
 }

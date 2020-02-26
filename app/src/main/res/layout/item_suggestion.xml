@@ -19,11 +19,11 @@
     <TextView
         android:id="@+id/tv_suggestion_name"
         android:text="@string/app_name"
+        android:textStyle="bold"
         android:textColor="@color/colorWhite"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/dimens_16"
-        android:background="@drawable/bg_menu_name"
+        android:background="@drawable/bg_txt_tranparent"
         android:padding="@dimen/dimens_5dp"
         android:layout_gravity="bottom|center"
         android:gravity="center" />

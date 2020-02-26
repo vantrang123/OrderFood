@@ -4,21 +4,15 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.hbb20.CountryCodePicker;
 import com.trangdv.orderfood.R;
-import com.trangdv.orderfood.model.User;
 
 public class SignupActivity extends AppCompatActivity {
 
@@ -28,7 +22,7 @@ public class SignupActivity extends AppCompatActivity {
     private FloatingActionButton fab;
     private CountryCodePicker countryCodePicker;
 
-    private String name;
+    private String userName;
     private String phonenumber;
     private String password;
     private String code;
@@ -59,7 +53,7 @@ public class SignupActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 getTextfromEdt();
-                if (name.equals("") == false && phonenumber.equals("") == false && password.equals("") == false) {
+                if (userName.equals("") == false && phonenumber.equals("") == false && password.equals("") == false) {
 //                    createUser();
                     gotoVerification();
                 }
@@ -71,7 +65,12 @@ public class SignupActivity extends AppCompatActivity {
         String phoneNumber = "+" + code + phonenumber;
 
         Intent intent = new Intent(SignupActivity.this, VerifyPhoneActivity.class);
-        intent.putExtra("phoneNumber", phoneNumber);
+        Bundle bundle = new Bundle();
+        bundle.putString("phoneNumber", phoneNumber);
+        bundle.putString("userName", userName);
+        bundle.putString("password", password);
+        intent.putExtras(bundle);
+//        intent.putExtra("phoneNumber", phoneNumber);
         startActivity(intent);
     }
 
@@ -90,7 +89,7 @@ public class SignupActivity extends AppCompatActivity {
                     Toast.makeText(SignupActivity.this, "Phone number already registered !", Toast.LENGTH_SHORT).show();
                 } else if (!dataSnapshot.child(phonenumber).exists()) {
                     i++;
-                    User user = new User(name, password);
+                    User user = new User(userName, password);
                     table_user.child(phonenumber).setValue(user);
                     Toast.makeText(SignupActivity.this, "Sign Up Successfully !", Toast.LENGTH_SHORT).show();
                     sendResult();
@@ -109,7 +108,7 @@ public class SignupActivity extends AppCompatActivity {
     private void getTextfromEdt() {
         phonenumber = edt_phonenumber.getText().toString().trim();
         password = edt_password.getText().toString();
-        name = edt_username.getText().toString();
+        userName = edt_username.getText().toString();
         code = countryCodePicker.getSelectedCountryCode().trim();
 
     }

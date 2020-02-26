@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:id="@+id/swr_menu"
     android:layout_width="match_parent"
@@ -14,22 +15,22 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-
             android:orientation="vertical">
 
             <include layout="@layout/layout_banner"/>
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_suggestion"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/dimens_10"/>
+            <include
+                android:id="@+id/layout_restaurant"
+                layout="@layout/layout_restaurant"
+                android:visibility="gone"
+                tools:visibility="visible"/>
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_menu"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/dimens_10"/>
+            <include
+                android:id="@+id/layout_suggestion"
+                layout="@layout/layout_suggestion"
+                android:visibility="gone"
+                tools:visibility="visible"/>
+
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 

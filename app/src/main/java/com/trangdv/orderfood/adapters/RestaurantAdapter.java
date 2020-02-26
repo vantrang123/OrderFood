@@ -18,27 +18,25 @@ import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.trangdv.orderfood.R;
-import com.trangdv.orderfood.model.Category;
+import com.trangdv.orderfood.model.Restaurant;
 
-import java.util.ArrayList;
 import java.util.List;
 
-
-public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.ViewHolder> {
+public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.ViewHolder> {
     private Context context;
-    private List<Category> categories;
+    private List<Restaurant> restaurantList;
     private ItemListener itemListener;
 
-    public MenuAdapter(Context context, List<Category> categoryList, ItemListener itemListener) {
+    public RestaurantAdapter(Context context, List<Restaurant> restaurants, ItemListener itemListener) {
         this.context = context;
-        this.categories = categoryList;
+        this.restaurantList = restaurants;
         this.itemListener = itemListener;
     }
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(context);
-        View view = inflater.inflate(R.layout.item_menu, parent, false);
+        View view = inflater.inflate(R.layout.item_restaurant, parent, false);
         return new ViewHolder(view);
     }
 
@@ -48,12 +46,12 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.ViewHolder> {
     }
 
     private void bindView(final ViewHolder holder, final int i) {
-        holder.tvMenuName.setText(categories.get(i).getName());
+        holder.tvRestaurantName.setText(restaurantList.get(i).getName());
 
-        if (categories.get(i).getBitmapImage() == null) {
+        if (restaurantList.get(i).getBitmapImage() == null) {
             Glide.with(context)
                     .asBitmap()
-                    .load(categories.get(i).getImage())
+                    .load(restaurantList.get(i).getImage())
                     .fitCenter()
                     .centerCrop()
                     .placeholder(R.drawable.image_default)
@@ -65,41 +63,41 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.ViewHolder> {
 
                         @Override
                         public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
-                            categories.get(i).setBitmapImage(resource);
+                            restaurantList.get(i).setBitmapImage(resource);
                             return false;
                         }
                     })
-                    .into(holder.ivMenuImage);
+                    .into(holder.ivRestaurantImage);
 
         } else {
-            holder.ivMenuImage.setImageBitmap(categories.get(i).getBitmapImage());
+            holder.ivRestaurantImage.setImageBitmap(restaurantList.get(i).getBitmapImage());
         }
     }
 
     @Override
     public int getItemCount() {
-        return categories.size();
+        return restaurantList.size();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        protected ImageView ivMenuImage;
-        protected TextView tvMenuName;
+        protected ImageView ivRestaurantImage;
+        protected TextView tvRestaurantName;
         public ViewHolder(@NonNull final View itemView) {
             super(itemView);
-            ivMenuImage = itemView.findViewById(R.id.img_menu_image);
-            tvMenuName  = itemView.findViewById(R.id.tv_menu_name);
+            ivRestaurantImage = itemView.findViewById(R.id.img_restaurant_image);
+            tvRestaurantName = itemView.findViewById(R.id.tv_restaurant_name);
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
 
-                    itemListener.dispatchToFoodList(getAdapterPosition());
+                    itemListener.dispatchToMenuList(getAdapterPosition());
                 }
             });
         }
     }
 
     public interface ItemListener {
-        void dispatchToFoodList(int position);
+        void dispatchToMenuList(int position);
     }
 }

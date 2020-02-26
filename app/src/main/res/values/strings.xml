@@ -36,4 +36,8 @@
     <string name="txt_yes">Có</string>
     <string name="txt_no">Không</string>
 
+    <string name="txt_popular_shop">Quán phổ biến</string>
+    <string name="txt_suggestion">Gợi ý</string>
+    <string name="txt_see_more">Xem thêm</string>
+
 </resources>
