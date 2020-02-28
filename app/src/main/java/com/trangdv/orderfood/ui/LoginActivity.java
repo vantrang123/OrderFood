@@ -3,7 +3,6 @@ package com.trangdv.orderfood.ui;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -16,15 +15,14 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.common.Common;
-import com.trangdv.orderfood.model.User;
 import com.trangdv.orderfood.retrofit.IAnNgonAPI;
 import com.trangdv.orderfood.retrofit.RetrofitClient;
+import com.trangdv.orderfood.ui.main.MainActivity;
+import com.trangdv.orderfood.utils.DialogUtils;
 import com.trangdv.orderfood.utils.SharedPrefs;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -33,6 +31,10 @@ import io.reactivex.schedulers.Schedulers;
 
 
 public class LoginActivity extends AppCompatActivity {
+
+    IAnNgonAPI anNgonAPI;
+    CompositeDisposable compositeDisposable = new CompositeDisposable();
+
     public static final int REQUEST_CODE = 2019;
     public static final String KEY_PHONENUMBER = "key phonenumber address";
     public static final String KEY_PASSWORD = "key password";
@@ -50,8 +52,7 @@ public class LoginActivity extends AppCompatActivity {
     FirebaseDatabase database = FirebaseDatabase.getInstance();
     final DatabaseReference table_user = database.getReference("User");
 
-    IAnNgonAPI anNgonAPI;
-    CompositeDisposable compositeDisposable = new CompositeDisposable();
+    DialogUtils dialogUtils;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -70,6 +71,8 @@ public class LoginActivity extends AppCompatActivity {
         setOnClickFab();
         edt_phonenumber = findViewById(R.id.phonenumber_edt_login);
         edt_password = findViewById(R.id.password_edt_login);
+
+        dialogUtils = new DialogUtils();
 
     }
 
@@ -107,6 +110,7 @@ public class LoginActivity extends AppCompatActivity {
                 getTextfromEdt();
 
                 if (phonenumber.equals("")==false && password.equals("")==false) {
+                    dialogUtils.showProgress(LoginActivity.this);
                     authLogin();
 
                 }
@@ -163,17 +167,19 @@ public class LoginActivity extends AppCompatActivity {
                                             //save user in share pref
                                             SharedPrefs.getInstance().put(SAVE_USER, Common.currentUser);
 
-                                            Toast.makeText(this, "[GET USER API SUCCESS]", Toast.LENGTH_SHORT).show();
+                                            Toast.makeText(this, "[GET USER API SUCCESS]" + Common.currentUser.getUserPhone(), Toast.LENGTH_SHORT).show();
 
                                             gotoMainActivity();
 
                                         } else {
                                             Toast.makeText(this, "[GET USER API NOT DATABASE]", Toast.LENGTH_SHORT).show();
                                         }
+                                        dialogUtils.dismissProgress();
 
                                     },
                                     throwable -> {
                                         Toast.makeText(this, "[GET USER API]" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                                        dialogUtils.dismissProgress();
                                     }
                             ));
     }

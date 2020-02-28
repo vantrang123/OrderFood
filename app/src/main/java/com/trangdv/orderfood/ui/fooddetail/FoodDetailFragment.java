@@ -7,7 +7,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -28,9 +27,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.trangdv.orderfood.R;
-import com.trangdv.orderfood.database.Database;
 import com.trangdv.orderfood.model.Food;
-import com.trangdv.orderfood.model.Order;
 
 import java.text.NumberFormat;
 import java.util.Locale;
@@ -49,8 +46,6 @@ public class FoodDetailFragment extends Fragment {
 
     String foodId = "";
     int lastQuantity = 0;
-
-    Database db;
 
     public static FoodDetailFragment newInstance(String id) {
         FoodDetailFragment foodDetailFragment = new FoodDetailFragment();
@@ -74,7 +69,7 @@ public class FoodDetailFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         database = FirebaseDatabase.getInstance();
-        db = new Database(getContext());
+
         foods = database.getReference("Foods");
         if (getArguments() != null) {
             foodId = getArguments().getString("FoodId");

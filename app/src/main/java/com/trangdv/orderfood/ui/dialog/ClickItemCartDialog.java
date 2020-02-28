@@ -1,4 +1,4 @@
-package com.trangdv.orderfood.ui;
+package com.trangdv.orderfood.ui.dialog;
 
 import android.app.Dialog;
 import android.content.Intent;
@@ -14,7 +14,8 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.model.Order;
 import com.trangdv.orderfood.ui.fooddetail.FoodDetailActivity;
-import com.trangdv.orderfood.ui.fooddetail.FoodDetailFragment;
+import com.trangdv.orderfood.ui.main.CartFragment;
+import com.trangdv.orderfood.ui.main.MainActivity;
 
 public class ClickItemCartDialog extends BottomSheetDialogFragment implements View.OnClickListener {
     private BottomSheetBehavior behavior;
@@ -69,7 +70,7 @@ public class ClickItemCartDialog extends BottomSheetDialogFragment implements Vi
                 closeBottomSheet();
                 break;
             case R.id.tv_detail:
-                onDetail();
+                gotoFoodDetail();
                 closeBottomSheet();
             default:
                 break;
@@ -77,21 +78,21 @@ public class ClickItemCartDialog extends BottomSheetDialogFragment implements Vi
         }
     }
 
-    private void onDetail() {
-        Intent intent = new Intent(getActivity(), FoodDetailActivity.class);
+    private void gotoFoodDetail() {
+        /*Intent intent = new Intent(getActivity(), FoodDetailActivity.class);
         Bundle bundle = new Bundle();
         bundle.putString("productId", order.getProductId());
         bundle.putInt("quantity", Integer.valueOf(order.getQuanlity()));
         intent.putExtras(bundle);
-        startActivity(intent);
+        startActivity(intent);*/
     }
 
     private void onDelete() {
-        Fragment fragment = ((MainActivity)getActivity()).getFragmentCurrent();
+        /*Fragment fragment = ((MainActivity)getActivity()).getFragmentCurrent();
         if (fragment instanceof CartFragment) {
             ((CartFragment) fragment).removeItem(position, order.getProductId());
             ((CartFragment) fragment).showUndoDelete(order.getProductName(), position, order);
-        }
+        }*/
     }
 
     private void closeBottomSheet() {

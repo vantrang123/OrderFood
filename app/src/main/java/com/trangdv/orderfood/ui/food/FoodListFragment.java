@@ -132,6 +132,8 @@ public class FoodListFragment extends Fragment implements FoodListAdapter.ItemLi
                         },
                         throwable -> {
                             Toast.makeText(getContext(), "[GET FOOD]" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                            mShimmerViewContainer.stopShimmerAnimation();
+                            mShimmerViewContainer.setVisibility(View.GONE);
                         }
                 ));
 
@@ -181,6 +183,9 @@ public class FoodListFragment extends Fragment implements FoodListAdapter.ItemLi
     @Override
     public void onDestroy() {
         compositeDisposable.clear();
+        if (foodListAdapter != null) {
+            foodListAdapter.onStop();
+        }
         super.onDestroy();
     }
 }

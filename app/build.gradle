@@ -87,6 +87,11 @@ dependencies {
 
     // EventBus
     implementation 'org.greenrobot:eventbus:3.1.1'
+
+    // Room + RxJava
+    annotationProcessor 'androidx.room:room-compiler:2.1.0-beta01'
+    implementation 'androidx.room:room-rxjava2:2.1.0-beta01'
+
 }
 apply plugin: 'com.google.gms.google-services'
 repositories {

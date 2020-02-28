@@ -3,11 +3,8 @@ package com.trangdv.orderfood.ui;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
-import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
 
@@ -18,15 +15,10 @@ import androidx.core.app.ActivityCompat;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
 import com.trangdv.orderfood.R;
-import com.trangdv.orderfood.model.User;
+import com.trangdv.orderfood.ui.main.MainActivity;
 import com.trangdv.orderfood.utils.SharedPrefs;
-
-import static com.trangdv.orderfood.ui.LoginActivity.SAVE_USER;
 
 public class SplashActivity extends AppCompatActivity {
 

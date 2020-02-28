@@ -19,10 +19,7 @@ import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.trangdv.orderfood.R;
-import com.trangdv.orderfood.common.Common;
-import com.trangdv.orderfood.database.Database;
 import com.trangdv.orderfood.model.Favorites;
-import com.trangdv.orderfood.ui.FavoritesFragment;
 
 import java.text.NumberFormat;
 import java.util.List;

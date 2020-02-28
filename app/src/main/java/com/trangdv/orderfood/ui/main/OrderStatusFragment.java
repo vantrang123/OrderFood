@@ -1,4 +1,4 @@
-package com.trangdv.orderfood.ui;
+package com.trangdv.orderfood.ui.main;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;

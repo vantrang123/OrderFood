@@ -1,8 +1,6 @@
 package com.trangdv.orderfood.ui;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -26,6 +24,7 @@ import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.common.Common;
 import com.trangdv.orderfood.retrofit.IAnNgonAPI;
 import com.trangdv.orderfood.retrofit.RetrofitClient;
+import com.trangdv.orderfood.ui.main.MainActivity;
 import com.trangdv.orderfood.utils.SharedPrefs;
 
 import java.util.Locale;

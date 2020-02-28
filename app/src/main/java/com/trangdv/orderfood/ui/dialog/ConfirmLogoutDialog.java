@@ -1,4 +1,4 @@
-package com.trangdv.orderfood.ui;
+package com.trangdv.orderfood.ui.dialog;
 
 import android.app.Dialog;
 import android.content.Intent;
@@ -12,6 +12,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.firebase.auth.FirebaseAuth;
 import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.common.Common;
+import com.trangdv.orderfood.ui.LoginActivity;
 import com.trangdv.orderfood.utils.SharedPrefs;
 
 public class ConfirmLogoutDialog extends BottomSheetDialogFragment implements View.OnClickListener {

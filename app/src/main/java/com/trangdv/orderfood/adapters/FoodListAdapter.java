@@ -21,14 +21,20 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.common.Common;
-import com.trangdv.orderfood.database.Database;
-import com.trangdv.orderfood.model.Favorites;
+import com.trangdv.orderfood.database.CartDataSource;
+import com.trangdv.orderfood.database.CartDatabase;
+import com.trangdv.orderfood.database.CartItem;
+import com.trangdv.orderfood.database.LocalCartDataSource;
 import com.trangdv.orderfood.model.Food;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.schedulers.Schedulers;
 
 public class FoodListAdapter extends RecyclerView.Adapter<FoodListAdapter.ViewHolder> {
     private static final String TAG = "FoodListAdapter";
@@ -40,13 +46,17 @@ public class FoodListAdapter extends RecyclerView.Adapter<FoodListAdapter.ViewHo
 
     Locale locale;
     NumberFormat fmt;
-    Database database;
+
+    CompositeDisposable compositeDisposable;
+    CartDataSource cartDataSource;
 
     public FoodListAdapter(Context context, List<Food> foods, ItemListener itemListener) {
         super();
         this.context = context;
         this.foods = foods;
         listener = itemListener;
+        compositeDisposable = new CompositeDisposable();
+        cartDataSource = new LocalCartDataSource(CartDatabase.getInstance(context).cartDAO());
     }
 
     @NonNull
@@ -56,7 +66,6 @@ public class FoodListAdapter extends RecyclerView.Adapter<FoodListAdapter.ViewHo
         View view = mInflater.inflate(R.layout.item_food, parent, false);
         locale = new Locale("vi", "VN");
         fmt = NumberFormat.getCurrencyInstance(locale);
-        database = new Database(context);
         return new ViewHolder(view);
     }
 
@@ -71,7 +80,7 @@ public class FoodListAdapter extends RecyclerView.Adapter<FoodListAdapter.ViewHo
         holder.tvPriceFood.setText("Price: " + fmt.format(price));
         holder.tvDiscountFood.setText("Discount: " + foods.get(position).getDiscount());
 
-        if (foods.get(position).getBitmapImage()==null) {
+        if (foods.get(position).getBitmapImage() == null) {
             Glide.with(context)
                     .asBitmap()
                     .load(foods.get(position).getImage())
@@ -110,7 +119,7 @@ public class FoodListAdapter extends RecyclerView.Adapter<FoodListAdapter.ViewHo
         public TextView tvNameFood;
         public TextView tvPriceFood;
         public TextView tvDiscountFood;
-        public ImageView ivFavorite;
+        public ImageView ivFavorite, ivCart;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -119,6 +128,7 @@ public class FoodListAdapter extends RecyclerView.Adapter<FoodListAdapter.ViewHo
             tvPriceFood = itemView.findViewById(R.id.food_price);
             tvDiscountFood = itemView.findViewById(R.id.food_discount);
             ivFavorite = itemView.findViewById(R.id.iv_favorite);
+            ivCart = itemView.findViewById(R.id.iv_cart);
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -130,6 +140,7 @@ public class FoodListAdapter extends RecyclerView.Adapter<FoodListAdapter.ViewHo
             ivFavorite.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    Toast.makeText(context, "like", Toast.LENGTH_SHORT).show();
                     /*Favorites favorites = new Favorites();
                     favorites.setFoodId(foods.get(getLayoutPosition()).getFoodId());
                     favorites.setFoodName(foods.get(getLayoutPosition()).getName());
@@ -155,7 +166,39 @@ public class FoodListAdapter extends RecyclerView.Adapter<FoodListAdapter.ViewHo
                 }
             });
 
+            ivCart.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    CartItem cartItem = new CartItem();
+                    cartItem.setFoodId(foods.get(getLayoutPosition()).getId());
+                    cartItem.setFoodName(foods.get(getLayoutPosition()).getName());
+                    cartItem.setFoodPrice(foods.get(getLayoutPosition()).getPrice());
+                    cartItem.setFoodImage(foods.get(getLayoutPosition()).getImage());
+                    cartItem.setFoodQuantity(1);
+                    cartItem.setUserPhone(Common.currentUser.getUserPhone());
+                    cartItem.setRestaurantId(Common.currentRestaurant.getId());
+                    cartItem.setFoodAddon("NOMAL");
+                    cartItem.setFoodSize("NOMAL");
+                    cartItem.setFoodExtraPrice(0.0);
+
+                    compositeDisposable.add(
+                            cartDataSource.insertOrReplaceAll(cartItem)
+                                    .subscribeOn(Schedulers.io())
+                                    .observeOn(AndroidSchedulers.mainThread())
+                                    .subscribe(() -> {
+                                                Toast.makeText(context," added to Cart", Toast.LENGTH_SHORT).show();
+                                            },
+                                            throwable -> {
+                                                Toast.makeText(context, "[ADD CART]" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                                            })
+                    );
+                }
+            });
         }
+    }
+
+    public void onStop() {
+        compositeDisposable.clear();
     }
 
     public interface ItemListener {

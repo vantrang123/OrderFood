@@ -17,17 +17,23 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
-            <include layout="@layout/layout_banner"/>
+            <include
+                android:id="@+id/layout_banner"
+                layout="@layout/layout_banner"
+                android:visibility="gone"
+                tools:visibility="visible"/>
 
             <include
                 android:id="@+id/layout_restaurant"
                 layout="@layout/layout_restaurant"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior"
                 android:visibility="gone"
                 tools:visibility="visible"/>
 
             <include
                 android:id="@+id/layout_suggestion"
                 layout="@layout/layout_suggestion"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior"
                 android:visibility="gone"
                 tools:visibility="visible"/>
 

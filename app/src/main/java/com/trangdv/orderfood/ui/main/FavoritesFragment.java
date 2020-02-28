@@ -1,4 +1,4 @@
-package com.trangdv.orderfood.ui;
+package com.trangdv.orderfood.ui.main;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -15,7 +15,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.adapters.FavoritesAdapter;
 import com.trangdv.orderfood.common.Common;
-import com.trangdv.orderfood.database.Database;
 import com.trangdv.orderfood.ui.fooddetail.FoodDetailActivity;
 
 public class FavoritesFragment extends Fragment implements FavoritesAdapter.ItemListener {
@@ -45,8 +44,8 @@ public class FavoritesFragment extends Fragment implements FavoritesAdapter.Item
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        favoritesAdapter = new FavoritesAdapter(getContext(), new Database(getContext()).getAllFavorites(Common.currentUser.getUserPhone()), this);
-        rvFavorite.setAdapter(favoritesAdapter);
+//        favoritesAdapter = new FavoritesAdapter(getContext(), new Database(getContext()).getAllFavorites(Common.currentUser.getUserPhone()), this);
+//        rvFavorite.setAdapter(favoritesAdapter);
     }
 
     @Override

@@ -1,7 +1,6 @@
-package com.trangdv.orderfood.ui;
+package com.trangdv.orderfood.ui.main;
 
 import android.content.BroadcastReceiver;
-import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
@@ -31,8 +30,6 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.common.Common;
 import com.trangdv.orderfood.model.Order;
@@ -40,11 +37,11 @@ import com.trangdv.orderfood.model.User;
 import com.trangdv.orderfood.receiver.InternetConnector;
 import com.trangdv.orderfood.retrofit.IAnNgonAPI;
 import com.trangdv.orderfood.retrofit.RetrofitClient;
+import com.trangdv.orderfood.ui.dialog.ClickItemCartDialog;
+import com.trangdv.orderfood.ui.dialog.ConfirmLogoutDialog;
 import com.trangdv.orderfood.utils.SharedPrefs;
 
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.schedulers.Schedulers;
 import it.sephiroth.android.library.bottomnavigation.BottomNavigation;
 
 import static com.google.android.material.appbar.AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS;
@@ -54,6 +51,9 @@ import static com.trangdv.orderfood.ui.LoginActivity.SAVE_USER;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, InternetConnector.BroadcastListener {
+
+    IAnNgonAPI anNgonAPI;
+    CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     FragmentManager fragmentManager;
     Toolbar toolbar;
@@ -72,9 +72,6 @@ public class MainActivity extends AppCompatActivity
     boolean doubleBackToExitPressedOnce = false;
     private BroadcastReceiver InternetReceiver = null;
     private int subscreensOnTheStack = -1;
-
-    IAnNgonAPI anNgonAPI;
-    CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -414,4 +411,6 @@ public class MainActivity extends AppCompatActivity
     public void updateUI(String status) {
         showInternetStatus(status);
     }
+
+
 }

@@ -16,8 +16,7 @@ import com.google.firebase.messaging.RemoteMessage;
 import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.common.Common;
 import com.trangdv.orderfood.helper.NotificationHelper;
-import com.trangdv.orderfood.ui.MainActivity;
-import com.trangdv.orderfood.ui.OrderStatusFragment;
+import com.trangdv.orderfood.ui.main.OrderStatusFragment;
 
 import java.util.Random;
 

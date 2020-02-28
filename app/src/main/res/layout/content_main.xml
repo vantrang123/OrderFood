@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:background="@color/colorWhite"
     android:orientation="vertical"
-    tools:context=".ui.MainActivity"
+    tools:context=".ui.main.MainActivity"
     tools:showIn="@layout/app_bar_main">
 
     <!--<include layout="@layout/nav_top_layout"

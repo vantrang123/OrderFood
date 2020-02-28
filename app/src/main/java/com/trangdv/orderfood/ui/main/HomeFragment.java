@@ -1,4 +1,4 @@
-package com.trangdv.orderfood.ui;
+package com.trangdv.orderfood.ui.main;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -6,7 +6,6 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -41,7 +40,7 @@ import com.trangdv.orderfood.model.eventbus.MenuItemEvent;
 import com.trangdv.orderfood.model.eventbus.RestaurantLoadEvent;
 import com.trangdv.orderfood.retrofit.IAnNgonAPI;
 import com.trangdv.orderfood.retrofit.RetrofitClient;
-import com.trangdv.orderfood.ui.food.FoodActivity;
+import com.trangdv.orderfood.utils.DialogUtils;
 import com.trangdv.orderfood.ui.menu.MenuActivity;
 import com.trangdv.orderfood.viewholder.MenuViewHolder;
 
@@ -90,22 +89,22 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
     TextView mTvTitle;
     View layoutRestaurant;
     View layout_suggestion;
+    View layout_banner;
+
+    DialogUtils dialogUtils = new DialogUtils();
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         ((MainActivity) getActivity()).getSupportActionBar().setTitle("Menu");
         View view = inflater.inflate(R.layout.fragment_home, container, false);
+
         findViewById(view);
 
         init();
 
         initBanner();
         return view;
-    }
-
-    private void init() {
-        anNgonAPI = RetrofitClient.getInstance(Common.API_ANNGON_ENDPOINT).create(IAnNgonAPI.class);
     }
 
     private void findViewById(View view) {
@@ -123,6 +122,11 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
         mIndicatorView = view.findViewById(R.id.indicator_view);
         layoutRestaurant = view.findViewById(R.id.layout_restaurant);
         layout_suggestion = view.findViewById(R.id.layout_suggestion);
+        layout_banner = view.findViewById(R.id.layout_banner);
+    }
+
+    private void init() {
+        anNgonAPI = RetrofitClient.getInstance(Common.API_ANNGON_ENDPOINT).create(IAnNgonAPI.class);
     }
 
     @Override
@@ -177,6 +181,7 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
     }
 
     public void fetchData() {
+        dialogUtils.showProgress(getContext());
         banner.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -189,6 +194,7 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
                 }
 
                 mViewPager.create(banners);
+                layout_banner.setVisibility(View.VISIBLE);
             }
 
             @Override
@@ -223,6 +229,7 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
     }
 
     private void fetchRestaurant() {
+        dialogUtils.showProgress(getContext());
         restaurants.clear();
         compositeDisposable.add(
           anNgonAPI.getRestaurant(Common.API_KEY)
@@ -230,9 +237,11 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe(restaurantModel -> {
                               EventBus.getDefault().post(new RestaurantLoadEvent(true, restaurantModel.getResult()));
+                              dialogUtils.dismissProgress();
                   },
                           throwable -> {
                               EventBus.getDefault().post(new RestaurantLoadEvent(false, throwable.getMessage()));
+                              dialogUtils.dismissProgress();
                           })
         );
     }
@@ -301,6 +310,7 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
     @Override
     public void onStop() {
         EventBus.getDefault().unregister(this);
+//        dialogUtils.dismissProgress();
         super.onStop();
     }
 
