@@ -95,7 +95,7 @@ public class FavoritesAdapter extends RecyclerView.Adapter<FavoritesAdapter.View
             tvNameFood = itemView.findViewById(R.id.food_name);
             tvPriceFood = itemView.findViewById(R.id.food_price);
             tvDiscountFood = itemView.findViewById(R.id.food_discount);
-            ivFavorite = itemView.findViewById(R.id.iv_favorite);
+            ivFavorite = itemView.findViewById(R.id.iv_increase);
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override

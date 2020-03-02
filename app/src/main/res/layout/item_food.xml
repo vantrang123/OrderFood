@@ -17,7 +17,7 @@
         android:padding="5dp">
 
         <ImageView
-            android:id="@+id/iv_favorite"
+            android:id="@+id/iv_increase"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="@dimen/dimens_5dp"
@@ -26,20 +26,20 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
-            android:id="@+id/iv_cart"
+            android:id="@+id/iv_decrease"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="@dimen/dimens_5dp"
             android:src="@drawable/ic_menu_cart"
             android:tint="@color/grey_40"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/iv_favorite"/>
+            app:layout_constraintTop_toBottomOf="@id/iv_increase"/>
 
         <TextView
             android:id="@+id/food_discount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/dimens_10"
+            android:layout_marginLeft="@dimen/dimens_10dp"
             tools:text="@string/app_name"
             android:textSize="@dimen/dimens_12sp"
             app:layout_constraintLeft_toRightOf="@id/cv_food_image"
@@ -49,7 +49,7 @@
             android:id="@+id/food_price"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/dimens_10"
+            android:layout_marginLeft="@dimen/dimens_10dp"
             tools:text="@string/app_name"
             android:textSize="@dimen/dimens_12sp"
             app:layout_constraintBottom_toBottomOf="@id/container_food_item"
@@ -59,8 +59,8 @@
             android:id="@+id/food_name"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/dimens_10"
-            android:layout_marginRight="@dimen/dimens_30"
+            android:layout_marginLeft="@dimen/dimens_10dp"
+            android:layout_marginRight="@dimen/dimens_30dp"
             android:inputType="textMultiLine"
             android:maxLines="2"
             android:textSize="@dimen/dimens_12sp"

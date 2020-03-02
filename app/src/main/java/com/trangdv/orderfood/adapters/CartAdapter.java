@@ -46,20 +46,20 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> im
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(context);
-        View itemView = inflater.inflate(R.layout.item_cart, parent, false);
+        View itemView = inflater.inflate(R.layout.layout_swipe_item_cart, parent, false);
         return new ViewHolder(itemView);
     }
 
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
-        TextDrawable drawable = TextDrawable.builder().buildRound("" + listData.get(position).getQuanlity(), Color.RED);
-        holder.img_cart_count.setImageDrawable(drawable);
+//        TextDrawable drawable = TextDrawable.builder().buildRound("" + listData.get(position).getQuanlity(), Color.RED);
+        holder.tvNumber.setText(listData.get(position).getQuanlity());
 
         Locale locale = new Locale("vi", "VN");
         NumberFormat fmt = NumberFormat.getCurrencyInstance(locale);
         int price = (Integer.parseInt(listData.get(position).getPrice()));
-        holder.tv_price.setText(fmt.format(price));
-        holder.tv_cart_name.setText(listData.get(position).getProductName());
+        holder.tvPrice.setText(fmt.format(price));
+        holder.tvName.setText(listData.get(position).getProductName());
         /*Picasso.with(context)
                 .load(listData.get(position).getImage())
                 .into(holder.img_cart_image);*/
@@ -77,11 +77,11 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> im
 
                     @Override
                     public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
-                        holder.img_cart_image.setImageBitmap(resource);
+                        holder.ivImage.setImageBitmap(resource);
                         return false;
                     }
                 })
-                .into(holder.img_cart_image);
+                .into(holder.ivImage);
 
 
         holder.viewForeground.setOnClickListener(new View.OnClickListener() {
@@ -115,20 +115,18 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> im
 
     public class ViewHolder extends RecyclerView.ViewHolder /*implements View.OnCreateContextMenuListener*/ {
 
-        public TextView tv_cart_name, tv_price;
-        public ImageView img_cart_count, img_cart_image;
+        public TextView tvName, tvPrice, tvNumber;
+        public ImageView ivPlus, ivImage, ivSub;
 
         public RelativeLayout viewBackground, viewForeground;
 
         public ViewHolder(@NonNull final View itemView) {
             super(itemView);
-            img_cart_image = itemView.findViewById(R.id.iv_cart_image);
-            tv_cart_name = itemView.findViewById(R.id.cart_item_name);
-            tv_price = itemView.findViewById(R.id.cart_item_price);
-            img_cart_count = itemView.findViewById(R.id.cart_item_count);
-
-            viewBackground = itemView.findViewById(R.id.view_background);
-            viewForeground = itemView.findViewById(R.id.view_foreground);
+            ivImage = itemView.findViewById(R.id.iv_food_image);
+            tvName = itemView.findViewById(R.id.tv_food_name);
+            tvPrice = itemView.findViewById(R.id.tv_food_price);
+            ivPlus = itemView.findViewById(R.id.iv_increase);
+            ivSub = ivImage.findViewById(R.id.iv_decrease);
 
         }
 

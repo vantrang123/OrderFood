@@ -26,4 +26,10 @@
     <dimen name="dp_55">55dp</dimen>
     <dimen name="dp_5">5dp</dimen>
     <dimen name="dp_0_5">0.5dp</dimen>
+
+    <dimen name="dimens_45dp">45dp</dimen>
+    <dimen name="dimens_30dp">30dp</dimen>
+    <dimen name="dimens_20dp">20dp</dimen>
+    <dimen name="dimen_16dp">16dp</dimen>
+    <dimen name="dimens_10dp">10dp</dimen>
 </resources>

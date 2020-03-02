@@ -31,7 +31,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Total: "
-            android:layout_marginLeft="@dimen/dimens_10"
+            android:layout_marginLeft="@dimen/dimens_10dp"
             android:textSize="@dimen/dimens_20sp"/>
         <TextView
             android:id="@+id/total"
@@ -51,7 +51,7 @@
         android:gravity="center"
         android:textColor="@color/colorOrange"
         app:layout_constraintBottom_toBottomOf="@id/container_cart"
-        android:layout_margin="@dimen/dimens_10"
+        android:layout_margin="@dimen/dimens_10dp"
         android:background="@drawable/bg_button_cart"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

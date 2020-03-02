@@ -17,9 +17,9 @@
     <it.sephiroth.android.library.bottomnavigation.BottomNavigation
         android:id="@+id/bottomNavigation"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         app:bbn_entries="@menu/nav_bottom"
-        app:bbn_badgeProvider="@string/bbn_badgeProvider" />
+        app:bbn_badgeProvider="com.trangdv.orderfood.providers.CustomBadgeProvider" />
 
     <FrameLayout
         android:id="@+id/fragment_container"

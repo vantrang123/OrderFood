@@ -9,17 +9,36 @@
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/action_bar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay">
+        android:layout_height="42dp"
+        app:elevation="0dp">
 
           <androidx.appcompat.widget.Toolbar
               android:id="@+id/toolbar"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
-              app:titleTextAppearance="@style/TextAppearance.AppCompat.Medium"
-              android:background="@drawable/side_nav_bar"
-              app:popupTheme="@style/AppTheme.PopupOverlay"
-              app:layout_scrollFlags="scroll|enterAlways"/>
+              app:contentInsetLeft="0dp"
+              app:contentInsetStart="0dp"
+              android:paddingLeft="0dp"
+              app:elevation="0dp"
+              app:layout_scrollFlags="scroll|enterAlways">
+
+              <RelativeLayout
+                  android:id="@+id/lnSearch"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content">
+
+                  <include
+                      layout="@layout/item_search"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content" />
+              </RelativeLayout>
+
+              <androidx.appcompat.widget.SearchView
+                  android:id="@+id/search_view"
+                  android:layout_width="match_parent"
+                  android:layout_height="match_parent"/>
+
+          </androidx.appcompat.widget.Toolbar>
     </com.google.android.material.appbar.AppBarLayout>
 
     <include layout="@layout/content_main"

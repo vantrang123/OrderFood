@@ -4,12 +4,12 @@
     android:id="@+id/container_order_status"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="@dimen/dimens_10"
+    android:layout_margin="@dimen/dimens_10dp"
     android:background="@drawable/bg_order_status_item"
     android:elevation="@dimen/dimens_5dp"
-    android:paddingLeft="@dimen/dimens_10"
+    android:paddingLeft="@dimen/dimens_10dp"
     android:paddingTop="@dimen/dimens_5dp"
-    android:paddingRight="@dimen/dimens_10"
+    android:paddingRight="@dimen/dimens_10dp"
     android:paddingBottom="@dimen/dimens_5dp">
 
     <LinearLayout

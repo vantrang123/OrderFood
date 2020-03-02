@@ -24,6 +24,11 @@ public class LocalCartDataSource implements CartDataSource{
     }
 
     @Override
+    public Single<Integer> countCart(String userPhone) {
+        return cartDAO.countCart(userPhone);
+    }
+
+    @Override
     public Single<Long> sumPrice(String userPhone, int restaurantId) {
         return cartDAO.sumPrice(userPhone, restaurantId);
     }

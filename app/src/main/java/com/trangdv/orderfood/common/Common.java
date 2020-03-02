@@ -1,9 +1,14 @@
 package com.trangdv.orderfood.common;
 
+import com.trangdv.orderfood.model.Addon;
 import com.trangdv.orderfood.model.Restaurant;
 import com.trangdv.orderfood.model.User;
 import com.trangdv.orderfood.remote.APIService;
 import com.trangdv.orderfood.remote.FCMRetrofitClient;
+
+import java.util.HashSet;
+import java.util.Queue;
+import java.util.Set;
 
 public class Common {
     public static final String API_KEY = "1234";
@@ -14,6 +19,7 @@ public class Common {
     private static final String fcmUrl="https://fcm.googleapis.com/";
 
     public static final String API_ANNGON_ENDPOINT = "http://192.168.137.1:3000";
+    public static Set<Addon> addonList = new HashSet<>();
 
 
     public static String convertCodeToStatus(String code){

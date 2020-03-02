@@ -53,6 +53,8 @@
 
         <activity android:name=".ui.menu.MenuActivity" />
 
+        <activity android:name=".ui.SearchActivity" android:theme="@style/AppTheme.NoActionBar"/>
+
         <service
             android:name=".service.MyFirebaseIdService"
             android:exported="true"

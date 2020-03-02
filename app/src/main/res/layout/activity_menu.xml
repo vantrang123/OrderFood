@@ -48,6 +48,6 @@
         android:id="@+id/rv_menu"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginLeft="@dimen/dimens_16"
-        android:layout_marginRight="@dimen/dimens_16"/>
+        android:layout_marginLeft="@dimen/dimen_16dp"
+        android:layout_marginRight="@dimen/dimen_16dp"/>
 </LinearLayout>

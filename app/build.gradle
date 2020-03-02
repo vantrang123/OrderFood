@@ -92,6 +92,9 @@ dependencies {
     annotationProcessor 'androidx.room:room-compiler:2.1.0-beta01'
     implementation 'androidx.room:room-rxjava2:2.1.0-beta01'
 
+    // Expandable layout
+    implementation 'com.github.florent37:expansionpanel:1.2.2'
+
 }
 apply plugin: 'com.google.gms.google-services'
 repositories {

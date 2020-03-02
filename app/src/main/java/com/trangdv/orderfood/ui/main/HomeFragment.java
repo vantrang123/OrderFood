@@ -31,6 +31,9 @@ import com.trangdv.orderfood.adapters.MenuAdapter;
 import com.trangdv.orderfood.adapters.RestaurantAdapter;
 import com.trangdv.orderfood.adapters.SuggestionAdapter;
 import com.trangdv.orderfood.common.Common;
+import com.trangdv.orderfood.database.CartDataSource;
+import com.trangdv.orderfood.database.CartDatabase;
+import com.trangdv.orderfood.database.LocalCartDataSource;
 import com.trangdv.orderfood.model.BannerData;
 import com.trangdv.orderfood.model.Category;
 import com.trangdv.orderfood.model.Restaurant;
@@ -58,8 +61,10 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.reactivex.SingleObserver;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 public class HomeFragment extends Fragment implements SuggestionAdapter.ItemListener, RestaurantAdapter.ItemListener {
@@ -91,12 +96,13 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
     View layout_suggestion;
     View layout_banner;
 
-    DialogUtils dialogUtils = new DialogUtils();
+    DialogUtils dialogUtils;
+
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        ((MainActivity) getActivity()).getSupportActionBar().setTitle("Menu");
+        ((MainActivity) getActivity()).getSupportActionBar().setTitle("Home");
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
         findViewById(view);
@@ -127,6 +133,8 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
 
     private void init() {
         anNgonAPI = RetrofitClient.getInstance(Common.API_ANNGON_ENDPOINT).create(IAnNgonAPI.class);
+        dialogUtils = new DialogUtils();
+
     }
 
     @Override
@@ -279,6 +287,8 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
         tokens.child(Common.currentUser.getUserPhone()).setValue(data);
     }
 
+
+
     // listen EventBus
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void processRestaurantLoadEvent(RestaurantLoadEvent event) {
@@ -301,7 +311,7 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
     @Override
     public void onResume() {
         super.onResume();
-        ((MainActivity) getActivity()).navigationView.getMenu().getItem(0).setChecked(true);
+//        ((MainActivity) getActivity()).navigationView.getMenu().getItem(0).setChecked(true);
         if (mViewPager != null) {
             mViewPager.startLoop();
         }

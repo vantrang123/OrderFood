@@ -1,5 +1,6 @@
 package com.trangdv.orderfood.ui.food;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,20 +16,17 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.facebook.shimmer.ShimmerFrameLayout;
 import com.google.android.material.appbar.AppBarLayout;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.adapters.FoodListAdapter;
 import com.trangdv.orderfood.common.Common;
 import com.trangdv.orderfood.model.Food;
+import com.trangdv.orderfood.model.eventbus.FoodDetailEvent;
 import com.trangdv.orderfood.model.eventbus.FoodListEvent;
-import com.trangdv.orderfood.model.eventbus.RestaurantLoadEvent;
 import com.trangdv.orderfood.retrofit.IAnNgonAPI;
 import com.trangdv.orderfood.retrofit.RetrofitClient;
-import com.trangdv.orderfood.ui.fooddetail.FoodDetailFragment;
+import com.trangdv.orderfood.ui.fooddetail.FoodDetailActivity;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -141,7 +139,9 @@ public class FoodListFragment extends Fragment implements FoodListAdapter.ItemLi
 
     @Override
     public void dispatchToFoodDetail(int position) {
-//        ((FoodActivity) getActivity()).replace(FoodDetailFragment.newInstance(foods.get(position)));
+        EventBus.getDefault().postSticky(new FoodDetailEvent(true, foods.get(position)));
+        startActivity(new Intent(getContext(), FoodDetailActivity.class));
+
     }
 
     // listen EventBus

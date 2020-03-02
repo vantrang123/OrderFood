@@ -260,8 +260,8 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
     @Override
     public void onResume() {
         super.onResume();
-        ((MainActivity) getActivity()).navigationView.getMenu().getItem(1).setChecked(true);
-        ((MainActivity) getActivity()).setScrollBar(0);
+//        ((MainActivity) getActivity()).navigationView.getMenu().getItem(1).setChecked(true);
+//        ((MainActivity) getActivity()).setScrollBar(0);
         checkPlayServices();
         loadListFood();
     }

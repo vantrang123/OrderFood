@@ -127,8 +127,8 @@ public class FoodListAdapter extends RecyclerView.Adapter<FoodListAdapter.ViewHo
             tvNameFood = itemView.findViewById(R.id.food_name);
             tvPriceFood = itemView.findViewById(R.id.food_price);
             tvDiscountFood = itemView.findViewById(R.id.food_discount);
-            ivFavorite = itemView.findViewById(R.id.iv_favorite);
-            ivCart = itemView.findViewById(R.id.iv_cart);
+            ivFavorite = itemView.findViewById(R.id.iv_increase);
+            ivCart = itemView.findViewById(R.id.iv_decrease);
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override

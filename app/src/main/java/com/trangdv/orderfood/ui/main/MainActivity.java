@@ -1,10 +1,15 @@
 package com.trangdv.orderfood.ui.main;
 
+import android.app.SearchManager;
 import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.drawable.LayerDrawable;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 
+import androidx.appcompat.widget.SearchView;
 import androidx.core.view.GravityCompat;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 
@@ -17,6 +22,7 @@ import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.navigation.NavigationView;
 
+import androidx.core.view.MenuItemCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -27,21 +33,32 @@ import androidx.fragment.app.FragmentManager;
 import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.common.Common;
+import com.trangdv.orderfood.database.CartDataSource;
+import com.trangdv.orderfood.database.CartDatabase;
+import com.trangdv.orderfood.database.LocalCartDataSource;
 import com.trangdv.orderfood.model.Order;
 import com.trangdv.orderfood.model.User;
+import com.trangdv.orderfood.providers.CustomBadgeProvider;
 import com.trangdv.orderfood.receiver.InternetConnector;
 import com.trangdv.orderfood.retrofit.IAnNgonAPI;
 import com.trangdv.orderfood.retrofit.RetrofitClient;
+import com.trangdv.orderfood.ui.SearchActivity;
 import com.trangdv.orderfood.ui.dialog.ClickItemCartDialog;
 import com.trangdv.orderfood.ui.dialog.ConfirmLogoutDialog;
 import com.trangdv.orderfood.utils.SharedPrefs;
 
+import io.reactivex.SingleObserver;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
+import it.sephiroth.android.library.bottomnavigation.BadgeProvider;
 import it.sephiroth.android.library.bottomnavigation.BottomNavigation;
 
 import static com.google.android.material.appbar.AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS;
@@ -50,18 +67,21 @@ import static com.trangdv.orderfood.ui.LoginActivity.SAVE_USER;
 
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, InternetConnector.BroadcastListener {
+        implements InternetConnector.BroadcastListener, View.OnClickListener {
 
     IAnNgonAPI anNgonAPI;
     CompositeDisposable compositeDisposable = new CompositeDisposable();
+    CustomBadgeProvider provider;
+    CartDataSource cartDataSource;
 
     FragmentManager fragmentManager;
     Toolbar toolbar;
     private TextView txtUserName;
     private TextView tvStatus;
     private BottomNavigation mBottomNavigation;
+    View rlSearch, rlSearchBg;
     String sFragment = null;
-    NavigationView navigationView;
+    //    NavigationView navigationView;
     BottomSheetBehavior mBottomSheetBehavior;
     GestureDetector mGestureDetector;
     HomeFragment homeFragment;
@@ -77,31 +97,33 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        init();
         findViewById();
+
+        init();
+
 
 //        getCurrentUser();
 
-        initializeBottomNavigation();
+        initializeBottomNavigation(savedInstanceState);
 
-        toolbar.setTitle("Menu");
+        toolbar.setTitle("Home");
         setSupportActionBar(toolbar);
         fragmentManager = getSupportFragmentManager();
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        /*DrawerLayout drawer = findViewById(R.id.drawer_layout);
         navigationView = findViewById(R.id.nav_view);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
-        navigationView.setNavigationItemSelectedListener(this);
+        navigationView.setNavigationItemSelectedListener(this);*/
 
         //get user from share pref
         User user = SharedPrefs.getInstance().get(SAVE_USER, User.class);
         Common.currentUser = user;
 
-        final View headerView = navigationView.getHeaderView(0);
-        txtUserName = headerView.findViewById(R.id.tv_username);
-        txtUserName.setText(Common.currentUser.getName());
+//        final View headerView = navigationView.getHeaderView(0);
+//        txtUserName = headerView.findViewById(R.id.tv_username);
+//        txtUserName.setText(Common.currentUser.getName());
 
         /*Intent service = new Intent(MainActivity.this, ListenOrder.class);
         startService(service);
@@ -126,13 +148,20 @@ public class MainActivity extends AppCompatActivity
         broadcastIntent();
         Home();
 
+        countCart();
     }
 
     private void init() {
         anNgonAPI = RetrofitClient.getInstance(Common.API_ANNGON_ENDPOINT).create(IAnNgonAPI.class);
+        cartDataSource = new LocalCartDataSource(CartDatabase.getInstance(this).cartDAO());
+
     }
 
-    private void initializeBottomNavigation() {
+    private void initializeBottomNavigation(final Bundle savedInstanceState) {
+        if (null == savedInstanceState) {
+            mBottomNavigation.setDefaultSelectedIndex(0);
+            provider = (CustomBadgeProvider) mBottomNavigation.getBadgeProvider();
+        }
         mBottomNavigation.setDefaultSelectedIndex(0);
         mBottomNavigation.setMenuItemSelectionListener(new BottomNavigation.OnMenuItemSelectionListener() {
             @Override
@@ -146,6 +175,7 @@ public class MainActivity extends AppCompatActivity
                         break;
                     case 2:
                         Favorite();
+                        provider.remove(i);
                         break;
                     default:
                         break;
@@ -157,13 +187,17 @@ public class MainActivity extends AppCompatActivity
 
             }
         });
-    }
 
+    }
 
 
     private void findViewById() {
         mBottomNavigation = findViewById(R.id.bottomNavigation);
         toolbar = findViewById(R.id.toolbar);
+        rlSearch = findViewById(R.id.rlSearch);
+        rlSearchBg = findViewById(R.id.rlSearchBg);
+
+        rlSearchBg.setOnClickListener(this);
     }
 
     private void initGestureDetector() {
@@ -213,8 +247,8 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void setScrollBar(int i) {
-        AppBarLayout.LayoutParams toolbarLayoutParams = (AppBarLayout.LayoutParams) toolbar.getLayoutParams();
-        toolbarLayoutParams.setScrollFlags(i);
+//        AppBarLayout.LayoutParams toolbarLayoutParams = (AppBarLayout.LayoutParams) toolbar.getLayoutParams();
+//        toolbarLayoutParams.setScrollFlags(i);
     }
 
     public void Home() {
@@ -224,7 +258,7 @@ public class MainActivity extends AppCompatActivity
                 .replace(R.id.fragment_container, homeFragment)
                 .commit();*/
         replace(homeFragment);
-        navigationView.getMenu().getItem(0).setChecked(true);
+//        navigationView.getMenu().getItem(0).setChecked(true);
     }
 
     public void Cart() {
@@ -266,13 +300,36 @@ public class MainActivity extends AppCompatActivity
         subscreensOnTheStack++;
     }
 
+    private void countCart() {
+        cartDataSource.countCart(Common.currentUser.getUserPhone())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new SingleObserver<Integer>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onSuccess(Integer integer) {
+                        provider.show(R.id.nav_cart, integer);
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+
+                    }
+                });
+    }
+
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        /*DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-        } else if (doubleBackToExitPressedOnce) {
+        } else */
+        if (doubleBackToExitPressedOnce) {
             finishAffinity();
             System.exit(0);
             return;
@@ -302,9 +359,18 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
+        /*// Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
-        return true;
+        // Get the notifications MenuItem and LayerDrawable (layer-list)
+        MenuItem item = menu.findItem(R.id.action_search);
+        MenuItemCompat.setActionView(item, R.layout.actionbar_badge_layout);
+        RelativeLayout notifCount = (RelativeLayout)   MenuItemCompat.getActionView(item);
+
+        TextView tv = (TextView) notifCount.findViewById(R.id.actionbar_notifcation_textview);
+        tv.setText("12");
+
+        return super.onCreateOptionsMenu(menu);*/
+        return false;
     }
 
     @Override
@@ -319,7 +385,7 @@ public class MainActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
-    @SuppressWarnings("StatementWithEmptyBody")
+    /*@SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
@@ -335,14 +401,14 @@ public class MainActivity extends AppCompatActivity
                 item.setChecked(true);
                 break;
 
-            case R.id.nav_cart:
+            *//*case R.id.nav_status:
                 if (item.isChecked()) item.setChecked(false);
                 else {
                     Cart();
 //                    Toast.makeText(MainActivity.this, "carts", Toast.LENGTH_SHORT).show();
                 }
                 item.setChecked(true);
-                break;
+                break;*//*
 
             case R.id.nav_status:
                 if (item.isChecked()) item.setChecked(false);
@@ -363,17 +429,17 @@ public class MainActivity extends AppCompatActivity
             case R.id.nav_exit:
                 ConfirmLogout();
                 break;
-                /*SharedPrefs.getInstance().clear();
+                *//*SharedPrefs.getInstance().clear();
                 Intent intent = new Intent(MainActivity.this, LoginActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
-                finish();*/
+                finish();*//*
         }
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
-    }
+    }*/
 
     private void ConfirmLogout() {
         new ConfirmLogoutDialog().show(getSupportFragmentManager(), "confirmlogutdialog");
@@ -398,6 +464,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
+        countCart();
     }
 
     @Override
@@ -413,4 +480,15 @@ public class MainActivity extends AppCompatActivity
     }
 
 
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.rlSearchBg:
+                Intent intent = new Intent(this, SearchActivity.class);
+                startActivity(intent);
+                break;
+            default:
+                break;
+        }
+    }
 }

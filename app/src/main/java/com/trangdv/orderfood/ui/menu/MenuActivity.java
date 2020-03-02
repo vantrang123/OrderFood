@@ -114,12 +114,12 @@ public class MenuActivity extends AppCompatActivity implements MenuAdapter.ItemL
 
                     @Override
                     public void onSuccess(Integer integer) {
-                        Toast.makeText(MenuActivity.this, "[COUNT CART]" + String.valueOf(integer), Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(MenuActivity.this, "[COUNT CART]" + String.valueOf(integer), Toast.LENGTH_SHORT).show();
                     }
 
                     @Override
                     public void onError(Throwable e) {
-                        Toast.makeText(MenuActivity.this, "[COUNT CART]" + e.getMessage(), Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(MenuActivity.this, "[COUNT CART]" + e.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
     }
