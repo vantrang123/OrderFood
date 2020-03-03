@@ -33,6 +33,8 @@ import androidx.fragment.app.FragmentManager;
 import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -48,6 +50,7 @@ import com.trangdv.orderfood.providers.CustomBadgeProvider;
 import com.trangdv.orderfood.receiver.InternetConnector;
 import com.trangdv.orderfood.retrofit.IAnNgonAPI;
 import com.trangdv.orderfood.retrofit.RetrofitClient;
+import com.trangdv.orderfood.ui.ProfileActivity;
 import com.trangdv.orderfood.ui.SearchActivity;
 import com.trangdv.orderfood.ui.dialog.ClickItemCartDialog;
 import com.trangdv.orderfood.ui.dialog.ConfirmLogoutDialog;
@@ -79,6 +82,7 @@ public class MainActivity extends AppCompatActivity
     private TextView txtUserName;
     private TextView tvStatus;
     private BottomNavigation mBottomNavigation;
+    private ImageView ivUser;
     View rlSearch, rlSearchBg;
     String sFragment = null;
     //    NavigationView navigationView;
@@ -97,6 +101,7 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         findViewById();
 
         init();
@@ -196,8 +201,10 @@ public class MainActivity extends AppCompatActivity
         toolbar = findViewById(R.id.toolbar);
         rlSearch = findViewById(R.id.rlSearch);
         rlSearchBg = findViewById(R.id.rlSearchBg);
+        ivUser = findViewById(R.id.iv_user);
 
         rlSearchBg.setOnClickListener(this);
+        ivUser.setOnClickListener(this);
     }
 
     private void initGestureDetector() {
@@ -441,9 +448,7 @@ public class MainActivity extends AppCompatActivity
         return true;
     }*/
 
-    private void ConfirmLogout() {
-        new ConfirmLogoutDialog().show(getSupportFragmentManager(), "confirmlogutdialog");
-    }
+
 
     public void broadcastIntent() {
         registerReceiver(InternetReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
@@ -486,6 +491,10 @@ public class MainActivity extends AppCompatActivity
             case R.id.rlSearchBg:
                 Intent intent = new Intent(this, SearchActivity.class);
                 startActivity(intent);
+                break;
+            case R.id.iv_user:
+                Intent intent1 = new Intent(this, ProfileActivity.class);
+                startActivity(intent1);
                 break;
             default:
                 break;

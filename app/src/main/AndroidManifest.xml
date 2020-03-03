@@ -55,6 +55,8 @@
 
         <activity android:name=".ui.SearchActivity" android:theme="@style/AppTheme.NoActionBar"/>
 
+        <activity android:name=".ui.ProfileActivity" />
+
         <service
             android:name=".service.MyFirebaseIdService"
             android:exported="true"
