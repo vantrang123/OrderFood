@@ -53,9 +53,9 @@
 
         <activity android:name=".ui.menu.MenuActivity" />
 
-        <activity android:name=".ui.SearchActivity" android:theme="@style/AppTheme.NoActionBar"/>
+        <activity android:name=".ui.SearchActivity" />
 
-        <activity android:name=".ui.ProfileActivity" />
+        <activity android:name=".ui.ProfileActivity" android:theme="@style/AppTheme.GradientStatusBar"/>
 
         <service
             android:name=".service.MyFirebaseIdService"

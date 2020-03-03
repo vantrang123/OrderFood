@@ -67,6 +67,7 @@
                     <androidx.constraintlayout.widget.ConstraintLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:background="@drawable/bg_bottom_line_gray"
                         android:layout_marginTop="@dimen/dimens_5dp">
                         <TextView
                             android:id="@+id/tv_add_cart"
@@ -74,7 +75,9 @@
                             android:layout_height="wrap_content"
                             android:drawableTop="@drawable/ic_add_cart"
                             android:textSize="14sp"
-                            android:padding="@dimen/dimens_5dp"
+                            android:gravity="center"
+                            android:padding="@dimen/dp_5"
+                            android:background="@drawable/bg_icon"
                             android:drawableTint="@color/grey_40"
                             app:layout_constraintTop_toTopOf="parent"
                             app:layout_constraintLeft_toLeftOf="parent"
@@ -88,6 +91,7 @@
                             android:drawableTop="@drawable/ic_favorite"
                             android:gravity="center"
                             android:textSize="14sp"
+                            android:background="@drawable/bg_icon"
                             android:padding="@dimen/dimens_5dp"
                             app:layout_constraintTop_toTopOf="parent"
                             app:layout_constraintLeft_toLeftOf="parent"
@@ -100,8 +104,9 @@
                             android:layout_height="wrap_content"
                             android:drawableTop="@drawable/ic_menu_share"
                             android:drawableTint="@color/grey_40"
-                            android:gravity="right"
+                            android:gravity="center"
                             android:textSize="14sp"
+                            android:background="@drawable/bg_icon"
                             android:padding="@dimen/dimens_5dp"
                             app:layout_constraintTop_toTopOf="parent"
                             app:layout_constraintRight_toRightOf="parent"
@@ -109,34 +114,6 @@
                             android:text="@string/menu_share"/>
 
                     </androidx.constraintlayout.widget.ConstraintLayout>
-
-                    <LinearLayout
-                        android:id="@+id/layout_price"
-                        android:orientation="horizontal"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/dimens_5dp">
-
-                        <ImageView
-                            android:src="@drawable/ic_money"
-                            android:layout_weight="1"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:background="@color/colorOrange"
-                            android:layout_marginLeft="8dp"
-                            android:layout_marginRight="@dimen/dimens_5dp"/>
-
-                        <TextView
-                            android:id="@+id/tv_food_price"
-                            tools:text="1,000"
-                            android:textColor="@color/colorPrimary"
-                            android:textSize="18sp"
-                            android:textStyle="bold"
-                            android:layout_weight="9"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content" />
-
-                    </LinearLayout>
 
                     <!--<com.cepheuen.elegantnumberbutton.view.ElegantNumberButton
                         android:id="@+id/amount"
@@ -152,15 +129,54 @@
 
                 </LinearLayout>
 
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dimens_10dp"
+                android:layout_marginHorizontal="@dimen/dimen_16dp">
+                <TextView
+                    android:id="@+id/tv_food_price"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:drawableLeft="@drawable/ic_money"
+                    android:drawableTint="@color/grey_40"
+                    android:drawablePadding="@dimen/dimens_5dp"
+                    android:textSize="17sp"
+                    android:textStyle="bold"
+                    tools:text="1,000" />
+
+                <RatingBar
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    style="@style/CustomRatingBar"
+                    android:numStars="5"
+                    android:stepSize="0.01"
+                    android:isIndicator="true"
+                    android:rating="3.75"
+                    android:layout_centerVertical="true"
+                    />
+
+            </RelativeLayout>
+
             <LinearLayout
+                android:id="@+id/ln_size"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_marginTop="@dimen/dimens_5dp">
+                android:visibility="gone"
+                tools:visibility="visible"
+                android:layout_marginHorizontal="@dimen/dimen_16dp"
+                android:background="@drawable/bg_bottom_line_gray"
+                android:layout_marginTop="@dimen/dimens_10dp">
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:drawableLeft="@drawable/ic_check_box"
+                    android:drawablePadding="@dimen/dimens_5dp"
+                    android:drawableTint="@color/grey_40"
                     android:text="Size"
+                    android:textSize="17sp"
                     android:textStyle="bold"/>
                 <RadioGroup
                     android:id="@+id/rdi_group_size"
@@ -173,10 +189,14 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/ln_addon"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_marginTop="@dimen/dimens_5dp">
+                android:visibility="gone"
+                tools:visibility="visible"
+                android:layout_marginHorizontal="@dimen/dimen_16dp"
+                android:layout_marginTop="@dimen/dimens_10dp">
                 <com.github.florent37.expansionpanel.ExpansionHeader
                     android:layout_height="wrap_content"
                     android:layout_width="match_parent"
@@ -187,6 +207,11 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:textSize="17sp"
+                        android:textStyle="bold"
+                        android:drawableLeft="@drawable/ic_check_box"
+                        android:drawableTint="@color/grey_40"
+                        android:drawablePadding="@dimen/dimens_5dp"
                         android:text="Add On"/>
                     <ImageView
                         android:adjustViewBounds="true"
@@ -217,7 +242,9 @@
             <androidx.cardview.widget.CardView
                 app:cardUseCompatPadding="true"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dimens_10dp"
+                android:layout_marginHorizontal="@dimen/dimen_16dp">
 
                 <TextView
                     android:id="@+id/tv_food_description"

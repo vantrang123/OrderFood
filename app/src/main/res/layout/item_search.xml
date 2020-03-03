@@ -62,7 +62,7 @@
             android:layout_alignParentBottom="true"
             android:layout_alignParentLeft="true"
             android:layout_marginStart="@dimen/dimens_10dp"
-            android:src="@drawable/ic_user"
+            android:src="@drawable/ic_person"
             android:tint="@color/grey_40"/>
     </RelativeLayout>
 

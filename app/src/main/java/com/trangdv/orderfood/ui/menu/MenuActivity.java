@@ -102,8 +102,7 @@ public class MenuActivity extends AppCompatActivity implements MenuAdapter.ItemL
     }
 
     private void countCartByRestaurant() {
-        cartDataSource.countItemInCart(Common.currentUser.getUserPhone(),
-                Common.currentRestaurant.getId())
+        cartDataSource.countCart(Common.currentUser.getFbid())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new SingleObserver<Integer>() {

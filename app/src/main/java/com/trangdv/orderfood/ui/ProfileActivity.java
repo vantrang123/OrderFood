@@ -3,6 +3,7 @@ package com.trangdv.orderfood.ui;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -17,7 +18,7 @@ import com.trangdv.orderfood.utils.SharedPrefs;
 public class ProfileActivity extends AppCompatActivity implements View.OnClickListener {
 
     private TextView tvUserName, tvUserPhone, tvEdit, tvLogout;
-    private Toolbar toolbar;
+    private ImageView ivBack;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -39,8 +40,10 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
         tvUserName = findViewById(R.id.tv_userName);
         tvUserPhone = findViewById(R.id.tv_userPhone);
         tvLogout = findViewById(R.id.tv_logout);
+        ivBack = findViewById(R.id.iv_back);
 
         tvLogout.setOnClickListener(this);
+        ivBack.setOnClickListener(this);
     }
 
     private void confirmLogout() {
@@ -52,7 +55,9 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
         switch (v.getId()) {
             case R.id.tv_logout:
                 confirmLogout();
-
+                break;
+            case R.id.iv_back:
+                finish();
                 break;
             default:
                 break;

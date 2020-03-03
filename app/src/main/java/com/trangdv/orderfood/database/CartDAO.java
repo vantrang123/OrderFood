@@ -15,20 +15,20 @@ import io.reactivex.Single;
 
 @Dao
 public interface CartDAO {
-    @Query("SELECT * FROM Cart WHERE userPhone=:userPhone AND restaurantId=:restaurantId")
-    Flowable<List<CartItem>> getAllCart(String userPhone, int restaurantId);
+    @Query("SELECT * FROM Cart WHERE fbid=:fbid")
+    Flowable<List<CartItem>> getAllCart(String fbid);
 
-    @Query("SELECT COUNT(*) from Cart WHERE userPhone=:userPhone AND restaurantId=:restaurantId")
-    Single<Integer> countItemInCart(String userPhone, int restaurantId);
+    @Query("SELECT COUNT(*) from Cart WHERE fbid=:fbid AND restaurantId=:restaurantId")
+    Single<Integer> countItemInCart(String fbid, int restaurantId);
 
-    @Query("SELECT COUNT(*) from Cart WHERE userPhone=:userPhone")
-    Single<Integer> countCart(String userPhone);
+    @Query("SELECT COUNT(*) from Cart WHERE fbid=:fbid")
+    Single<Integer> countCart(String fbid);
 
-    @Query("SELECT SUM(foodPrice*foodQuantity) + (foodExtraPrice*foodQuantity) from Cart where userPhone=:userPhone AND restaurantId=:restaurantId")
-    Single<Long> sumPrice(String userPhone, int restaurantId);
+    @Query("SELECT SUM(foodPrice*foodQuantity) + (foodExtraPrice*foodQuantity) from Cart where fbid=:fbid")
+    Single<Long> sumPrice(String fbid);
 
-    @Query("SELECT * from Cart where foodId=:foodId AND userPhone=:userPhone AND restaurantId=:restaurantId")
-    Single<CartItem> getItemInCart(String foodId, String userPhone, int restaurantId);
+    @Query("SELECT * from Cart where foodId=:foodId AND fbid=:fbid AND restaurantId=:restaurantId")
+    Single<CartItem> getItemInCart(String foodId, String fbid, int restaurantId);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     Completable insertOrReplaceAll(CartItem... cartItems);
@@ -39,6 +39,6 @@ public interface CartDAO {
     @Delete
     Single<Integer> deleteCart(CartItem cart);
 
-    @Query("DELETE FROM Cart WHERE userPhone=:userPhone AND restaurantId=:restaurantId")
-    Single<Integer> cleanCart(String userPhone, int restaurantId);
+    @Query("DELETE FROM Cart WHERE fbid=:fbid AND restaurantId=:restaurantId")
+    Single<Integer> cleanCart(String fbid, int restaurantId);
 }

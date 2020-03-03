@@ -6,12 +6,10 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -20,10 +18,10 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -33,41 +31,45 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.material.snackbar.Snackbar;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
 import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.common.Common;
-import com.trangdv.orderfood.helper.RecyclerItemTouchHelper;
-import com.trangdv.orderfood.model.MyResponse;
-import com.trangdv.orderfood.model.Notification;
+import com.trangdv.orderfood.database.CartDataSource;
+import com.trangdv.orderfood.database.CartDatabase;
+import com.trangdv.orderfood.database.CartItem;
+import com.trangdv.orderfood.database.LocalCartDataSource;
 import com.trangdv.orderfood.model.Order;
-import com.trangdv.orderfood.model.Request;
 import com.trangdv.orderfood.adapters.CartAdapter;
-import com.trangdv.orderfood.model.Sender;
-import com.trangdv.orderfood.model.Token;
+import com.trangdv.orderfood.model.eventbus.CaculatePriceEvent;
 import com.trangdv.orderfood.remote.APIService;
+import com.trangdv.orderfood.retrofit.IAnNgonAPI;
+import com.trangdv.orderfood.retrofit.RetrofitClient;
+import com.trangdv.orderfood.utils.DialogUtils;
 
-import java.text.NumberFormat;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import io.reactivex.SingleObserver;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
+
+import static com.google.android.material.appbar.AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS_COLLAPSED;
 
 public class CartFragment extends Fragment implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener,
-        RecyclerItemTouchHelper.RecyclerItemTouchHelperListener, CartAdapter.ItemListener {
+        CartAdapter.ItemListener {
 
-    FirebaseDatabase firebaseDatabase;
-    DatabaseReference requests;
 
     APIService mService;
+    IAnNgonAPI anNgonAPI;
+    CompositeDisposable compositeDisposable = new CompositeDisposable();
+    DialogUtils dialogUtils;
+    CartDataSource cartDataSource;
 
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
@@ -83,15 +85,10 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
 
     RecyclerView recyclerView;
     RecyclerView.LayoutManager layoutManager;
-    CartAdapter adapter;
-    List<Order> carts = new ArrayList<>();
-    Order deletedItem;
-    static List<List<Order>> orderList = new ArrayList<>();
+    CartAdapter cartAdapter;
+    List<CartItem> cartItemList = new ArrayList<>();
 
-    TextView tvTotalPrice;
-    Button btnPlace;
-    float totalPrice;
-    static float total;
+    TextView tvTotalPrice, tvOrder;
 
     String latitude = "16.000";
     String longitude = "108.000";
@@ -116,15 +113,24 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        ((MainActivity) getActivity()).getSupportActionBar().setTitle("Cart");
+
         View view = inflater.inflate(R.layout.fragment_cart, container, false);
         constraintLayout = view.findViewById(R.id.container_cart);
 
-        firebaseDatabase = FirebaseDatabase.getInstance();
-        requests = firebaseDatabase.getReference("Requests");
         initView(view);
 
+        init();
+
         return view;
+    }
+
+    private void init() {
+        cartAdapter = new CartAdapter(cartItemList, getActivity(), this);
+        recyclerView.setAdapter(cartAdapter);
+
+        anNgonAPI = RetrofitClient.getInstance(Common.API_ANNGON_ENDPOINT).create(IAnNgonAPI.class);
+        cartDataSource = new LocalCartDataSource(CartDatabase.getInstance(getContext()).cartDAO());
+        dialogUtils = new DialogUtils();
     }
 
     @Override
@@ -132,15 +138,11 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
         super.onViewCreated(view, savedInstanceState);
         layoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(layoutManager);
-        loadListFood();
-
-        ItemTouchHelper.SimpleCallback itemTouchHelperCallback = new RecyclerItemTouchHelper(0,
-                ItemTouchHelper.LEFT, this);
-        new ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(recyclerView);
+//        loadListFood();
+        getAllItemInCart();
 
         mService = Common.getFCMClient();
     }
-
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
@@ -150,26 +152,26 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
     }
 
     private void deleteCart(int position) {
-        carts.remove(position);
+        cartItemList.remove(position);
 
         //refresh
-        adapter.notifyItemRemoved(position);
+        cartAdapter.notifyItemRemoved(position);
     }
 
     private void initView(View view) {
         recyclerView = view.findViewById(R.id.rv_cart);
 
-        tvTotalPrice = view.findViewById(R.id.total);
-        btnPlace = view.findViewById(R.id.btnPlaceOrder);
+        tvTotalPrice = view.findViewById(R.id.tv_total);
+        tvOrder = view.findViewById(R.id.tv_order);
 
-        btnPlace.setOnClickListener(new View.OnClickListener() {
+        tvOrder.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (carts.size() > 0) {
+                if (cartItemList.size() > 0) {
 
                     showAlertDialog();
                 } else {
-                    Toast.makeText(getActivity(), "Your Basket is Empty!!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), getString(R.string.txt_cart_empty), Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -177,16 +179,67 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
 
 
     private void loadListFood() {
-        orderList.add(carts);
-        adapter = new CartAdapter(carts, getActivity(), this);
-        recyclerView.setAdapter(adapter);
-        adapter.notifyDataSetChanged();
+//        orderList.add(cartItemList);
+
+        cartAdapter.notifyDataSetChanged();
 
         changeStatus();
     }
 
+    private void getAllItemInCart() {
+        cartItemList.clear();
+        compositeDisposable.add(
+                cartDataSource.getAllCart(Common.currentUser.getFbid())
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(cartItems -> {
+                            if (cartItems.isEmpty()) {
+                                tvOrder.setBackground(getResources().getDrawable(R.drawable.bg_button_cart_gray));
+                            } else {
+                                tvOrder.setBackground(getResources().getDrawable(R.drawable.bg_button_cart));
+                                cartItemList.clear();
+                                cartItemList.addAll(cartItems);
+                                cartAdapter.notifyDataSetChanged();
+
+                                caculateCartTotalPrice();
+                            }
+                        }, throwable -> {
+
+                        }));
+    }
+
+    private void caculateCartTotalPrice() {
+        cartDataSource.sumPrice(Common.currentUser.getFbid())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new SingleObserver<Long>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onSuccess(Long aLong) {
+                        if (aLong ==0 ){
+                            tvOrder.setBackground(getResources().getDrawable(R.drawable.bg_button_cart_gray));
+                        } else {
+                            tvOrder.setBackground(getResources().getDrawable(R.drawable.bg_button_cart));
+                        }
+
+                        tvTotalPrice.setText(String.valueOf(aLong));
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        if (e.getMessage().contains("Query returned empty")) {
+                            tvTotalPrice.setText("0");
+                        }
+                    }
+                });
+    }
+
     private void changeStatus() {
-        //Calculate total price
+        /*//Calculate total price
         total = 0;
         for (Order order : carts)
             total += (float) (Integer.parseInt(order.getPrice())) * (Integer.parseInt(order.getQuanlity()));
@@ -199,7 +252,7 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
         total += tax + profit;
 
         totalPrice = total;
-        tvTotalPrice.setText(fmt.format(total));
+        tvTotalPrice.setText(fmt.format(total));*/
     }
 
 
@@ -222,7 +275,7 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
             @Override
             public void onClick(DialogInterface dialog, int which) {
 
-                Request request = new Request(
+                /*Request request = new Request(
                         Common.currentUser.getUserPhone(),
                         Common.currentUser.getName(),
                         edtAddress.getText().toString(),
@@ -230,15 +283,13 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
                         latitude,
                         longitude,
                         carts
-                );
+                );*/
 
-                requests.child(String.valueOf(System.currentTimeMillis()))
-                        .setValue(request);
 
                 dialog.dismiss();
                 /*new Database(getActivity().getBaseContext()).cleanCart();
                 carts.clear();
-                adapter.notifyDataSetChanged();
+                cartAdapter.notifyDataSetChanged();
                 changeStatus();*/
                 sendOrderStatusToServer();
 
@@ -263,15 +314,22 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
 //        ((MainActivity) getActivity()).navigationView.getMenu().getItem(1).setChecked(true);
 //        ((MainActivity) getActivity()).setScrollBar(0);
         checkPlayServices();
-        loadListFood();
+//        loadListFood();
     }
 
     @Override
     public void onStart() {
         super.onStart();
+        EventBus.getDefault().register(this);
         if (mGoogleApiClient != null) {
             mGoogleApiClient.connect();
         }
+    }
+
+    @Override
+    public void onStop() {
+        EventBus.getDefault().unregister(this);
+        super.onStop();
     }
 
     @Override
@@ -367,16 +425,6 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
         }
     }
 
-    @Override
-    public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction, int position) {
-        String name = carts.get(viewHolder.getAdapterPosition()).getProductName();
-        final String productId = carts.get(position).getProductId();
-        deletedItem = carts.get(viewHolder.getAdapterPosition());
-
-        removeItem(position, productId);
-
-        showUndoDelete(name, position, deletedItem);
-    }
 
     public void showUndoDelete(String name, final int i, final Order deletedItem) {
         Snackbar snackbar = Snackbar
@@ -401,4 +449,16 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
         ((MainActivity) getActivity()).showBottomSheet(position, order);
     }
 
+    @Override
+    public void onDestroy() {
+        compositeDisposable.clear();
+        super.onDestroy();
+    }
+
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+    public void caculatePrice(CaculatePriceEvent event) {
+        if (event!=null) {
+            caculateCartTotalPrice();
+        }
+    }
 }

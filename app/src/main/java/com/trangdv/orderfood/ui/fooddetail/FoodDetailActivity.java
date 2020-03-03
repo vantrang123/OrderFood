@@ -62,6 +62,7 @@ public class FoodDetailActivity extends AppCompatActivity {
     RecyclerView rvAddon;
     Toolbar toolbar;
     AppBarLayout appBarLayout;
+    View lnSize, lnAddon;
 
     Double originalPrice;
     private double sizePrice = 0.0;
@@ -100,6 +101,8 @@ public class FoodDetailActivity extends AppCompatActivity {
         tvFoodName = findViewById(R.id.tv_food_name);
         tvFoodPrice = findViewById(R.id.tv_food_price);
         imgFoodImage = findViewById(R.id.iv_food_image);
+        lnSize = findViewById(R.id.ln_size);
+        lnAddon = findViewById(R.id.ln_addon);
     }
 
     private void initView() {
@@ -147,6 +150,7 @@ public class FoodDetailActivity extends AppCompatActivity {
                 cartItem.setFoodAddon(new Gson().toJson(Common.addonList));
                 cartItem.setFoodSize(sizeSelected);
                 cartItem.setFoodExtraPrice(extraPrice);
+                cartItem.setFbid(Common.currentUser.getFbid());
 
                 compositeDisposable.add(
                         cartDataSource.insertOrReplaceAll(cartItem)
@@ -202,13 +206,14 @@ public class FoodDetailActivity extends AppCompatActivity {
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(sizeModel -> {
                         EventBus.getDefault().post(new SizeLoadEvent(true, sizeModel.getResult()));
-
+                        lnSize.setVisibility(View.VISIBLE);
                         // load addon
                         compositeDisposable.add(anNgonAPI.getAddonOfFood(Common.API_KEY, food.getId())
                                 .subscribeOn(Schedulers.io())
                                 .observeOn(AndroidSchedulers.mainThread())
                                 .subscribe(addonModel -> {
                                     EventBus.getDefault().post(new AddonLoadEvent(true, addonModel.getResult()));
+                                    lnAddon.setVisibility(View.VISIBLE);
                                     dialogUtils.dismissProgress();
                                 }, throwable -> {
                                     dialogUtils.dismissProgress();
@@ -227,7 +232,7 @@ public class FoodDetailActivity extends AppCompatActivity {
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(sizeModel -> {
                             EventBus.getDefault().post(new SizeLoadEvent(true, sizeModel.getResult()));
-
+                            lnSize.setVisibility(View.VISIBLE);
                         }, throwable -> {
 
                         })
@@ -240,6 +245,7 @@ public class FoodDetailActivity extends AppCompatActivity {
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(addonModel -> {
                             EventBus.getDefault().post(new AddonLoadEvent(true, addonModel.getResult()));
+                            lnAddon.setVisibility(View.VISIBLE);
                             dialogUtils.dismissProgress();
                         }, throwable -> {
                             dialogUtils.dismissProgress();

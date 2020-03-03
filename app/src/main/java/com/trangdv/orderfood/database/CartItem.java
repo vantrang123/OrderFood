@@ -39,6 +39,17 @@ public class CartItem {
     @ColumnInfo(name = "foodExtraPrice")
     private Double foodExtraPrice;
 
+    @ColumnInfo(name = "fbid")
+    private String fbid;
+
+    public String getFbid() {
+        return fbid;
+    }
+
+    public void setFbid(String fbid) {
+        this.fbid = fbid;
+    }
+
     public CartItem() {
 
     }

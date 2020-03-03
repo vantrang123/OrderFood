@@ -10,6 +10,7 @@ import android.net.ConnectivityManager;
 import android.os.Bundle;
 
 import androidx.appcompat.widget.SearchView;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.view.GravityCompat;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 
@@ -65,6 +66,8 @@ import it.sephiroth.android.library.bottomnavigation.BadgeProvider;
 import it.sephiroth.android.library.bottomnavigation.BottomNavigation;
 
 import static com.google.android.material.appbar.AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS;
+import static com.google.android.material.appbar.AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS_COLLAPSED;
+import static com.google.android.material.appbar.AppBarLayout.LayoutParams.SCROLL_FLAG_EXIT_UNTIL_COLLAPSED;
 import static com.google.android.material.appbar.AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL;
 import static com.trangdv.orderfood.ui.LoginActivity.SAVE_USER;
 
@@ -179,7 +182,7 @@ public class MainActivity extends AppCompatActivity
                         OrderStatus();
                         break;
                     case 2:
-                        Favorite();
+                        Cart();
                         provider.remove(i);
                         break;
                     default:
@@ -254,8 +257,9 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void setScrollBar(int i) {
-//        AppBarLayout.LayoutParams toolbarLayoutParams = (AppBarLayout.LayoutParams) toolbar.getLayoutParams();
-//        toolbarLayoutParams.setScrollFlags(i);
+        AppBarLayout.LayoutParams toolbarLayoutParams = (AppBarLayout.LayoutParams) toolbar.getLayoutParams();
+        toolbarLayoutParams.setScrollFlags(i);
+
     }
 
     public void Home() {
@@ -308,7 +312,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void countCart() {
-        cartDataSource.countCart(Common.currentUser.getUserPhone())
+        cartDataSource.countCart(Common.currentUser.getFbid())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new SingleObserver<Integer>() {
@@ -328,7 +332,6 @@ public class MainActivity extends AppCompatActivity
                     }
                 });
     }
-
 
     @Override
     public void onBackPressed() {

@@ -12,7 +12,7 @@
         android:id="@+id/rv_favorite"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_constraintBottom_toTopOf="@+id/ln_place_order"
+        app:layout_constraintBottom_toTopOf="@+id/rl_place_order"
         app:layout_constraintTop_toTopOf="@id/container_cart"
         app:layout_constraintLeft_toLeftOf="@id/container_cart" />
 

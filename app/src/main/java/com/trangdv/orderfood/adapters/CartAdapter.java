@@ -21,25 +21,41 @@ import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.trangdv.orderfood.R;
+import com.trangdv.orderfood.common.Common;
+import com.trangdv.orderfood.database.CartDataSource;
+import com.trangdv.orderfood.database.CartDatabase;
+import com.trangdv.orderfood.database.CartItem;
+import com.trangdv.orderfood.database.LocalCartDataSource;
+import com.trangdv.orderfood.listener.IOnImageViewAdapterClickListener;
 import com.trangdv.orderfood.listener.OnDatabaseChangedListeners;
 import com.trangdv.orderfood.model.Order;
+import com.trangdv.orderfood.model.eventbus.CaculatePriceEvent;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import io.reactivex.SingleObserver;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
+
 public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> implements OnDatabaseChangedListeners {
 
-    private List<Order> listData = new ArrayList<>();
+    private List<CartItem> cartItemList = new ArrayList<>();
     private Context context;
-    public RelativeLayout viewBackground, viewForeground;
+    CartDataSource cartDataSource;
+
     ItemListener listener;
 
-    public CartAdapter(List<Order> listData, Context context, ItemListener listener) {
-        this.listData = listData;
+    public CartAdapter(List<CartItem> cartItems, Context context, ItemListener listener) {
+        this.cartItemList = cartItems;
         this.context = context;
         this.listener = listener;
+        cartDataSource = new LocalCartDataSource(CartDatabase.getInstance(context).cartDAO());
     }
 
     @NonNull
@@ -52,23 +68,21 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> im
 
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
-//        TextDrawable drawable = TextDrawable.builder().buildRound("" + listData.get(position).getQuanlity(), Color.RED);
-        holder.tvNumber.setText(listData.get(position).getQuanlity());
+        holder.tvQuantity.setText(String.valueOf(cartItemList.get(position).getFoodQuantity()));
 
         Locale locale = new Locale("vi", "VN");
         NumberFormat fmt = NumberFormat.getCurrencyInstance(locale);
-        int price = (Integer.parseInt(listData.get(position).getPrice()));
+        Double price = cartItemList.get(position).getFoodPrice();
         holder.tvPrice.setText(fmt.format(price));
-        holder.tvName.setText(listData.get(position).getProductName());
-        /*Picasso.with(context)
-                .load(listData.get(position).getImage())
-                .into(holder.img_cart_image);*/
+
+        holder.tvName.setText(cartItemList.get(position).getFoodName());
+
         Glide.with(context)
                 .asBitmap()
                 .centerCrop()
                 .fitCenter()
                 .placeholder(R.drawable.image_default)
-                .load(listData.get(position).getImage())
+                .load(cartItemList.get(position).getFoodImage())
                 .listener(new RequestListener<Bitmap>() {
                     @Override
                     public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Bitmap> target, boolean isFirstResource) {
@@ -83,18 +97,71 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> im
                 })
                 .into(holder.ivImage);
 
+        Double finalResult = cartItemList.get(position).getFoodPrice() * cartItemList.get(position).getFoodQuantity();
+        holder.tvPrice.setText(fmt.format(finalResult));
 
-        holder.viewForeground.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                listener.showDialogOptions(position, listData.get(position));
+        // event
+        holder.setListener(((view, position1, isDecrease, isDelete) -> {
+            if (!isDelete) {
+                if (isDecrease) {
+                    if (cartItemList.get(position).getFoodQuantity()>1) {
+                        cartItemList.get(position).setFoodQuantity(cartItemList.get(position).getFoodQuantity()-1);
+                    }
+                } else {
+                    if (cartItemList.get(position).getFoodQuantity()<99) {
+                        cartItemList.get(position).setFoodQuantity(cartItemList.get(position).getFoodQuantity()+1);
+                    }
+                }
+
+                cartDataSource.updateCart(cartItemList.get(position))
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(new SingleObserver<Integer>() {
+                            @Override
+                            public void onSubscribe(Disposable d) {
+
+                            }
+
+                            @Override
+                            public void onSuccess(Integer integer) {
+                                holder.tvQuantity.setText(String.valueOf(cartItemList.get(position).getFoodQuantity()));
+
+                                EventBus.getDefault().postSticky(new CaculatePriceEvent());
+                            }
+
+                            @Override
+                            public void onError(Throwable e) {
+
+                            }
+                        });
+            } else {
+                cartDataSource.deleteCart(cartItemList.get(position))
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(new SingleObserver<Integer>() {
+                            @Override
+                            public void onSubscribe(Disposable d) {
+
+                            }
+
+                            @Override
+                            public void onSuccess(Integer integer) {
+                                notifyItemRemoved(integer);
+                                EventBus.getDefault().postSticky(new CaculatePriceEvent());
+                            }
+
+                            @Override
+                            public void onError(Throwable e) {
+
+                            }
+                        });
             }
-        });
+        }));
     }
 
     @Override
     public int getItemCount() {
-        return listData.size();
+        return cartItemList.size();
     }
 
     @Override
@@ -112,13 +179,18 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> im
 
     }
 
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-    public class ViewHolder extends RecyclerView.ViewHolder /*implements View.OnCreateContextMenuListener*/ {
-
-        public TextView tvName, tvPrice, tvNumber;
+        public TextView tvName, tvPrice, tvQuantity;
         public ImageView ivPlus, ivImage, ivSub;
 
         public RelativeLayout viewBackground, viewForeground;
+
+        IOnImageViewAdapterClickListener onCaculatePriceListener;
+
+        public void setListener(IOnImageViewAdapterClickListener itemListener) {
+            onCaculatePriceListener = itemListener;
+        }
 
         public ViewHolder(@NonNull final View itemView) {
             super(itemView);
@@ -126,8 +198,25 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> im
             tvName = itemView.findViewById(R.id.tv_food_name);
             tvPrice = itemView.findViewById(R.id.tv_food_price);
             ivPlus = itemView.findViewById(R.id.iv_increase);
-            ivSub = ivImage.findViewById(R.id.iv_decrease);
+            ivSub = itemView.findViewById(R.id.iv_decrease);
+            tvQuantity = itemView.findViewById(R.id.tv_quantity);
+            ivSub.setOnClickListener(this);
+            ivPlus.setOnClickListener(this);
 
+        }
+
+        @Override
+        public void onClick(View v) {
+            switch (v.getId()) {
+                case R.id.iv_decrease:
+                    onCaculatePriceListener.onCaculatePriceListener(v, getAdapterPosition(), true, false);
+                    break;
+                case R.id.iv_increase:
+                    onCaculatePriceListener.onCaculatePriceListener(v, getAdapterPosition(), false, false);
+                    break;
+                default:
+                    break;
+            }
         }
 
         /*@Override
@@ -139,7 +228,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> im
     }
 
     public void removeItem(int position) {
-        listData.remove(position);
+        cartItemList.remove(position);
         // notify the item removed by position
         // to perform recycler view delete animations
         // NOTE: don't call notifyDataSetChanged()
@@ -147,7 +236,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> im
     }
 
     public void restoreItem(Order item, int position) {
-        listData.add(position, item);
+//        cartItemList.add(position, item);
         // notify item added by position
         notifyItemInserted(position);
     }

@@ -180,6 +180,7 @@ public class FoodListAdapter extends RecyclerView.Adapter<FoodListAdapter.ViewHo
                     cartItem.setFoodAddon("NOMAL");
                     cartItem.setFoodSize("NOMAL");
                     cartItem.setFoodExtraPrice(0.0);
+                    cartItem.setFbid(Common.currentUser.getFbid());
 
                     compositeDisposable.add(
                             cartDataSource.insertOrReplaceAll(cartItem)
