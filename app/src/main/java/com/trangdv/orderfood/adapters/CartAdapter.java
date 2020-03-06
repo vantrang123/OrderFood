@@ -30,6 +30,7 @@ import com.trangdv.orderfood.listener.IOnImageViewAdapterClickListener;
 import com.trangdv.orderfood.listener.OnDatabaseChangedListeners;
 import com.trangdv.orderfood.model.Order;
 import com.trangdv.orderfood.model.eventbus.CaculatePriceEvent;
+import com.trangdv.orderfood.utils.SwipeLayout;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -42,6 +43,8 @@ import io.reactivex.SingleObserver;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+
+import static androidx.recyclerview.widget.RecyclerView.NO_POSITION;
 
 public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> implements OnDatabaseChangedListeners {
 
@@ -182,7 +185,8 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> im
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         public TextView tvName, tvPrice, tvQuantity;
-        public ImageView ivPlus, ivImage, ivSub;
+        public ImageView ivPlus, ivImage, ivSub, ivDelete;
+        SwipeLayout swipeLayout;
 
         public RelativeLayout viewBackground, viewForeground;
 
@@ -200,8 +204,20 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> im
             ivPlus = itemView.findViewById(R.id.iv_increase);
             ivSub = itemView.findViewById(R.id.iv_decrease);
             tvQuantity = itemView.findViewById(R.id.tv_quantity);
+            swipeLayout = itemView.findViewById(R.id.swipe_layout);
+            ivDelete = itemView.findViewById(R.id.iv_delete);
+
             ivSub.setOnClickListener(this);
             ivPlus.setOnClickListener(this);
+            ivDelete.setOnClickListener(this);
+
+            swipeLayout.getSurfaceView().setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    listener.showDialogOptions(getAdapterPosition());
+                }
+            });
+
 
         }
 
@@ -214,34 +230,28 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> im
                 case R.id.iv_increase:
                     onCaculatePriceListener.onCaculatePriceListener(v, getAdapterPosition(), false, false);
                     break;
+                case R.id.iv_delete:
+                    if (getAdapterPosition() != NO_POSITION) {
+                        onCaculatePriceListener.onCaculatePriceListener(v, getAdapterPosition(), false, true);
+                    }
+                    break;
                 default:
                     break;
             }
         }
 
-        /*@Override
-        public void onCreateContextMenu(ContextMenu contextMenu, View view, ContextMenu.ContextMenuInfo contextMenuInfo) {
-            contextMenu.setHeaderTitle(Common.DELETE);
-            contextMenu.add(0, 0, gaddToCartetAdapterPosition(), Common.DELETE);
-        }*/
-
     }
 
     public void removeItem(int position) {
         cartItemList.remove(position);
-        // notify the item removed by position
-        // to perform recycler view delete animations
-        // NOTE: don't call notifyDataSetChanged()
         notifyItemRemoved(position);
     }
 
     public void restoreItem(Order item, int position) {
-//        cartItemList.add(position, item);
-        // notify item added by position
         notifyItemInserted(position);
     }
 
     public interface ItemListener {
-        void showDialogOptions(int position, Order order);
+        void showDialogOptions(int position);
     }
 }

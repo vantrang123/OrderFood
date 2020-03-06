@@ -5,29 +5,45 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
-
-import androidx.fragment.app.Fragment;
+import android.widget.Toast;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.trangdv.orderfood.R;
-import com.trangdv.orderfood.model.Order;
+import com.trangdv.orderfood.common.Common;
+import com.trangdv.orderfood.database.CartDatabase;
+import com.trangdv.orderfood.database.LocalCartDataSource;
+import com.trangdv.orderfood.model.Food;
+import com.trangdv.orderfood.model.eventbus.FoodDetailEvent;
+import com.trangdv.orderfood.remote.APIService;
+import com.trangdv.orderfood.retrofit.IAnNgonAPI;
+import com.trangdv.orderfood.retrofit.RetrofitClient;
 import com.trangdv.orderfood.ui.fooddetail.FoodDetailActivity;
-import com.trangdv.orderfood.ui.main.CartFragment;
-import com.trangdv.orderfood.ui.main.MainActivity;
+import com.trangdv.orderfood.utils.DialogUtils;
+
+import org.greenrobot.eventbus.EventBus;
+
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.schedulers.Schedulers;
 
 public class ClickItemCartDialog extends BottomSheetDialogFragment implements View.OnClickListener {
     private BottomSheetBehavior behavior;
     private TextView tvCancel;
     private TextView tvDelete;
     private TextView tvDetail;
-    private Order order;
+    private Food food;
     private int position;
+    private int foodId;
+    DialogUtils dialogUtils;
+    APIService mService;
+    IAnNgonAPI anNgonAPI;
+    CompositeDisposable compositeDisposable = new CompositeDisposable();
 
-    public ClickItemCartDialog(int position, Order order) {
-        this.order = order;
+    public ClickItemCartDialog(int position, int foodId) {
         this.position = position;
+        this.foodId = foodId;
     }
 
     @Override
@@ -39,8 +55,15 @@ public class ClickItemCartDialog extends BottomSheetDialogFragment implements Vi
         behavior = BottomSheetBehavior.from((View) view.getParent());
 
         findViewById(view);
+        init();
+
         ((View) view.getParent()).setBackgroundColor(getResources().getColor(android.R.color.transparent));
         return dialog;
+    }
+
+    private void init() {
+        anNgonAPI = RetrofitClient.getInstance(Common.API_ANNGON_ENDPOINT).create(IAnNgonAPI.class);
+        dialogUtils = new DialogUtils();
     }
 
     private void findViewById(View v) {
@@ -79,23 +102,40 @@ public class ClickItemCartDialog extends BottomSheetDialogFragment implements Vi
     }
 
     private void gotoFoodDetail() {
-        /*Intent intent = new Intent(getActivity(), FoodDetailActivity.class);
-        Bundle bundle = new Bundle();
-        bundle.putString("productId", order.getProductId());
-        bundle.putInt("quantity", Integer.valueOf(order.getQuanlity()));
-        intent.putExtras(bundle);
-        startActivity(intent);*/
+        dialogUtils.showProgress(getContext());
+
+        compositeDisposable.add(
+                anNgonAPI.getFoodById(Common.API_KEY, foodId)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(foodModel -> {
+                            dialogUtils.dismissProgress();
+                            EventBus.getDefault().postSticky(new FoodDetailEvent(true, foodModel.getResult().get(0)));
+                            startActivity(new Intent(getContext(), FoodDetailActivity.class));
+
+                        }, throwable -> {
+                            Toast.makeText(getActivity(), "[GET FOOD]" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                            dialogUtils.dismissProgress();
+                        })
+        );
+
     }
 
     private void onDelete() {
         /*Fragment fragment = ((MainActivity)getActivity()).getFragmentCurrent();
         if (fragment instanceof CartFragment) {
-            ((CartFragment) fragment).removeItem(position, order.getProductId());
-            ((CartFragment) fragment).showUndoDelete(order.getProductName(), position, order);
+            ((CartFragment) fragment).removeItem(position, food.getProductId());
+            ((CartFragment) fragment).showUndoDelete(food.getProductName(), position, food);
         }*/
     }
 
     private void closeBottomSheet() {
         behavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+    }
+
+    @Override
+    public void onDestroy() {
+        compositeDisposable.clear();
+        super.onDestroy();
     }
 }

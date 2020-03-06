@@ -8,8 +8,6 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -21,13 +19,11 @@ import com.trangdv.orderfood.database.CartDataSource;
 import com.trangdv.orderfood.database.CartDatabase;
 import com.trangdv.orderfood.database.LocalCartDataSource;
 import com.trangdv.orderfood.model.Category;
-import com.trangdv.orderfood.model.User;
 import com.trangdv.orderfood.model.eventbus.FoodListEvent;
 import com.trangdv.orderfood.model.eventbus.MenuItemEvent;
 import com.trangdv.orderfood.retrofit.IAnNgonAPI;
 import com.trangdv.orderfood.retrofit.RetrofitClient;
 import com.trangdv.orderfood.ui.food.FoodActivity;
-import com.trangdv.orderfood.utils.SharedPrefs;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -41,8 +37,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-
-import static com.trangdv.orderfood.ui.LoginActivity.SAVE_USER;
 
 public class MenuActivity extends AppCompatActivity implements MenuAdapter.ItemListener {
 
@@ -69,6 +63,29 @@ public class MenuActivity extends AppCompatActivity implements MenuAdapter.ItemL
         setupToolBar();
 
         countCartByRestaurant();
+        loadFavByRes();
+    }
+
+    private void loadFavByRes() {
+
+        compositeDisposable.add(
+                anNgonAPI.getFavoriteByRestaurant(Common.API_KEY, Common.currentUser.getFbid(), Common.currentRestaurant.getId())
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(favoriteOnlyIdModel -> {
+                            if (favoriteOnlyIdModel.isSuccess()) {
+                                if (favoriteOnlyIdModel.getResult() != null && favoriteOnlyIdModel.getResult().size() >0) {
+                                    Common.currentFavOfRestaurant = favoriteOnlyIdModel.getResult();
+                                }
+                            } else {
+                                Common.currentFavOfRestaurant = new ArrayList<>();
+                            }
+
+                        }, throwable -> {
+                            Toast.makeText(MenuActivity.this, "[GET FAV BY RES]" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
+
+                        })
+        );
     }
 
     private void findViewById() {
@@ -171,6 +188,8 @@ public class MenuActivity extends AppCompatActivity implements MenuAdapter.ItemL
                                 mShimmerViewContainer.setVisibility(View.GONE);
                             }, throwable -> {
                                 Toast.makeText(this, "[GET CATEGORY]" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                                mShimmerViewContainer.stopShimmerAnimation();
+                                mShimmerViewContainer.setVisibility(View.GONE);
                             })
             );
 

@@ -17,7 +17,7 @@
         android:padding="5dp">
 
         <ImageView
-            android:id="@+id/iv_increase"
+            android:id="@+id/iv_favorite"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="@dimen/dimens_5dp"
@@ -26,14 +26,14 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
-            android:id="@+id/iv_decrease"
+            android:id="@+id/iv_cart"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="@dimen/dimens_5dp"
             android:src="@drawable/ic_menu_cart"
             android:tint="@color/grey_40"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/iv_increase"/>
+            app:layout_constraintTop_toBottomOf="@id/iv_favorite"/>
 
         <TextView
             android:id="@+id/food_discount"

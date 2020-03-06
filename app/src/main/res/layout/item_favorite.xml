@@ -42,7 +42,7 @@
         app:layout_constraintTop_toTopOf="@id/container_food_item"
         tools:text="aaaaaaaaaaaaaaaaaasssssssssssssssssssdddddddddddddddddddaaaaaaaaaaaaaaassssss" />
 
-    <TextView
+    <!--<TextView
         android:id="@+id/food_discount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -50,7 +50,7 @@
         android:text="@string/app_name"
         android:textSize="@dimen/dimens_12sp"
         app:layout_constraintLeft_toRightOf="@id/cv_food_image"
-        app:layout_constraintTop_toBottomOf="@id/food_name" />
+        app:layout_constraintTop_toBottomOf="@id/food_name" />-->
 
     <TextView
         android:id="@+id/food_price"
@@ -63,7 +63,7 @@
         app:layout_constraintLeft_toRightOf="@id/cv_food_image" />
 
     <ImageView
-        android:id="@+id/iv_increase"
+        android:id="@+id/iv_favorite"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="@dimen/dimens_5dp"

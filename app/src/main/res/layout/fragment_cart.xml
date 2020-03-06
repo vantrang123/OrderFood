@@ -8,17 +8,17 @@
     android:scrollbarStyle="insideOverlay"
     android:background="@color/colorWhite"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_cart"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:nestedScrollingEnabled="true"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        android:layout_marginHorizontal="@dimen/dimen_16dp"
-        android:layout_marginVertical="@dimen/dimens_10dp"
-        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/rl_place_order"
-        app:layout_constraintLeft_toLeftOf="@id/container_cart" />
+        app:layout_constraintLeft_toLeftOf="@id/container_cart"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0" />
 
     <RelativeLayout
         android:id="@+id/rl_place_order"

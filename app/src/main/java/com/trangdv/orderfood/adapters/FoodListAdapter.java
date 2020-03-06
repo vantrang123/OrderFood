@@ -1,6 +1,7 @@
 package com.trangdv.orderfood.adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,7 +26,15 @@ import com.trangdv.orderfood.database.CartDataSource;
 import com.trangdv.orderfood.database.CartDatabase;
 import com.trangdv.orderfood.database.CartItem;
 import com.trangdv.orderfood.database.LocalCartDataSource;
+import com.trangdv.orderfood.model.FavoriteOnlyId;
 import com.trangdv.orderfood.model.Food;
+import com.trangdv.orderfood.model.eventbus.FoodDetailEvent;
+import com.trangdv.orderfood.retrofit.IAnNgonAPI;
+import com.trangdv.orderfood.retrofit.RetrofitClient;
+import com.trangdv.orderfood.ui.fooddetail.FoodDetailActivity;
+import com.trangdv.orderfood.utils.DialogUtils;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -47,8 +56,10 @@ public class FoodListAdapter extends RecyclerView.Adapter<FoodListAdapter.ViewHo
     Locale locale;
     NumberFormat fmt;
 
+    IAnNgonAPI anNgonAPI;
     CompositeDisposable compositeDisposable;
     CartDataSource cartDataSource;
+    DialogUtils dialogUtils;
 
     public FoodListAdapter(Context context, List<Food> foods, ItemListener itemListener) {
         super();
@@ -57,6 +68,8 @@ public class FoodListAdapter extends RecyclerView.Adapter<FoodListAdapter.ViewHo
         listener = itemListener;
         compositeDisposable = new CompositeDisposable();
         cartDataSource = new LocalCartDataSource(CartDatabase.getInstance(context).cartDAO());
+        anNgonAPI = RetrofitClient.getInstance(Common.API_ANNGON_ENDPOINT).create(IAnNgonAPI.class);
+        dialogUtils = new DialogUtils();
     }
 
     @NonNull
@@ -104,8 +117,17 @@ public class FoodListAdapter extends RecyclerView.Adapter<FoodListAdapter.ViewHo
             holder.imgFood.setImageBitmap(foods.get(position).getBitmapImage());
         }
 
-        /*if (database.isFavourite(foods.get(position).getFoodId(), Common.currentUser.getUserPhone()))
-            holder.ivFavorite.setImageResource(R.drawable.ic_favorite_red);*/
+        if (Common.currentFavOfRestaurant != null && Common.currentFavOfRestaurant.size() > 0) {
+            if (Common.checkFavorite(foods.get(position).getId())) {
+                holder.ivFavorite.setImageResource(R.drawable.ic_favorite_red);
+                holder.ivFavorite.setTag(true);
+            } else {
+                holder.ivFavorite.setImageResource(R.drawable.ic_favorite_gray);
+                holder.ivFavorite.setTag(false);
+            }
+        } else {
+            holder.ivFavorite.setTag(false);
+        }
 
     }
 
@@ -127,8 +149,8 @@ public class FoodListAdapter extends RecyclerView.Adapter<FoodListAdapter.ViewHo
             tvNameFood = itemView.findViewById(R.id.food_name);
             tvPriceFood = itemView.findViewById(R.id.food_price);
             tvDiscountFood = itemView.findViewById(R.id.food_discount);
-            ivFavorite = itemView.findViewById(R.id.iv_increase);
-            ivCart = itemView.findViewById(R.id.iv_decrease);
+            ivFavorite = itemView.findViewById(R.id.iv_favorite);
+            ivCart = itemView.findViewById(R.id.iv_cart);
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -140,35 +162,68 @@ public class FoodListAdapter extends RecyclerView.Adapter<FoodListAdapter.ViewHo
             ivFavorite.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Toast.makeText(context, "like", Toast.LENGTH_SHORT).show();
-                    /*Favorites favorites = new Favorites();
-                    favorites.setFoodId(foods.get(getLayoutPosition()).getFoodId());
-                    favorites.setFoodName(foods.get(getLayoutPosition()).getName());
-                    favorites.setFoodDescription(foods.get(getLayoutPosition()).getDescription());
-                    favorites.setFoodImage(foods.get(getLayoutPosition()).getImage());
-                    favorites.setFoodMenuId(foods.get(getLayoutPosition()).getMenuId());
-                    favorites.setUserPhone(Common.currentUser.getUserPhone());
-                    favorites.setFoodPrice(foods.get(getLayoutPosition()).getPrice());
-                    favorites.setFoodDiscount(foods.get(getLayoutPosition()).getDiscount());
 
-                    if (!database.isFavourite(foods.get(getLayoutPosition()).getFoodId(), Common.currentUser.getUserPhone())) {
+                    ImageView fav = (ImageView)v;
+                    if ((Boolean) v.getTag()) {
+                        dialogUtils.showProgress(context);
 
-                        database.addToFavourites(favorites);
-                        ivFavorite.setImageResource(R.drawable.ic_favorite_red);
-                        Toast.makeText(context, "" + foods.get(getLayoutPosition()).getName() +
-                                " was added to Favourites", Toast.LENGTH_SHORT).show();
+                        compositeDisposable.add(
+                                anNgonAPI.removeFavorite(Common.API_KEY,
+                                        Common.currentUser.getFbid(),
+                                        foods.get(getAdapterPosition()).getId(),
+                                        Common.currentRestaurant.getId())
+                                        .subscribeOn(Schedulers.io())
+                                        .observeOn(AndroidSchedulers.mainThread())
+                                        .subscribe(favoriteModel -> {
+                                            if (favoriteModel.isSuccess() && favoriteModel.getMessage().contains("Success")) {
+                                                fav.setImageResource(R.drawable.ic_favorite_gray);
+                                                fav.setTag(false);
+                                                if (Common.currentFavOfRestaurant != null) {
+                                                    Common.removeFavorite(foods.get(getAdapterPosition()).getId());
+                                                }
+                                            }
+                                            dialogUtils.dismissProgress();
+                                        }, throwable -> {
+                                            Toast.makeText(context, "[REMOVE FAV]" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                                            dialogUtils.dismissProgress();
+                                        })
+                        );
                     } else {
-                        database.removeFromFavourites(foods.get(getLayoutPosition()).getFoodId(), Common.currentUser.getUserPhone());
-                        ivFavorite.setImageResource(R.drawable.ic_favorite_gray);
-                        Toast.makeText(context, "" + foods.get(getLayoutPosition()).getName() +
-                                " was removed from Favourites", Toast.LENGTH_SHORT).show();
-                    }*/
+                        dialogUtils.showProgress(context);
+
+                        compositeDisposable.add(
+                                anNgonAPI.insertFavorite(Common.API_KEY,
+                                        Common.currentUser.getFbid(),
+                                        foods.get(getAdapterPosition()).getId(),
+                                        Common.currentRestaurant.getId(),
+                                        Common.currentRestaurant.getName(),
+                                        foods.get(getAdapterPosition()).getName(),
+                                        foods.get(getAdapterPosition()).getImage(),
+                                        foods.get(getAdapterPosition()).getPrice())
+                                        .subscribeOn(Schedulers.io())
+                                        .observeOn(AndroidSchedulers.mainThread())
+                                        .subscribe(favoriteModel -> {
+                                            if (favoriteModel.isSuccess() && favoriteModel.getMessage().contains("Success")) {
+                                                fav.setImageResource(R.drawable.ic_favorite_red);
+                                                fav.setTag(true);
+                                                if (Common.currentFavOfRestaurant != null) {
+                                                    Common.currentFavOfRestaurant.add(new FavoriteOnlyId(foods.get(getAdapterPosition()).getId()));
+                                                }
+                                            }
+                                            dialogUtils.dismissProgress();
+                                        }, throwable -> {
+                                            Toast.makeText(context, "[ADD FAV]" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                                            dialogUtils.dismissProgress();
+                                        })
+                        );
+                    }
                 }
             });
 
             ivCart.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    dialogUtils.showProgress(context);
                     CartItem cartItem = new CartItem();
                     cartItem.setFoodId(foods.get(getLayoutPosition()).getId());
                     cartItem.setFoodName(foods.get(getLayoutPosition()).getName());
@@ -187,10 +242,12 @@ public class FoodListAdapter extends RecyclerView.Adapter<FoodListAdapter.ViewHo
                                     .subscribeOn(Schedulers.io())
                                     .observeOn(AndroidSchedulers.mainThread())
                                     .subscribe(() -> {
-                                                Toast.makeText(context," added to Cart", Toast.LENGTH_SHORT).show();
+                                                Toast.makeText(context, " added to Cart", Toast.LENGTH_SHORT).show();
+                                                dialogUtils.dismissProgress();
                                             },
                                             throwable -> {
                                                 Toast.makeText(context, "[ADD CART]" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                                                dialogUtils.dismissProgress();
                                             })
                     );
                 }

@@ -3,6 +3,12 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <com.trangdv.orderfood.ui.BaseStatusBar
+        android:id="@+id/base_status_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_header" />
+
     <RelativeLayout
         android:id="@+id/rlSearch"
         android:layout_width="match_parent"

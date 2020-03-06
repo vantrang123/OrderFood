@@ -13,8 +13,7 @@
             <solid android:color="@color/colorWhite" />
 
             <padding
-                android:bottom="@dimen/dimens_5dp"
-                android:top="@dimen/dimens_5dp"/>
+                android:bottom="@dimen/dimens_5dp"/>
         </shape>
     </item>
 

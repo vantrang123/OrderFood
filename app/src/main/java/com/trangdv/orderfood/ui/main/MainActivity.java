@@ -45,6 +45,7 @@ import com.trangdv.orderfood.common.Common;
 import com.trangdv.orderfood.database.CartDataSource;
 import com.trangdv.orderfood.database.CartDatabase;
 import com.trangdv.orderfood.database.LocalCartDataSource;
+import com.trangdv.orderfood.model.Food;
 import com.trangdv.orderfood.model.Order;
 import com.trangdv.orderfood.model.User;
 import com.trangdv.orderfood.providers.CustomBadgeProvider;
@@ -185,6 +186,9 @@ public class MainActivity extends AppCompatActivity
                         Cart();
                         provider.remove(i);
                         break;
+                    case 3:
+                        Favorite();
+                        break;
                     default:
                         break;
                 }
@@ -224,8 +228,8 @@ public class MainActivity extends AppCompatActivity
                 });
     }
 
-    public void showBottomSheet(int position, Order order) {
-        new ClickItemCartDialog(position, order).show(getSupportFragmentManager(), "dialog");
+    public void showBottomSheet(int position, int foodId) {
+        new ClickItemCartDialog(position, foodId).show(getSupportFragmentManager(), "dialog");
     }
 
     public void showInternetStatus(final String status) {

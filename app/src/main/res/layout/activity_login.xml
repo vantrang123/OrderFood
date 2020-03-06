@@ -141,6 +141,8 @@
         android:src="@drawable/icon_next"
         app:fabCustomSize="45dp"
         app:maxImageSize="38dp"
+        app:borderWidth="0dp"
+        android:backgroundTint="@color/colorWhite"
         app:layout_constraintTop_toBottomOf="@+id/area_interactive"
         app:layout_constraintBottom_toBottomOf="@id/area_interactive"
         app:layout_constraintLeft_toLeftOf="@id/area_interactive"

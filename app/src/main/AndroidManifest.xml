@@ -3,14 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.trangdv.orderfood">
 
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-
     <application
         android:name=".App"
         android:allowBackup="true"
@@ -32,7 +24,7 @@
         <activity
             android:name=".ui.main.MainActivity"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme" />
+            android:theme="@style/AppTheme.GradientStatusBar" />
 
         <activity
             android:name=".ui.SignupActivity"
@@ -41,21 +33,33 @@
             android:name=".ui.LoginActivity"
             android:theme="@style/AppTheme" />
 
-        <activity android:name=".ui.food.FoodActivity"
-            android:theme="@style/AppTheme"/>
+        <activity
+            android:name=".ui.food.FoodActivity"
+            android:theme="@style/AppTheme.GradientStatusBar" />
 
-        <activity android:name=".ui.fooddetail.FoodDetailActivity"
-            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".ui.fooddetail.FoodDetailActivity"
+            android:theme="@style/AppTheme.GradientStatusBar" />
 
-        <activity android:name=".ui.main.CartFragment" />
+        <activity
+            android:name=".ui.VerifyPhoneActivity"
+            android:theme="@style/AppTheme.GradientStatusBar" />
 
-        <activity android:name=".ui.VerifyPhoneActivity" />
+        <activity
+            android:name=".ui.menu.MenuActivity"
+            android:theme="@style/AppTheme.GradientStatusBar" />
 
-        <activity android:name=".ui.menu.MenuActivity" />
+        <activity
+            android:name=".ui.SearchActivity"
+            android:theme="@style/AppTheme.GradientStatusBar" />
 
-        <activity android:name=".ui.SearchActivity" />
+        <activity
+            android:name=".ui.ProfileActivity"
+            android:theme="@style/AppTheme.GradientStatusBar" />
 
-        <activity android:name=".ui.ProfileActivity" android:theme="@style/AppTheme.GradientStatusBar"/>
+        <activity
+            android:name=".ui.PlaceOrderActivity"
+            android:theme="@style/AppTheme.GradientStatusBar" />
 
         <service
             android:name=".service.MyFirebaseIdService"
@@ -74,7 +78,7 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
-        
+
         <!--<receiver android:name=".receiver.InternetConnector">
             <intent-filter>
 
@@ -86,5 +90,13 @@
 
 
     </application>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
 
 </manifest>

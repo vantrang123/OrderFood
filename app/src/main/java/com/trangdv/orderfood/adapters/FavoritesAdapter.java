@@ -19,23 +19,39 @@ import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.trangdv.orderfood.R;
-import com.trangdv.orderfood.model.Favorites;
+import com.trangdv.orderfood.common.Common;
+import com.trangdv.orderfood.model.Favorite;
+import com.trangdv.orderfood.model.Restaurant;
+import com.trangdv.orderfood.retrofit.IAnNgonAPI;
+import com.trangdv.orderfood.retrofit.RetrofitClient;
+import com.trangdv.orderfood.utils.DialogUtils;
 
 import java.text.NumberFormat;
 import java.util.List;
 import java.util.Locale;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.schedulers.Schedulers;
+
 public class FavoritesAdapter extends RecyclerView.Adapter<FavoritesAdapter.ViewHolder> {
+    DialogUtils dialogUtils;
+    IAnNgonAPI anNgonAPI;
+    CompositeDisposable compositeDisposable;
+
     private Context context;
-    private List<Favorites> favoritesList;
+    private List<Favorite> favoritesList;
     ItemListener itemListener;
     Locale locale;
     NumberFormat fmt;
 
-    public FavoritesAdapter(Context context, List<Favorites> favoritesList, ItemListener itemListener) {
+    public FavoritesAdapter(Context context, List<Favorite> favoritesList, ItemListener itemListener) {
         this.context = context;
         this.favoritesList = favoritesList;
         this.itemListener = itemListener;
+        dialogUtils = new DialogUtils();
+        compositeDisposable = new CompositeDisposable();
+        anNgonAPI = RetrofitClient.getInstance(Common.API_ANNGON_ENDPOINT).create(IAnNgonAPI.class);
     }
 
     @NonNull
@@ -50,11 +66,10 @@ public class FavoritesAdapter extends RecyclerView.Adapter<FavoritesAdapter.View
 
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
-        int price = (Integer.parseInt(favoritesList.get(position).getFoodPrice()));
+        Double price = favoritesList.get(position).getPrice();
 
         holder.tvNameFood.setText("Name: " + favoritesList.get(position).getFoodName());
         holder.tvPriceFood.setText("Price: " + fmt.format(price));
-        holder.tvDiscountFood.setText("Discount: " + favoritesList.get(position).getFoodDiscount());
 
         Glide.with(context)
                 .asBitmap()
@@ -95,7 +110,7 @@ public class FavoritesAdapter extends RecyclerView.Adapter<FavoritesAdapter.View
             tvNameFood = itemView.findViewById(R.id.food_name);
             tvPriceFood = itemView.findViewById(R.id.food_price);
             tvDiscountFood = itemView.findViewById(R.id.food_discount);
-            ivFavorite = itemView.findViewById(R.id.iv_increase);
+            ivFavorite = itemView.findViewById(R.id.iv_favorite);
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -107,27 +122,50 @@ public class FavoritesAdapter extends RecyclerView.Adapter<FavoritesAdapter.View
             ivFavorite.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Toast.makeText(context, "like", Toast.LENGTH_SHORT).show();
+                    ImageView fav = (ImageView)v;
+                    dialogUtils.showProgress(context);
+
+                    compositeDisposable.add(
+                            anNgonAPI.removeFavorite(Common.API_KEY,
+                                    Common.currentUser.getFbid(),
+                                    favoritesList.get(getAdapterPosition()).getFoodId(),
+                                    Common.currentRestaurant.getId())
+                                    .subscribeOn(Schedulers.io())
+                                    .observeOn(AndroidSchedulers.mainThread())
+                                    .subscribe(favoriteModel -> {
+                                        if (favoriteModel.isSuccess() && favoriteModel.getMessage().contains("Success")) {
+                                            removeItem(getAdapterPosition());
+                                        }
+                                        dialogUtils.dismissProgress();
+                                    }, throwable -> {
+                                        Toast.makeText(context, "[REMOVE FAV]" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                                        dialogUtils.dismissProgress();
+                                    })
+                    );
                 }
             });
         }
     }
 
-    public void removeItem(int position){
+    public void removeItem(int position) {
         favoritesList.remove(position);
         notifyItemRemoved(position);
     }
 
-    public void restoreItem(Favorites item, int position){
+    public void restoreItem(Favorite item, int position){
         favoritesList.add(position,item);
         notifyItemInserted(position);
     }
 
-    public Favorites getItem(int position){
+    public Favorite getItem(int position){
         return favoritesList.get(position);
     }
 
+    public void onStop() {
+        compositeDisposable.clear();
+    }
+
     public interface ItemListener {
-        void dispatchToFoodDetail(int position, String foodId);
+        void dispatchToFoodDetail(int position, int foodId);
     }
 }

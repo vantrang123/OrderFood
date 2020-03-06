@@ -8,6 +8,15 @@
     android:fitsSystemWindows="true"
     android:orientation="vertical">
 
+    <com.trangdv.orderfood.ui.BaseStatusBar
+        android:id="@+id/base_status_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_header"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"/>
+
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"

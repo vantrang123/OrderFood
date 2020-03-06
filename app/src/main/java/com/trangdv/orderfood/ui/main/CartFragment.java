@@ -2,6 +2,7 @@ package com.trangdv.orderfood.ui.main;
 
 import android.Manifest;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
@@ -18,7 +19,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
@@ -32,17 +32,23 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.material.snackbar.Snackbar;
 import com.trangdv.orderfood.R;
+import com.trangdv.orderfood.adapters.FoodListAdapter;
 import com.trangdv.orderfood.common.Common;
 import com.trangdv.orderfood.database.CartDataSource;
 import com.trangdv.orderfood.database.CartDatabase;
 import com.trangdv.orderfood.database.CartItem;
 import com.trangdv.orderfood.database.LocalCartDataSource;
+import com.trangdv.orderfood.model.Food;
 import com.trangdv.orderfood.model.Order;
 import com.trangdv.orderfood.adapters.CartAdapter;
 import com.trangdv.orderfood.model.eventbus.CaculatePriceEvent;
+import com.trangdv.orderfood.model.eventbus.FoodDetailEvent;
 import com.trangdv.orderfood.remote.APIService;
 import com.trangdv.orderfood.retrofit.IAnNgonAPI;
 import com.trangdv.orderfood.retrofit.RetrofitClient;
+import com.trangdv.orderfood.ui.PlaceOrderActivity;
+import com.trangdv.orderfood.ui.dialog.ClickItemCartDialog;
+import com.trangdv.orderfood.ui.fooddetail.FoodDetailActivity;
 import com.trangdv.orderfood.utils.DialogUtils;
 
 import org.greenrobot.eventbus.EventBus;
@@ -51,14 +57,13 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import io.reactivex.SingleObserver;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-
-import static com.google.android.material.appbar.AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS_COLLAPSED;
 
 public class CartFragment extends Fragment implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener,
@@ -169,7 +174,8 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
             public void onClick(View v) {
                 if (cartItemList.size() > 0) {
 
-                    showAlertDialog();
+//                    showAlertDialog();
+                    startActivity(new Intent(getContext(), PlaceOrderActivity.class));
                 } else {
                     Toast.makeText(getActivity(), getString(R.string.txt_cart_empty), Toast.LENGTH_SHORT).show();
                 }
@@ -445,8 +451,8 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
     }
 
     @Override
-    public void showDialogOptions(int position, Order order) {
-        ((MainActivity) getActivity()).showBottomSheet(position, order);
+    public void showDialogOptions(int position) {
+        ((MainActivity) getActivity()).showBottomSheet(position, cartItemList.get(position).getFoodId());
     }
 
     @Override

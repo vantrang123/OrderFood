@@ -47,7 +47,16 @@
     <string name="txt_manage_addresses">Manage Addresses</string>
     <string name="txt_edit">Chỉnh sửa</string>
     <string name="txt_profile">Trang cá nhân</string>
+    <string name="txt_place_order">Đặt món</string>
     <string name="txt_order">Đặt hàng</string>
     <string name="txt_cart_empty">Giỏ hàng rỗng!!!</string>
+    <string name="txt_date">Date</string>
+    <string name="txt_seleted_date">Selected Date</string>
+    <string name="txt_address">Address</string>
+    <string name="txt_add_new_address">Add New Address</string>
+    <string name="txt_cash_on_deliver">Thanh toán khi nhận hàng</string>
+    <string name="txt_online_payment">Thanh toán Online</string>
+    <string name="txt_proceed">Tiến hành</string>
+
 
 </resources>
