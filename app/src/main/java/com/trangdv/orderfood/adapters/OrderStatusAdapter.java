@@ -12,28 +12,28 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.common.Common;
+import com.trangdv.orderfood.model.Order;
 import com.trangdv.orderfood.model.Request;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 public class OrderStatusAdapter extends RecyclerView.Adapter<OrderStatusAdapter.ViewHolder> {
 
     private LayoutInflater mInflater;
-    private List<Request> requests = new ArrayList<>();
-    List<String> listIds = new ArrayList<>();
+    private List<Order> orderList = new ArrayList<>();
     Context context;
     LinearLayoutManager layoutManager;
     ItemListener listener;
+    SimpleDateFormat simpleDateFormat;
 
-    public TextView tvOrderId, tvOrderStatus, tvOrderPhone, tvOrderAddres;
-
-    public OrderStatusAdapter(Context context, List<Request> requests, List<String> ids, ItemListener itemListener) {
+    public OrderStatusAdapter(Context context, List<Order> requests, ItemListener itemListener) {
         super();
         this.context = context;
-        this.requests = requests;
-        this.listIds = ids;
+        this.orderList = requests;
         listener = itemListener;
+        simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy");
     }
 
     @NonNull
@@ -46,19 +46,28 @@ public class OrderStatusAdapter extends RecyclerView.Adapter<OrderStatusAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.tvOrderId.setText(listIds.get(position));
-        holder.tvOrderStatus.setText(Common.convertCodeToStatus(requests.get(position).getStatus()));
-        holder.tvOrderPhone.setText(requests.get(position).getPhone());
-        holder.tvOrderAddres.setText(requests.get(position).getAddress());
+        holder.tvOrderNumOfItem.setText(new StringBuilder(String.valueOf(orderList.get(position).getNumOfItem())));
+        holder.tvOrderAddres.setText(new StringBuilder(orderList.get(position).getOrderAddress()));
+        holder.tvOrderPhone.setText(new StringBuilder(orderList.get(position).getOrderPhone()));
+        holder.tvOrderPrice.setText(new StringBuilder(String.valueOf(orderList.get(position).getTotalPrice())));
+        holder.tvOrerDate.setText(new StringBuilder(simpleDateFormat.format(orderList.get(position).getOrderDate())));
+        holder.tvOrderId.setText(new StringBuilder(String.valueOf(orderList.get(position).getOrderId())));
+        holder.tvOrderStatus.setText(Common.convertCodeToStatus(orderList.get(position).getOrderStatus()));
+
+        if (orderList.get(position).isCod()) {
+            holder.tvOrderCod.setText(new StringBuilder("Cash On Delivery"));
+        } else {
+            holder.tvOrderCod.setText(new StringBuilder("TransID: ").append(orderList.get(position).getTransactionId()));
+        }
     }
 
     @Override
     public int getItemCount() {
-        return requests.size();
+        return orderList.size();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        public TextView tvOrderId, tvOrderStatus, tvOrderPhone, tvOrderAddres;
+        public TextView tvOrderId, tvOrderStatus, tvOrderPhone, tvOrderAddres, tvOrderCod, tvOrerDate, tvOrderPrice, tvOrderNumOfItem;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -66,6 +75,10 @@ public class OrderStatusAdapter extends RecyclerView.Adapter<OrderStatusAdapter.
             tvOrderAddres = itemView.findViewById(R.id.tv_order_address);
             tvOrderStatus = itemView.findViewById(R.id.tv_order_status);
             tvOrderPhone = itemView.findViewById(R.id.tv_order_phone);
+            tvOrderCod = itemView.findViewById(R.id.tv_order_cod);
+            tvOrerDate = itemView.findViewById(R.id.tv_order_date);
+            tvOrderPrice = itemView.findViewById(R.id.tv_order_price);
+            tvOrderNumOfItem = itemView.findViewById(R.id.tv_order_num_of_item);
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override

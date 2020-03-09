@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -19,87 +20,121 @@ import com.google.firebase.database.ValueEventListener;
 import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.adapters.OrderStatusAdapter;
 import com.trangdv.orderfood.common.Common;
+import com.trangdv.orderfood.database.CartDataSource;
+import com.trangdv.orderfood.database.CartDatabase;
+import com.trangdv.orderfood.database.LocalCartDataSource;
+import com.trangdv.orderfood.model.Order;
 import com.trangdv.orderfood.model.Request;
+import com.trangdv.orderfood.retrofit.IAnNgonAPI;
+import com.trangdv.orderfood.retrofit.RetrofitClient;
+import com.trangdv.orderfood.utils.DialogUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.schedulers.Schedulers;
+
 public class OrderStatusFragment extends Fragment implements OrderStatusAdapter.ItemListener {
-    FirebaseDatabase database;
-    DatabaseReference requests;
+    IAnNgonAPI anNgonAPI;
+    CompositeDisposable compositeDisposable;
+    DialogUtils dialogUtils;
+
     OrderStatusAdapter orderStatusAdapter;
     public RecyclerView rvListOrder;
     public RecyclerView.LayoutManager layoutManager;
 
-    List<String> listIds = new ArrayList<>();
-    List<Request> listRequests = new ArrayList<>();
-    String requestId;
+    List<Order> orderList = new ArrayList<>();
 
-    public static OrderStatusFragment newInstance(String phone) {
+    /*public static OrderStatusFragment newInstance(String phone) {
         OrderStatusFragment orderStatus = new OrderStatusFragment();
         Bundle bundle = new Bundle();
         bundle.putString("FoodId", phone);
         orderStatus.setArguments(bundle);
         return orderStatus;
-    }
+    }*/
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_orderstatus, container, false);
-        ((MainActivity) getActivity()).getSupportActionBar().setTitle("Order Status");
-        database = FirebaseDatabase.getInstance();
-        requests = database.getReference("Requests");
+        ((MainActivity) getActivity()).getSupportActionBar().setTitle("Order");
 
         rvListOrder = view.findViewById(R.id.listOrders);
         initView();
+
         return view;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        init();
+        loadOrders();
+    }
+
+    private void init() {
+        anNgonAPI = RetrofitClient.getInstance(Common.API_ANNGON_ENDPOINT).create(IAnNgonAPI.class);
+        compositeDisposable = new CompositeDisposable();
+//        cartDataSource = new LocalCartDataSource(CartDatabase.getInstance(this).cartDAO());
+        dialogUtils = new DialogUtils();
+
         layoutManager = new LinearLayoutManager(getActivity());
         rvListOrder.setLayoutManager(layoutManager);
-        loadOrders(Common.currentUser.getUserPhone());
+        orderStatusAdapter = new OrderStatusAdapter(getContext(), orderList, this);
+        rvListOrder.setAdapter(orderStatusAdapter);
     }
 
     private void initView() {
         layoutManager = new LinearLayoutManager(getActivity());
         rvListOrder.setLayoutManager(layoutManager);
+
     }
 
-    private void loadOrders(String phone) {
-        requests.orderByChild("phone").equalTo(phone).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for (DataSnapshot dsp : dataSnapshot.getChildren()) {
-                    requestId = dsp.getKey();
-                    listIds.add(requestId);
-                    Request request = dsp.getValue(Request.class);
-                    listRequests.add(request);
-                }
-                viewData(listRequests, listIds);
+    private void loadOrders() {
+        dialogUtils.showProgress(getContext());
+        compositeDisposable.add(anNgonAPI.getOrder(Common.API_KEY, Common.currentUser.getFbid())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(orderModel -> {
+                    if (orderModel.isSuccess()) {
+                        if (orderModel.getResult().size() > 0) {
+                            orderList.clear();
+                            orderList.addAll(orderModel.getResult());
+                            orderStatusAdapter.notifyDataSetChanged();
 
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
+                        }
+                    }
+                    dialogUtils.dismissProgress();
+                        }
+                , throwable -> {
+                            dialogUtils.dismissProgress();
+                            Toast.makeText(getContext(), "[ERROR]" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                ));
     }
 
-    private void viewData(List<Request> listRequests, List<String> listIds) {
-        orderStatusAdapter = new OrderStatusAdapter(getContext(), listRequests, listIds, this);
-        rvListOrder.setAdapter(orderStatusAdapter);
+    @Override
+    public void onStart() {
+        super.onStart();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+    }
+
+    @Override
+    public void onDestroy() {
+        compositeDisposable.clear();
+        super.onDestroy();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        listIds.clear();
-        listRequests.clear();
     }
 
     @Override

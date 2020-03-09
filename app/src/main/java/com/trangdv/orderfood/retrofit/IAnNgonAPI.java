@@ -6,6 +6,7 @@ import com.trangdv.orderfood.model.FavoriteModel;
 import com.trangdv.orderfood.model.FavoriteOnlyIdModel;
 import com.trangdv.orderfood.model.FoodModel;
 import com.trangdv.orderfood.model.MenuModel;
+import com.trangdv.orderfood.model.OrderModel;
 import com.trangdv.orderfood.model.RestaurantModel;
 import com.trangdv.orderfood.model.SizeModel;
 import com.trangdv.orderfood.model.UpdateOrderModel;
@@ -63,6 +64,11 @@ public interface IAnNgonAPI {
     Observable<FavoriteOnlyIdModel> getFavoriteByRestaurant(@Query("key") String apiKey,
                                                             @Query("fbid") String fbid,
                                                             @Query("restaurantId") int restaurantId);
+
+    @GET("order")
+    Observable<OrderModel> getOrder(@Query("key") String apiKey,
+                                    @Query("orderFBID") String orderFBID);
+
 
     @POST("user")
     @FormUrlEncoded
