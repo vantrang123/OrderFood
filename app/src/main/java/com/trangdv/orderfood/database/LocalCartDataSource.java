@@ -54,7 +54,7 @@ public class LocalCartDataSource implements CartDataSource{
     }
 
     @Override
-    public Single<Integer> cleanCart(String userPhone, int restaurantId) {
-        return cartDAO.cleanCart(userPhone, restaurantId);
+    public Single<Integer> cleanCart(String userPhone) {
+        return cartDAO.cleanCart(userPhone);
     }
 }

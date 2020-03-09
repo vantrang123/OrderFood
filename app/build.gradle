@@ -95,6 +95,9 @@ dependencies {
     // Expandable layout
     implementation 'com.github.florent37:expansionpanel:1.2.2'
 
+    // date time picker
+    implementation 'com.wdullaer:materialdatetimepicker:4.2.3'
+
 }
 apply plugin: 'com.google.gms.google-services'
 repositories {

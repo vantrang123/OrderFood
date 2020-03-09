@@ -1,6 +1,7 @@
 package com.trangdv.orderfood.ui.main;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -43,6 +44,7 @@ import com.trangdv.orderfood.model.Order;
 import com.trangdv.orderfood.adapters.CartAdapter;
 import com.trangdv.orderfood.model.eventbus.CaculatePriceEvent;
 import com.trangdv.orderfood.model.eventbus.FoodDetailEvent;
+import com.trangdv.orderfood.model.eventbus.SendTotalCashEvent;
 import com.trangdv.orderfood.remote.APIService;
 import com.trangdv.orderfood.retrofit.IAnNgonAPI;
 import com.trangdv.orderfood.retrofit.RetrofitClient;
@@ -173,7 +175,7 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
             @Override
             public void onClick(View v) {
                 if (cartItemList.size() > 0) {
-
+                    EventBus.getDefault().postSticky(new SendTotalCashEvent(tvTotalPrice.getText().toString()));
 //                    showAlertDialog();
                     startActivity(new Intent(getContext(), PlaceOrderActivity.class));
                 } else {
@@ -181,15 +183,6 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
                 }
             }
         });
-    }
-
-
-    private void loadListFood() {
-//        orderList.add(cartItemList);
-
-        cartAdapter.notifyDataSetChanged();
-
-        changeStatus();
     }
 
     private void getAllItemInCart() {

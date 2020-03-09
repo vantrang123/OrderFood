@@ -92,7 +92,7 @@
         app:layout_constraintLeft_toLeftOf="parent"
         android:drawableLeft="@drawable/ic_date"
         android:drawableTint="@color/grey_40"
-        android:paddingLeft="@dimen/dimen_16dp"
+        android:layout_marginLeft="@dimen/dimen_16dp"
         android:drawablePadding="@dimen/dp_5"
         android:layout_marginTop="@dimen/dimens_10dp"
         android:textSize="16sp"

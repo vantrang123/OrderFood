@@ -327,7 +327,9 @@ public class MainActivity extends AppCompatActivity
 
                     @Override
                     public void onSuccess(Integer integer) {
-                        provider.show(R.id.nav_cart, integer);
+                        if (!(getFragmentCurrent() instanceof CartFragment)) {
+                            provider.show(R.id.nav_cart, integer);
+                        }
                     }
 
                     @Override

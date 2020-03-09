@@ -39,6 +39,6 @@ public interface CartDAO {
     @Delete
     Single<Integer> deleteCart(CartItem cart);
 
-    @Query("DELETE FROM Cart WHERE fbid=:fbid AND restaurantId=:restaurantId")
-    Single<Integer> cleanCart(String fbid, int restaurantId);
+    @Query("DELETE FROM Cart WHERE fbid=:fbid")
+    Single<Integer> cleanCart(String fbid);
 }

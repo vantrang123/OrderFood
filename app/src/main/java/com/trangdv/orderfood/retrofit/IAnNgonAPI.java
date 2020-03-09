@@ -1,17 +1,20 @@
 package com.trangdv.orderfood.retrofit;
 
 import com.trangdv.orderfood.model.AddonModel;
+import com.trangdv.orderfood.model.CreateOrderModel;
 import com.trangdv.orderfood.model.FavoriteModel;
 import com.trangdv.orderfood.model.FavoriteOnlyIdModel;
 import com.trangdv.orderfood.model.FoodModel;
 import com.trangdv.orderfood.model.MenuModel;
 import com.trangdv.orderfood.model.RestaurantModel;
 import com.trangdv.orderfood.model.SizeModel;
+import com.trangdv.orderfood.model.UpdateOrderModel;
 import com.trangdv.orderfood.model.UpdateUserModel;
 import com.trangdv.orderfood.model.UserModel;
 
 
 import io.reactivex.Observable;
+import lombok.Generated;
 import retrofit2.http.DELETE;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
@@ -80,9 +83,30 @@ public interface IAnNgonAPI {
                                              @Field("foodImage") String foodImage,
                                              @Field("price") double price);
 
+    @POST("createOrder")
+    @FormUrlEncoded
+    Observable<CreateOrderModel> createOrder(@Field("key") String key,
+                                             @Field("orderFBID") String orderFBID,
+                                             @Field("orderPhone") String orderPhone,
+                                             @Field("orderName") String orderName,
+                                             @Field("orderAddress") String orderAddress,
+                                             @Field("orderDate") String orderDate,
+                                             @Field("transactionId") String transactionId,
+                                             @Field("cod") boolean cod,
+                                             @Field("totalPrice") Double totalPrice,
+                                             @Field("numOfItem") int numOfItem);
+
+    @POST("updateOrder")
+    @FormUrlEncoded
+    Observable<UpdateOrderModel> updateOrder(@Field("key") String key,
+                                             @Field("orderId") String orderId,
+                                             @Field("orderDetail") String orderDetail);
+
     @DELETE("favorite")
     Observable<FavoriteModel> removeFavorite(@Query("key") String apiKey,
                                              @Query("fbid") String fbid,
                                              @Query("foodId") int foodId,
                                              @Query("restaurantId") int restaurantId);
+
+
 }

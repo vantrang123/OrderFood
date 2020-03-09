@@ -18,7 +18,7 @@ import com.trangdv.orderfood.utils.SharedPrefs;
 public class ProfileActivity extends AppCompatActivity implements View.OnClickListener {
 
     private TextView tvUserName, tvUserPhone, tvEdit, tvLogout;
-    private ImageView ivBack;
+        private ImageView ivBack;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {

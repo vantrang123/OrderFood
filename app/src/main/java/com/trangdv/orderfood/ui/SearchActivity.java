@@ -108,7 +108,7 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
                 finish();
                 break;
             case R.id.iv_search:
-                String keySearch = edtSearch.getText().toString();
+                String keySearch = edtSearch.getText().toString().trim();
                 if (!TextUtils.isEmpty(keySearch)) {
                     searchFood(1, keySearch);
                 }
