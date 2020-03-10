@@ -3,6 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.trangdv.orderfood">
 
+    <!--
+         The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
+         Google Maps Android API v2, but you must specify either coarse or fine
+         location permissions for the 'MyLocation' functionality.
+    -->
     <application
         android:name=".App"
         android:allowBackup="true"
@@ -11,6 +16,19 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
+        <!--
+             The API key for Google Maps-based APIs is defined as a string resource.
+             (See the file "res/values/google_maps_api.xml").
+             Note that the API key is linked to the encryption key used to sign the APK.
+             You need a different API key for each encryption key, including the release key that is used to
+             sign the APK for publishing.
+             You can define the keys for the debug and release targets in src/debug/ and src/release/.
+        -->
+        <activity
+            android:name=".ui.NearbyRestaurntActivity"
+            android:label="@string/title_activity_nearby_restaurnt"></activity>
+
         <activity
             android:name=".ui.SplashActivity"
             android:theme="@style/AppTheme.NoActionBar">
@@ -20,46 +38,40 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".ui.main.MainActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.GradientStatusBar" />
-
         <activity
             android:name=".ui.SignupActivity"
             android:theme="@style/AppTheme" />
         <activity
             android:name=".ui.LoginActivity"
             android:theme="@style/AppTheme" />
-
         <activity
             android:name=".ui.food.FoodActivity"
             android:theme="@style/AppTheme.GradientStatusBar" />
-
         <activity
             android:name=".ui.fooddetail.FoodDetailActivity"
             android:theme="@style/AppTheme.GradientStatusBar" />
-
         <activity
             android:name=".ui.VerifyPhoneActivity"
             android:theme="@style/AppTheme.GradientStatusBar" />
-
         <activity
             android:name=".ui.menu.MenuActivity"
             android:theme="@style/AppTheme.GradientStatusBar" />
-
         <activity
             android:name=".ui.SearchActivity"
             android:theme="@style/AppTheme.GradientStatusBar" />
-
         <activity
             android:name=".ui.ProfileActivity"
             android:theme="@style/AppTheme.GradientStatusBar" />
-
         <activity
             android:name=".ui.PlaceOrderActivity"
             android:theme="@style/AppTheme.GradientStatusBar" />
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="@string/google_maps_key" />
 
         <service
             android:name=".service.MyFirebaseIdService"
@@ -69,7 +81,6 @@
                 <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
             </intent-filter>
         </service>
-
         <service
             android:name=".service.MyFirebaseMessaging"
             android:exported="true"
@@ -78,25 +89,14 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
-
-        <!--<receiver android:name=".receiver.InternetConnector">
-            <intent-filter>
-
-                &lt;!&ndash; Intent filters for broadcast receiver &ndash;&gt;
-                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
-            </intent-filter>
-
-        </receiver>-->
-
-
     </application>
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
 </manifest>

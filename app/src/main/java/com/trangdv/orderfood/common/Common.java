@@ -23,7 +23,7 @@ public class Common {
     public static final String API_ANNGON_ENDPOINT = "http://192.168.137.1:3000";
     public static Set<Addon> addonList = new HashSet<>();
     public static List<FavoriteOnlyId> currentFavOfRestaurant;
-
+    public static final String SAVE_LOCATION = "save location";
 
     public static String convertCodeToStatus(int code) {
         switch (code) {

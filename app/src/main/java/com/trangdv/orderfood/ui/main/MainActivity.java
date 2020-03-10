@@ -229,7 +229,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void showBottomSheet(int position, int foodId) {
-        new ClickItemCartDialog(position, foodId).show(getSupportFragmentManager(), "dialog");
+        new ClickItemCartDialog(position, foodId).show(getSupportFragmentManager(), "click item cart dialog");
     }
 
     public void showInternetStatus(final String status) {

@@ -69,6 +69,15 @@ public interface IAnNgonAPI {
     Observable<OrderModel> getOrder(@Query("key") String apiKey,
                                     @Query("orderFBID") String orderFBID);
 
+    @GET("nearbyrestaurant")
+    Observable<RestaurantModel> getNearbyRestaurant(@Query("key") String apiKey,
+                                                    @Query("lat") Double lat,
+                                                    @Query("lng") Double lng,
+                                                    @Query("distance") int distance);
+
+    @GET("restaurantById")
+    Observable<RestaurantModel> getRestaurantById(@Query("key") String apiKey,
+                                                  @Query("restaurantId") String restaurantId);
 
     @POST("user")
     @FormUrlEncoded

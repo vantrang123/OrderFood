@@ -36,7 +36,7 @@
     <string name="txt_yes">Có</string>
     <string name="txt_no">Không</string>
 
-    <string name="txt_popular_shop">Quán phổ biến</string>
+    <string name="txt_near_you">Gần bạn</string>
     <string name="txt_suggestion">Gợi ý</string>
     <string name="txt_see_more">Xem thêm</string>
     <string name="tv_search">Tìm kiếm</string>
@@ -57,6 +57,9 @@
     <string name="txt_cash_on_deliver">Thanh toán khi nhận hàng</string>
     <string name="txt_online_payment">Thanh toán Online</string>
     <string name="txt_proceed">Tiến hành</string>
+    <string name="title_activity_nearby_restaurnt">Map</string>
+    <string name="title_dialog_gps">Reminder</string>
+    <string name="txt_body_dialog_gps">Bạn nên mở dịch vụ truy cập vị trí cho ứng dụng để hiển thị địa điểm lân cận</string>
 
 
 </resources>
