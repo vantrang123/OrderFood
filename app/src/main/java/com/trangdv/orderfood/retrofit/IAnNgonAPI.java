@@ -5,6 +5,7 @@ import com.trangdv.orderfood.model.CreateOrderModel;
 import com.trangdv.orderfood.model.FavoriteModel;
 import com.trangdv.orderfood.model.FavoriteOnlyIdModel;
 import com.trangdv.orderfood.model.FoodModel;
+import com.trangdv.orderfood.model.MaxOrderModel;
 import com.trangdv.orderfood.model.MenuModel;
 import com.trangdv.orderfood.model.OrderModel;
 import com.trangdv.orderfood.model.RestaurantModel;
@@ -67,7 +68,13 @@ public interface IAnNgonAPI {
 
     @GET("order")
     Observable<OrderModel> getOrder(@Query("key") String apiKey,
-                                    @Query("orderFBID") String orderFBID);
+                                    @Query("orderFBID") String orderFBID,
+                                    @Query("from") int from,
+                                    @Query("to") int to);
+
+    @GET("maxorder")
+    Observable<MaxOrderModel> getMaxOrder(@Query("key") String apiKey,
+                                          @Query("orderFBID") String orderFBID);
 
     @GET("nearbyrestaurant")
     Observable<RestaurantModel> getNearbyRestaurant(@Query("key") String apiKey,

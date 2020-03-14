@@ -1,9 +1,11 @@
 package com.trangdv.orderfood.adapters;
 
 import android.content.Context;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -13,18 +15,18 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.common.Common;
 import com.trangdv.orderfood.model.Order;
-import com.trangdv.orderfood.model.Request;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-public class OrderStatusAdapter extends RecyclerView.Adapter<OrderStatusAdapter.ViewHolder> {
+public class OrderStatusAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
+    private static final int VIEW_TYPE_LOADING = 1;
+    private static final int VIEW_TYPE_ITEM = 0;
     private LayoutInflater mInflater;
     private List<Order> orderList = new ArrayList<>();
     Context context;
-    LinearLayoutManager layoutManager;
     ItemListener listener;
     SimpleDateFormat simpleDateFormat;
 
@@ -36,28 +38,62 @@ public class OrderStatusAdapter extends RecyclerView.Adapter<OrderStatusAdapter.
         simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy");
     }
 
-    @NonNull
-    @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        mInflater = LayoutInflater.from(parent.getContext());
-        View view = mInflater.inflate(R.layout.item_order, parent, false);
-        return new ViewHolder(view);
+    public void addItem(List<Order> addedItems) {
+        int startInsertedIndex = orderList.size();
+        orderList.addAll(addedItems);
+        notifyItemInserted(startInsertedIndex);
+    }
+
+    public void addNull() {
+        orderList.add(null);
+        notifyItemInserted(orderList.size() -1);
+    }
+
+    public void removeNull() {
+        orderList.remove(orderList.size()-1);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.tvOrderNumOfItem.setText(new StringBuilder(String.valueOf(orderList.get(position).getNumOfItem())));
-        holder.tvOrderAddres.setText(new StringBuilder(orderList.get(position).getOrderAddress()));
-        holder.tvOrderPhone.setText(new StringBuilder(orderList.get(position).getOrderPhone()));
-        holder.tvOrderPrice.setText(new StringBuilder(String.valueOf(orderList.get(position).getTotalPrice())));
-        holder.tvOrerDate.setText(new StringBuilder(simpleDateFormat.format(orderList.get(position).getOrderDate())));
-        holder.tvOrderId.setText(new StringBuilder(String.valueOf(orderList.get(position).getOrderId())));
-        holder.tvOrderStatus.setText(Common.convertCodeToStatus(orderList.get(position).getOrderStatus()));
+    public int getItemViewType(int position) {
+        if (orderList.get(position) == null) {
+            return VIEW_TYPE_LOADING;
+        } else return VIEW_TYPE_ITEM;
+    }
 
-        if (orderList.get(position).isCod()) {
-            holder.tvOrderCod.setText(new StringBuilder("Cash On Delivery"));
+    @NonNull
+    @Override
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View itemView;
+        mInflater = LayoutInflater.from(parent.getContext());
+        if (viewType == VIEW_TYPE_ITEM) {
+            itemView = mInflater.inflate(R.layout.item_order, parent, false);
+            return new ViewHolder(itemView);
         } else {
-            holder.tvOrderCod.setText(new StringBuilder("TransID: ").append(orderList.get(position).getTransactionId()));
+            itemView = mInflater.inflate(R.layout.layout_loading_item, parent, false);
+            return new LoadingHolder(itemView);
+        }
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+        if (holder instanceof ViewHolder) {
+            ViewHolder viewHolder = (ViewHolder) holder;
+            viewHolder.tvOrderNumOfItem.setText(new StringBuilder(String.valueOf(orderList.get(position).getNumOfItem())));
+            viewHolder.tvOrderAddres.setText(new StringBuilder(orderList.get(position).getOrderAddress()));
+            viewHolder.tvOrderPhone.setText(new StringBuilder(orderList.get(position).getOrderPhone()));
+            viewHolder.tvOrderPrice.setText(new StringBuilder(String.valueOf(orderList.get(position).getTotalPrice())));
+            viewHolder.tvOrerDate.setText(new StringBuilder(simpleDateFormat.format(orderList.get(position).getOrderDate())));
+            viewHolder.tvOrderId.setText(new StringBuilder(String.valueOf(orderList.get(position).getOrderId())));
+            viewHolder.tvOrderStatus.setText(Common.convertCodeToStatus(orderList.get(position).getOrderStatus()));
+
+            if (orderList.get(position).isCod()) {
+                viewHolder.tvOrderCod.setText(new StringBuilder("Cash On Delivery"));
+            } else {
+                viewHolder.tvOrderCod.setText(new StringBuilder("TransID: ").append(orderList.get(position).getTransactionId()));
+            }
+        } else if (holder instanceof LoadingHolder) {
+            LoadingHolder loadingHolder = (LoadingHolder) holder;
+            loadingHolder.progressBar.setIndeterminate(true);
         }
     }
 
@@ -86,6 +122,15 @@ public class OrderStatusAdapter extends RecyclerView.Adapter<OrderStatusAdapter.
                     listener.dispatchToOrderDetail(getLayoutPosition());
                 }
             });
+        }
+    }
+
+    public class LoadingHolder extends RecyclerView.ViewHolder {
+        public ProgressBar progressBar;
+
+        public LoadingHolder(@NonNull View itemView) {
+            super(itemView);
+            progressBar = itemView.findViewById(R.id.progressbar);
         }
     }
 
