@@ -1,24 +1,36 @@
 package com.trangdv.orderfood.ui.main;
 
+import android.Manifest;
+import android.app.Activity;
 import android.app.SearchManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.graphics.drawable.LayerDrawable;
+import android.location.Location;
+import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 
 import androidx.appcompat.widget.SearchView;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.core.app.ActivityCompat;
 import androidx.core.view.GravityCompat;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 
 import android.os.Handler;
 
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MenuItem;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.navigation.NavigationView;
@@ -40,6 +52,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.trangdv.orderfood.AppConstants;
 import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.common.Common;
 import com.trangdv.orderfood.database.CartDataSource;
@@ -56,7 +69,10 @@ import com.trangdv.orderfood.ui.ProfileActivity;
 import com.trangdv.orderfood.ui.SearchActivity;
 import com.trangdv.orderfood.ui.dialog.ClickItemCartDialog;
 import com.trangdv.orderfood.ui.dialog.ConfirmLogoutDialog;
+import com.trangdv.orderfood.utils.GpsUtils;
 import com.trangdv.orderfood.utils.SharedPrefs;
+
+import java.util.Locale;
 
 import io.reactivex.SingleObserver;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -75,9 +91,10 @@ import static com.trangdv.orderfood.ui.LoginActivity.SAVE_USER;
 
 public class MainActivity extends AppCompatActivity
         implements InternetConnector.BroadcastListener, View.OnClickListener {
+    private static final String TAG = "MainActivity";
 
     IAnNgonAPI anNgonAPI;
-    CompositeDisposable compositeDisposable = new CompositeDisposable();
+    CompositeDisposable compositeDisposable;
     CustomBadgeProvider provider;
     CartDataSource cartDataSource;
 
@@ -101,16 +118,20 @@ public class MainActivity extends AppCompatActivity
     private BroadcastReceiver InternetReceiver = null;
     private int subscreensOnTheStack = -1;
 
+    private FusedLocationProviderClient mFusedLocationClient;
+    private double wayLatitude = 0.0, wayLongitude = 0.0;
+    private LocationRequest locationRequest;
+    private LocationCallback locationCallback;
+    public boolean isGPS = false;
+    public boolean isContinue = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         findViewById();
-
         init();
-
-
 //        getCurrentUser();
 
         initializeBottomNavigation(savedInstanceState);
@@ -156,14 +177,80 @@ public class MainActivity extends AppCompatActivity
         InternetReceiver = new InternetConnector(this);
         broadcastIntent();
         Home();
-
         countCart();
     }
 
     private void init() {
         anNgonAPI = RetrofitClient.getInstance(Common.API_ANNGON_ENDPOINT).create(IAnNgonAPI.class);
         cartDataSource = new LocalCartDataSource(CartDatabase.getInstance(this).cartDAO());
+        compositeDisposable = new CompositeDisposable();
 
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
+        locationRequest = LocationRequest.create();
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        locationRequest.setInterval(10 * 1000); // 10 seconds
+        locationRequest.setFastestInterval(5 * 1000); // 5 seconds
+
+        new GpsUtils(this).turnGPSOn(new GpsUtils.onGpsListener() {
+            @Override
+            public void gpsStatus(boolean isGPSEnable) {
+                // turn on GPS
+                isGPS = isGPSEnable;
+                isContinue = false;
+                getLocation();
+            }
+        });
+
+        locationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                if (locationResult == null) {
+                    return;
+                }
+                for (Location location : locationResult.getLocations()) {
+                    if (location != null) {
+                        wayLatitude = location.getLatitude();
+                        wayLongitude = location.getLongitude();
+                        if (!isContinue) {
+                            if (getFragmentCurrent() instanceof HomeFragment) {
+                                ((HomeFragment) getFragmentCurrent()).requestNearbyRestaurant(wayLatitude, wayLongitude, 10);
+                            }
+                        } else {
+                            Toast.makeText(MainActivity.this, "THREE "+wayLatitude +","+ wayLongitude, Toast.LENGTH_LONG).show();
+                        }
+                        if (!isContinue && mFusedLocationClient != null) {
+                            mFusedLocationClient.removeLocationUpdates(locationCallback);
+                        }
+                    }
+                }
+            }
+        };
+    }
+
+    public void getLocation() {
+        if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
+                    AppConstants.LOCATION_REQUEST);
+
+        } else {
+            if (isContinue) {
+                mFusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null);
+            } else {
+                mFusedLocationClient.getLastLocation().addOnSuccessListener(MainActivity.this, location -> {
+                    if (location != null) {
+                        wayLatitude = location.getLatitude();
+                        wayLongitude = location.getLongitude();
+                        if (getFragmentCurrent() instanceof HomeFragment) {
+                            ((HomeFragment) getFragmentCurrent()).requestNearbyRestaurant(wayLatitude, wayLongitude, 10);
+                        }
+                    } else {
+                        mFusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null);
+                    }
+                });
+            }
+        }
     }
 
     private void initializeBottomNavigation(final Bundle savedInstanceState) {
@@ -393,17 +480,14 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_search) {
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
-    /*@SuppressWarnings("StatementWithEmptyBody")
-    @Override
+    /*@Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
@@ -418,14 +502,14 @@ public class MainActivity extends AppCompatActivity
                 item.setChecked(true);
                 break;
 
-            *//*case R.id.nav_status:
+            case R.id.nav_status:
                 if (item.isChecked()) item.setChecked(false);
                 else {
                     Cart();
 //                    Toast.makeText(MainActivity.this, "carts", Toast.LENGTH_SHORT).show();
                 }
                 item.setChecked(true);
-                break;*//*
+                break;
 
             case R.id.nav_status:
                 if (item.isChecked()) item.setChecked(false);
@@ -446,19 +530,17 @@ public class MainActivity extends AppCompatActivity
             case R.id.nav_exit:
                 ConfirmLogout();
                 break;
-                *//*SharedPrefs.getInstance().clear();
+                SharedPrefs.getInstance().clear();
                 Intent intent = new Intent(MainActivity.this, LoginActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
-                finish();*//*
+                finish();
         }
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }*/
-
-
 
     public void broadcastIntent() {
         registerReceiver(InternetReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
@@ -508,6 +590,18 @@ public class MainActivity extends AppCompatActivity
                 break;
             default:
                 break;
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == Activity.RESULT_OK) {
+            if (requestCode == AppConstants.GPS_REQUEST) {
+                Log.d(TAG, "onActivityResult : "  + "GPSsssssss");
+                isContinue = false;
+                getLocation();
+            }
         }
     }
 }

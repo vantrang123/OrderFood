@@ -1,5 +1,6 @@
 package com.trangdv.orderfood.ui.main;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
@@ -25,9 +26,6 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -36,16 +34,12 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
+import com.trangdv.orderfood.AppConstants;
 import com.trangdv.orderfood.R;
-import com.trangdv.orderfood.adapters.MenuAdapter;
 import com.trangdv.orderfood.adapters.RestaurantAdapter;
 import com.trangdv.orderfood.adapters.SuggestionAdapter;
 import com.trangdv.orderfood.common.Common;
-import com.trangdv.orderfood.database.CartDataSource;
-import com.trangdv.orderfood.database.CartDatabase;
-import com.trangdv.orderfood.database.LocalCartDataSource;
 import com.trangdv.orderfood.model.BannerData;
-import com.trangdv.orderfood.model.Category;
 import com.trangdv.orderfood.model.Restaurant;
 import com.trangdv.orderfood.model.Suggestion;
 import com.trangdv.orderfood.model.Token;
@@ -55,10 +49,9 @@ import com.trangdv.orderfood.retrofit.IAnNgonAPI;
 import com.trangdv.orderfood.retrofit.RetrofitClient;
 import com.trangdv.orderfood.utils.DialogUtils;
 import com.trangdv.orderfood.ui.menu.MenuActivity;
+import com.trangdv.orderfood.utils.GpsUtils;
 import com.trangdv.orderfood.utils.SharedPrefs;
-import com.trangdv.orderfood.viewholder.MenuViewHolder;
 
-import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.trangdv.orderfood.viewholder.NetViewHolder;
 import com.zhpan.bannerview.BannerViewPager;
 import com.zhpan.bannerview.adapter.OnPageChangeListenerAdapter;
@@ -72,23 +65,17 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.reactivex.SingleObserver;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 public class HomeFragment extends Fragment implements SuggestionAdapter.ItemListener,
         RestaurantAdapter.ItemListener {
+    private static final String TAG = "HomeFragment";
 
     IAnNgonAPI anNgonAPI;
     CompositeDisposable compositeDisposable;
     DialogUtils dialogUtils;
-
-    LocationRequest locationRequest;
-    LocationCallback locationCallback;
-    FusedLocationProviderClient fusedLocationProviderClient;
-    Location currentLocation;
 
     FirebaseDatabase database;
     DatabaseReference banner, suggestion;
@@ -112,10 +99,6 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
     View layout_suggestion;
     View layout_banner;
 
-    private static int UPDATE_INTERVAL = 1000;
-    private static int FASTEST_INTERVAL = 5000;
-    private static float DISPLACEMENT = 10f;
-
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -123,9 +106,7 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
         findViewById(view);
-
         init();
-
         initBanner();
         return view;
     }
@@ -152,37 +133,9 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
         compositeDisposable = new CompositeDisposable();
         anNgonAPI = RetrofitClient.getInstance(Common.API_ANNGON_ENDPOINT).create(IAnNgonAPI.class);
         dialogUtils = new DialogUtils();
-
-        builLocationResquest();
-        builLocationCallback();
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getActivity());
-        fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper());
-
     }
 
-    private void builLocationResquest() {
-        locationRequest = new LocationRequest();
-        locationRequest.setInterval(UPDATE_INTERVAL);
-        locationRequest.setFastestInterval(FASTEST_INTERVAL);
-        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        locationRequest.setSmallestDisplacement(DISPLACEMENT);
-    }
-
-    private void builLocationCallback() {
-        locationCallback = new LocationCallback() {
-            @Override
-            public void onLocationResult(LocationResult locationResult) {
-                super.onLocationResult(locationResult);
-
-                currentLocation = locationResult.getLastLocation();
-
-                SharedPrefs.getInstance().put(Common.SAVE_LOCATION, currentLocation);
-                requestNearbyRestaurant(currentLocation.getLatitude(), currentLocation.getLongitude(), 10);
-            }
-        };
-    }
-
-    private void requestNearbyRestaurant(double latitude, double longitude, int distance) {
+    public void requestNearbyRestaurant(double latitude, double longitude, int distance) {
         dialogUtils.showProgress(getContext());
 
         compositeDisposable.add(
@@ -241,6 +194,7 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
             @Override
             public void onRefresh() {
                 fetchData();
+                fetchNearRestaurant();
             }
         });
         refreshLayout.post(new Runnable() {
@@ -249,6 +203,23 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
                 fetchData();
             }
         });
+    }
+
+    private void fetchNearRestaurant() {
+        if (!((MainActivity)getActivity()).isGPS) {
+            new GpsUtils(getContext()).turnGPSOn(new GpsUtils.onGpsListener() {
+                @Override
+                public void gpsStatus(boolean isGPSEnable) {
+                    // turn on GPS
+                    ((MainActivity)getActivity()).isGPS = isGPSEnable;
+                    ((MainActivity)getActivity()).isContinue = false;
+                    ((MainActivity)getActivity()).getLocation();
+                }
+            });
+        } else {
+            ((MainActivity)getActivity()).isContinue = false;
+            ((MainActivity)getActivity()).getLocation();
+        }
     }
 
     @Override
@@ -300,7 +271,7 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
             }
         });
 
-        if (currentLocation != null) {
+        /*if (currentLocation != null) {
             requestNearbyRestaurant(currentLocation.getLatitude(), currentLocation.getLongitude(), 10);
         } else {
             try {
@@ -310,7 +281,7 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
 
             }
 
-        }
+        }*/
 
         refreshLayout.setRefreshing(false);
     }
@@ -366,8 +337,6 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
         tokens.child(Common.currentUser.getUserPhone()).setValue(data);
     }
 
-
-
     // listen EventBus
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void processRestaurantLoadEvent(RestaurantLoadEvent event) {
@@ -414,7 +383,6 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
     @Override
     public void onDestroy() {
         compositeDisposable.clear();
-        fusedLocationProviderClient.removeLocationUpdates(locationCallback);
         super.onDestroy();
     }
 
