@@ -20,7 +20,8 @@ public class Common {
     public static String PHONE_TEXT = "userPhone";
     private static final String fcmUrl = "https://fcm.googleapis.com/";
 
-    public static final String API_ANNGON_ENDPOINT = "http://192.168.137.1:3000";
+        public static final String API_ANNGON_ENDPOINT = "http://192.168.137.1:3000";
+//    public static final String API_ANNGON_ENDPOINT = "http://192.168.43.205:3000";
     public static Set<Addon> addonList = new HashSet<>();
     public static List<FavoriteOnlyId> currentFavOfRestaurant;
     public static final String SAVE_LOCATION = "save location";

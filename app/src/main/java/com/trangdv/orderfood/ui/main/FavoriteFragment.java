@@ -12,12 +12,14 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.adapters.FavoritesAdapter;
 import com.trangdv.orderfood.common.Common;
 import com.trangdv.orderfood.database.CartItem;
 import com.trangdv.orderfood.model.Favorite;
+import com.trangdv.orderfood.model.Order;
 import com.trangdv.orderfood.model.eventbus.FoodDetailEvent;
 import com.trangdv.orderfood.retrofit.IAnNgonAPI;
 import com.trangdv.orderfood.retrofit.RetrofitClient;
@@ -26,6 +28,7 @@ import com.trangdv.orderfood.utils.DialogUtils;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,7 +36,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
 
-public class FavoritesFragment extends Fragment implements FavoritesAdapter.ItemListener {
+public class FavoriteFragment extends Fragment implements FavoritesAdapter.ItemListener {
     DialogUtils dialogUtils;
     IAnNgonAPI anNgonAPI;
     CompositeDisposable compositeDisposable = new CompositeDisposable();
@@ -42,6 +45,24 @@ public class FavoritesFragment extends Fragment implements FavoritesAdapter.Item
     RecyclerView rvFavorite;
     RecyclerView.LayoutManager layoutManager;
     FavoritesAdapter favoritesAdapter;
+    SwipeRefreshLayout refreshLayout;
+    boolean loaded = false;
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (loaded) {
+            outState.putBoolean("loaded", true);
+        }
+    }
+
+    @Override
+    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+        if (savedInstanceState != null) {
+            loaded = savedInstanceState.getBoolean("loaded", false);
+        }
+    }
 
     @Nullable
     @Override
@@ -59,6 +80,30 @@ public class FavoritesFragment extends Fragment implements FavoritesAdapter.Item
     private void init() {
         dialogUtils = new DialogUtils();
         anNgonAPI = RetrofitClient.getInstance(Common.API_ANNGON_ENDPOINT).create(IAnNgonAPI.class);
+
+        refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                favoriteList.clear();
+                loadFavorite();
+            }
+        });
+        refreshLayout.post(new Runnable() {
+            @Override
+            public void run() {
+                if (!loaded) {
+                    loadFavorite();
+                } else {
+                    showDataLoaded();
+                }
+            }
+        });
+    }
+
+    private void showDataLoaded() {
+//        favoriteList.addAll(favorites);
+        favoritesAdapter = new FavoritesAdapter(getContext(),favoriteList,this);
+        rvFavorite.setAdapter(favoritesAdapter);
     }
 
     private void initView() {
@@ -66,10 +111,15 @@ public class FavoritesFragment extends Fragment implements FavoritesAdapter.Item
         rvFavorite.setLayoutManager(layoutManager);
         favoritesAdapter = new FavoritesAdapter(getContext(),favoriteList,this);
         rvFavorite.setAdapter(favoritesAdapter);
+        refreshLayout.setColorSchemeResources(R.color.colorPrimary,
+                android.R.color.holo_green_dark,
+                android.R.color.holo_orange_dark,
+                android.R.color.holo_blue_dark);
     }
 
     private void findViewById(View v) {
         rvFavorite = v.findViewById(R.id.rv_favorite);
+        refreshLayout = v.findViewById(R.id.swr_favorite);
     }
 
     private void loadFavorite() {
@@ -81,9 +131,9 @@ public class FavoritesFragment extends Fragment implements FavoritesAdapter.Item
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(favoriteModel -> {
                             if (favoriteModel.isSuccess()) {
-                                favoriteList.clear();
                                 favoriteList.addAll(favoriteModel.getResult());
                                 favoritesAdapter.notifyDataSetChanged();
+                                loaded = true;
                             } else {
                                 Toast.makeText(getActivity(), "[GET FAV]" + favoriteModel.getMessage(), Toast.LENGTH_SHORT).show();
                             }
@@ -94,12 +144,13 @@ public class FavoritesFragment extends Fragment implements FavoritesAdapter.Item
                             dialogUtils.dismissProgress();
                         })
         );
+        refreshLayout.setRefreshing(false);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        loadFavorite();
+//        loadFavorite();
     }
 
     @Override

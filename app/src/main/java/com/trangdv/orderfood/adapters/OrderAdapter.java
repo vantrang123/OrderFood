@@ -20,7 +20,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-public class OrderStatusAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class OrderAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private static final int VIEW_TYPE_LOADING = 1;
     private static final int VIEW_TYPE_ITEM = 0;
@@ -30,7 +30,7 @@ public class OrderStatusAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     ItemListener listener;
     SimpleDateFormat simpleDateFormat;
 
-    public OrderStatusAdapter(Context context, List<Order> requests, ItemListener itemListener) {
+    public OrderAdapter(Context context, List<Order> requests, ItemListener itemListener) {
         super();
         this.context = context;
         this.orderList = requests;
@@ -41,16 +41,19 @@ public class OrderStatusAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     public void addItem(List<Order> addedItems) {
         int startInsertedIndex = orderList.size();
         orderList.addAll(addedItems);
-        notifyItemInserted(startInsertedIndex);
+        notifyItemInserted(startInsertedIndex-1);
+        removeNull(startInsertedIndex, addedItems.size());
+
     }
 
     public void addNull() {
         orderList.add(null);
-        notifyItemInserted(orderList.size() -1);
+        notifyItemInserted(orderList.size() - 1);
     }
 
-    public void removeNull() {
-        orderList.remove(orderList.size()-1);
+    public void removeNull(int size,int itemAdd) {
+        orderList.remove(size - itemAdd );
+        notifyItemRemoved(size - itemAdd );
     }
 
     @Override

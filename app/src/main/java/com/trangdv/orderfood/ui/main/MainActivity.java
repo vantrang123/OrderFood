@@ -2,23 +2,15 @@ package com.trangdv.orderfood.ui.main;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.SearchManager;
 import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.graphics.drawable.LayerDrawable;
 import android.location.Location;
-import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 
-import androidx.appcompat.widget.SearchView;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.app.ActivityCompat;
-import androidx.core.view.GravityCompat;
-import androidx.appcompat.app.ActionBarDrawerToggle;
 
 import android.os.Handler;
 
@@ -33,33 +25,27 @@ import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
-import com.google.android.material.navigation.NavigationView;
-
-import androidx.core.view.MenuItemCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.viewpager.widget.ViewPager;
 
 import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.trangdv.orderfood.AppConstants;
 import com.trangdv.orderfood.R;
+import com.trangdv.orderfood.adapters.ViewPagerAdapter;
 import com.trangdv.orderfood.common.Common;
 import com.trangdv.orderfood.database.CartDataSource;
 import com.trangdv.orderfood.database.CartDatabase;
 import com.trangdv.orderfood.database.LocalCartDataSource;
-import com.trangdv.orderfood.model.Food;
-import com.trangdv.orderfood.model.Order;
 import com.trangdv.orderfood.model.User;
 import com.trangdv.orderfood.providers.CustomBadgeProvider;
 import com.trangdv.orderfood.receiver.InternetConnector;
@@ -68,23 +54,17 @@ import com.trangdv.orderfood.retrofit.RetrofitClient;
 import com.trangdv.orderfood.ui.ProfileActivity;
 import com.trangdv.orderfood.ui.SearchActivity;
 import com.trangdv.orderfood.ui.dialog.ClickItemCartDialog;
-import com.trangdv.orderfood.ui.dialog.ConfirmLogoutDialog;
 import com.trangdv.orderfood.utils.GpsUtils;
 import com.trangdv.orderfood.utils.SharedPrefs;
-
-import java.util.Locale;
 
 import io.reactivex.SingleObserver;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import it.sephiroth.android.library.bottomnavigation.BadgeProvider;
 import it.sephiroth.android.library.bottomnavigation.BottomNavigation;
 
 import static com.google.android.material.appbar.AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS;
-import static com.google.android.material.appbar.AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS_COLLAPSED;
-import static com.google.android.material.appbar.AppBarLayout.LayoutParams.SCROLL_FLAG_EXIT_UNTIL_COLLAPSED;
 import static com.google.android.material.appbar.AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL;
 import static com.trangdv.orderfood.ui.LoginActivity.SAVE_USER;
 
@@ -103,16 +83,12 @@ public class MainActivity extends AppCompatActivity
     private TextView txtUserName;
     private TextView tvStatus;
     private BottomNavigation mBottomNavigation;
+    private ViewPager viewPager;
     private ImageView ivUser;
     View rlSearch, rlSearchBg;
     String sFragment = null;
-    //    NavigationView navigationView;
     BottomSheetBehavior mBottomSheetBehavior;
     GestureDetector mGestureDetector;
-    HomeFragment homeFragment;
-    CartFragment cartFragment;
-    OrderStatusFragment orderStatusFragment;
-    FavoritesFragment favoritesFragment;
 
     boolean doubleBackToExitPressedOnce = false;
     private BroadcastReceiver InternetReceiver = null;
@@ -132,41 +108,15 @@ public class MainActivity extends AppCompatActivity
 
         findViewById();
         init();
-//        getCurrentUser();
-
         initializeBottomNavigation(savedInstanceState);
 
         toolbar.setTitle("Home");
         setSupportActionBar(toolbar);
         fragmentManager = getSupportFragmentManager();
-        /*DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        navigationView = findViewById(R.id.nav_view);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.addDrawerListener(toggle);
-        toggle.syncState();
-        navigationView.setNavigationItemSelectedListener(this);*/
 
         //get user from share pref
         User user = SharedPrefs.getInstance().get(SAVE_USER, User.class);
         Common.currentUser = user;
-
-//        final View headerView = navigationView.getHeaderView(0);
-//        txtUserName = headerView.findViewById(R.id.tv_username);
-//        txtUserName.setText(Common.currentUser.getName());
-
-        /*Intent service = new Intent(MainActivity.this, ListenOrder.class);
-        startService(service);
-        sFragment = getIntent().getStringExtra("startFragment");*/
-//        if (sFragment != null) {
-//            OrderStatus();
-//        } else {
-//            Home();
-//        }
-        homeFragment = new HomeFragment();
-        orderStatusFragment = new OrderStatusFragment();
-        cartFragment = new CartFragment();
-        favoritesFragment = new FavoritesFragment();
 
         View bottomSheet = findViewById(R.id.nsv_internet_notify);
         tvStatus = findViewById(R.id.tv_status_internet);
@@ -176,7 +126,6 @@ public class MainActivity extends AppCompatActivity
 
         InternetReceiver = new InternetConnector(this);
         broadcastIntent();
-        Home();
         countCart();
     }
 
@@ -216,8 +165,9 @@ public class MainActivity extends AppCompatActivity
                             if (getFragmentCurrent() instanceof HomeFragment) {
                                 ((HomeFragment) getFragmentCurrent()).requestNearbyRestaurant(wayLatitude, wayLongitude, 10);
                             }
+
                         } else {
-                            Toast.makeText(MainActivity.this, "THREE "+wayLatitude +","+ wayLongitude, Toast.LENGTH_LONG).show();
+                            Toast.makeText(MainActivity.this, "THREE " + wayLatitude + "," + wayLongitude, Toast.LENGTH_LONG).show();
                         }
                         if (!isContinue && mFusedLocationClient != null) {
                             mFusedLocationClient.removeLocationUpdates(locationCallback);
@@ -226,6 +176,8 @@ public class MainActivity extends AppCompatActivity
                 }
             }
         };
+
+//        viewPagerAdapter = new ViewPagerAdapter(this, 4);
     }
 
     public void getLocation() {
@@ -262,22 +214,11 @@ public class MainActivity extends AppCompatActivity
         mBottomNavigation.setMenuItemSelectionListener(new BottomNavigation.OnMenuItemSelectionListener() {
             @Override
             public void onMenuItemSelect(int i, int i1, boolean b) {
-                switch (i1) {
-                    case 0:
-                        Home();
-                        break;
-                    case 1:
-                        OrderStatus();
-                        break;
-                    case 2:
-                        Cart();
-                        provider.remove(i);
-                        break;
-                    case 3:
-                        Favorite();
-                        break;
-                    default:
-                        break;
+                if (b) {
+                    mBottomNavigation.getBadgeProvider().remove(i);
+                    if (null != viewPager) {
+                        viewPager.setCurrentItem(i1);
+                    }
                 }
             }
 
@@ -285,6 +226,25 @@ public class MainActivity extends AppCompatActivity
             public void onMenuItemReselect(int i, int i1, boolean b) {
 
             }
+        });
+        mBottomNavigation.setMenuChangedListener(parent -> {
+            viewPager.setAdapter(new ViewPagerAdapter(MainActivity.this, parent.getMenuItemCount()));
+            viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+                @Override
+                public void onPageScrolled(final int position, final float positionOffset, final int positionOffsetPixels) {
+
+                }
+
+                @Override
+                public void onPageSelected(final int position) {
+                    if (mBottomNavigation.getSelectedIndex() != position) {
+                        mBottomNavigation.setSelectedIndex(position, false);
+                    }
+                }
+
+                @Override
+                public void onPageScrollStateChanged(final int state) { }
+            });
         });
 
     }
@@ -296,6 +256,7 @@ public class MainActivity extends AppCompatActivity
         rlSearch = findViewById(R.id.rlSearch);
         rlSearchBg = findViewById(R.id.rlSearchBg);
         ivUser = findViewById(R.id.iv_user);
+        viewPager = findViewById(R.id.vp_main);
 
         rlSearchBg.setOnClickListener(this);
         ivUser.setOnClickListener(this);
@@ -347,59 +308,8 @@ public class MainActivity extends AppCompatActivity
         mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
     }
 
-    public void setScrollBar(int i) {
-        AppBarLayout.LayoutParams toolbarLayoutParams = (AppBarLayout.LayoutParams) toolbar.getLayoutParams();
-        toolbarLayoutParams.setScrollFlags(i);
-
-    }
-
-    public void Home() {
-        //setScrollBar(1);
-        setScrollBar(SCROLL_FLAG_SCROLL | SCROLL_FLAG_ENTER_ALWAYS);
-        /*fragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, homeFragment)
-                .commit();*/
-        replace(homeFragment);
-//        navigationView.getMenu().getItem(0).setChecked(true);
-    }
-
-    public void Cart() {
-//        setScrollBar(0);
-        /*fragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, new CartFragment())
-                .addToBackStack(null)
-                .commit();*/
-        setScrollBar(SCROLL_FLAG_SCROLL | SCROLL_FLAG_ENTER_ALWAYS);
-        replace(cartFragment);
-    }
-
-    public void OrderStatus() {
-//        setScrollBar(1);
-        /*setScrollBar(SCROLL_FLAG_SCROLL | SCROLL_FLAG_ENTER_ALWAYS);
-        fragmentManager.beginTransaction()
-                //.replace(R.id.fragment_container, new OrderStatusFragment())
-                .replace(R.id.fragment_container, new OrderStatusFragment())
-                .addToBackStack(null)
-                .commit();*/
-        setScrollBar(SCROLL_FLAG_SCROLL | SCROLL_FLAG_ENTER_ALWAYS);
-        replace(orderStatusFragment);
-    }
-
-    public void Favorite() {
-        setScrollBar(SCROLL_FLAG_SCROLL | SCROLL_FLAG_ENTER_ALWAYS);
-        replace(favoritesFragment);
-    }
-
-
     public Fragment getFragmentCurrent() {
-        return getSupportFragmentManager().findFragmentById(R.id.fragment_container);
-    }
-
-    void replace(Fragment fragment) {
-        fragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, fragment)
-                .addToBackStack(null).commit();
-        subscreensOnTheStack++;
+        return getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.vp_main + ":" + viewPager.getCurrentItem());
     }
 
     private void countCart() {
@@ -414,10 +324,12 @@ public class MainActivity extends AppCompatActivity
 
                     @Override
                     public void onSuccess(Integer integer) {
-                        if (!(getFragmentCurrent() instanceof CartFragment)) {
+                        /*if (!(getFragmentCurrent() instanceof CartFragment)) {
                             if (integer != 0)
+                                provider.show(R.id.nav_cart, integer);
+                        }*/
+                        if (integer != 0)
                             provider.show(R.id.nav_cart, integer);
-                        }
                     }
 
                     @Override
@@ -429,22 +341,15 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
-        /*DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else */
         if (doubleBackToExitPressedOnce) {
             finishAffinity();
             System.exit(0);
             return;
         } else {
-            Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
+            Fragment fragment = getFragmentCurrent();
 
             if (!(fragment instanceof HomeFragment)) {
-                while (subscreensOnTheStack > 0) {
-                    subscreensOnTheStack--;
-                    getSupportFragmentManager().popBackStackImmediate();
-                }
+                viewPager.setCurrentItem(0);
                 mBottomNavigation.setSelectedIndex(0, false);
             } else {
                 this.doubleBackToExitPressedOnce = true;
@@ -460,87 +365,6 @@ public class MainActivity extends AppCompatActivity
             }
         }
     }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        /*// Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        // Get the notifications MenuItem and LayerDrawable (layer-list)
-        MenuItem item = menu.findItem(R.id.action_search);
-        MenuItemCompat.setActionView(item, R.layout.actionbar_badge_layout);
-        RelativeLayout notifCount = (RelativeLayout)   MenuItemCompat.getActionView(item);
-
-        TextView tv = (TextView) notifCount.findViewById(R.id.actionbar_notifcation_textview);
-        tv.setText("12");
-
-        return super.onCreateOptionsMenu(menu);*/
-        return false;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_search) {
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    /*@Override
-    public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
-        int id = item.getItemId();
-        switch (id) {
-
-            case R.id.nav_home:
-                if (item.isChecked()) item.setChecked(false);
-                else {
-                    Home();
-//                    Toast.makeText(MainActivity.this, "menu", Toast.LENGTH_SHORT).show();
-                }
-                item.setChecked(true);
-                break;
-
-            case R.id.nav_status:
-                if (item.isChecked()) item.setChecked(false);
-                else {
-                    Cart();
-//                    Toast.makeText(MainActivity.this, "carts", Toast.LENGTH_SHORT).show();
-                }
-                item.setChecked(true);
-                break;
-
-            case R.id.nav_status:
-                if (item.isChecked()) item.setChecked(false);
-                else {
-                    OrderStatus();
-//                    Toast.makeText(MainActivity.this, "order status", Toast.LENGTH_SHORT).show();
-                }
-                item.setChecked(true);
-                break;
-            case R.id.nav_favorites:
-                if (item.isChecked()) item.setChecked(false);
-                else {
-                    Favorite();
-                }
-                item.setChecked(true);
-                break;
-
-            case R.id.nav_exit:
-                ConfirmLogout();
-                break;
-                SharedPrefs.getInstance().clear();
-                Intent intent = new Intent(MainActivity.this, LoginActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-                finish();
-        }
-
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
-        return true;
-    }*/
 
     public void broadcastIntent() {
         registerReceiver(InternetReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
@@ -561,7 +385,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
-        countCart();
+//        countCart();
     }
 
     @Override
@@ -598,7 +422,7 @@ public class MainActivity extends AppCompatActivity
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode == AppConstants.GPS_REQUEST) {
-                Log.d(TAG, "onActivityResult : "  + "GPSsssssss");
+                Log.d(TAG, "onActivityResult : " + "GPSsssssss");
                 isContinue = false;
                 getLocation();
             }

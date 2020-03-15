@@ -1,8 +1,6 @@
 package com.trangdv.orderfood.ui.main;
 
-import android.app.Activity;
 import android.content.Intent;
-import android.location.Location;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -12,7 +10,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,11 +18,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationCallback;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationResult;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -34,12 +26,12 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
-import com.trangdv.orderfood.AppConstants;
 import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.adapters.RestaurantAdapter;
 import com.trangdv.orderfood.adapters.SuggestionAdapter;
 import com.trangdv.orderfood.common.Common;
 import com.trangdv.orderfood.model.BannerData;
+import com.trangdv.orderfood.model.Order;
 import com.trangdv.orderfood.model.Restaurant;
 import com.trangdv.orderfood.model.Suggestion;
 import com.trangdv.orderfood.model.Token;
@@ -50,7 +42,6 @@ import com.trangdv.orderfood.retrofit.RetrofitClient;
 import com.trangdv.orderfood.utils.DialogUtils;
 import com.trangdv.orderfood.ui.menu.MenuActivity;
 import com.trangdv.orderfood.utils.GpsUtils;
-import com.trangdv.orderfood.utils.SharedPrefs;
 
 import com.trangdv.orderfood.viewholder.NetViewHolder;
 import com.zhpan.bannerview.BannerViewPager;
@@ -62,6 +53,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -89,8 +81,8 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
     RestaurantAdapter restaurantAdapter;
 
     List<Suggestion> suggestions = new ArrayList<>();
-    List<Restaurant> restaurants = new ArrayList<>();
-    BannerViewPager<BannerData, NetViewHolder> mViewPager;
+    List<Restaurant> restaurantList = new ArrayList<>();
+    private BannerViewPager<BannerData, NetViewHolder> mViewPager;
     List<BannerData> banners = new ArrayList<>();
     IndicatorView mIndicatorView;
     RelativeLayout mRlIndicator;
@@ -98,6 +90,23 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
     View layoutRestaurant;
     View layout_suggestion;
     View layout_banner;
+    boolean loaded = false;
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (loaded) {
+            outState.putBoolean("loaded", true);
+        }
+    }
+
+    @Override
+    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+        if (savedInstanceState != null) {
+            loaded = savedInstanceState.getBoolean("loaded", false);
+        }
+    }
 
     @Nullable
     @Override
@@ -144,10 +153,11 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(restaurantModel -> {
                                     if (restaurantModel.isSuccess()) {
-                                        restaurants.clear();
-                                        restaurants.addAll(restaurantModel.getResult());
+                                        restaurantList.clear();
+                                        restaurantList.addAll(restaurantModel.getResult());
                                         restaurantAdapter.notifyDataSetChanged();
                                         layoutRestaurant.setVisibility(View.VISIBLE);
+                                        loaded = true;
                                     } else {
                                     }
 
@@ -187,7 +197,7 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
         // load restaurant
         LinearLayoutManager restaurantLayout = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
         recycler_restaurant.setLayoutManager(restaurantLayout);
-        restaurantAdapter = new RestaurantAdapter(getContext(), restaurants, this);
+        restaurantAdapter = new RestaurantAdapter(getContext(), restaurantList, this);
         recycler_restaurant.setAdapter(restaurantAdapter);
 
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -201,8 +211,20 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
             @Override
             public void run() {
                 fetchData();
+                if (!loaded) {
+                    fetchNearRestaurant();
+                } else {
+                    showDataLoaded();
+                }
+
             }
         });
+    }
+
+    private void showDataLoaded() {
+        layoutRestaurant.setVisibility(View.VISIBLE);
+        restaurantAdapter = new RestaurantAdapter(getContext(), restaurantList, this);
+        recycler_restaurant.setAdapter(restaurantAdapter);
     }
 
     private void fetchNearRestaurant() {
@@ -288,7 +310,7 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
 
     private void fetchRestaurant() {
         dialogUtils.showProgress(getContext());
-        restaurants.clear();
+        restaurantList.clear();
         compositeDisposable.add(
           anNgonAPI.getRestaurant(Common.API_KEY)
                   .subscribeOn(Schedulers.io())
@@ -341,7 +363,7 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void processRestaurantLoadEvent(RestaurantLoadEvent event) {
         if (event.isSuccess()) {
-            restaurants.addAll(event.getRestaurantList());
+            restaurantList.addAll(event.getRestaurantList());
             restaurantAdapter.notifyDataSetChanged();
             layoutRestaurant.setVisibility(View.VISIBLE);
 
@@ -393,8 +415,8 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
 
     @Override
     public void dispatchToMenuList(int position) {
-        Common.currentRestaurant = restaurants.get(position);
-        EventBus.getDefault().postSticky(new MenuItemEvent(true, restaurants.get(position)));
+        Common.currentRestaurant = restaurantList.get(position);
+        EventBus.getDefault().postSticky(new MenuItemEvent(true, restaurantList.get(position)));
         getActivity().startActivity(new Intent(getContext(), MenuActivity.class));
     }
 }

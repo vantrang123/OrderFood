@@ -16,15 +16,17 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.trangdv.orderfood.R;
-import com.trangdv.orderfood.adapters.OrderStatusAdapter;
+import com.trangdv.orderfood.adapters.OrderAdapter;
 import com.trangdv.orderfood.common.Common;
 import com.trangdv.orderfood.model.Order;
 import com.trangdv.orderfood.retrofit.IAnNgonAPI;
 import com.trangdv.orderfood.retrofit.RetrofitClient;
 import com.trangdv.orderfood.utils.DialogUtils;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,48 +34,59 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
 
-public class OrderStatusFragment extends Fragment implements OrderStatusAdapter.ItemListener {
+public class OrderFragment extends Fragment implements OrderAdapter.ItemListener {
     private static final String TAG = "OrderStatusFragment";
     IAnNgonAPI anNgonAPI;
     CompositeDisposable compositeDisposable;
     DialogUtils dialogUtils;
 
-    OrderStatusAdapter orderStatusAdapter;
+    OrderAdapter orderStatusAdapter;
     public RecyclerView rvListOrder;
     public RecyclerView.LayoutManager layoutManager;
+    SwipeRefreshLayout refreshLayout;
     List<Order> orderList = new ArrayList<>();
     private int maxData = 0;
     boolean isLoading = false;
+    boolean loaded = false;
 
     LayoutAnimationController layoutAnimationController;
 
-    /*public static OrderStatusFragment newInstance(String phone) {
-        OrderStatusFragment orderStatus = new OrderStatusFragment();
-        Bundle bundle = new Bundle();
-        bundle.putString("FoodId", phone);
-        orderStatus.setArguments(bundle);
-        return orderStatus;
-    }*/
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (loaded) {
+            outState.putBoolean("loaded", true);
+        }
+    }
+
+    @Override
+    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+        if (savedInstanceState != null) {
+            loaded = savedInstanceState.getBoolean("loaded", false);
+        }
+    }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_orderstatus, container, false);
+        View view = inflater.inflate(R.layout.fragment_order, container, false);
         ((MainActivity) getActivity()).getSupportActionBar().setTitle("Order");
 
-        rvListOrder = view.findViewById(R.id.listOrders);
+        findViewById(view);
         initView();
-
         return view;
+    }
+
+    private void findViewById(View view) {
+        rvListOrder = view.findViewById(R.id.listOrders);
+        refreshLayout = view.findViewById(R.id.swr_order);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
         init();
-//        loadOrders();
-        loadMaxOrder();
         initScrollListener();
     }
 
@@ -85,6 +98,29 @@ public class OrderStatusFragment extends Fragment implements OrderStatusAdapter.
 
         layoutManager = new LinearLayoutManager(getActivity());
         rvListOrder.setLayoutManager(layoutManager);
+
+        refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                orderList.clear();
+                loadMaxOrder();
+            }
+        });
+        refreshLayout.post(new Runnable() {
+            @Override
+            public void run() {
+                if (!loaded) {
+                    loadMaxOrder();
+                } else {
+                    showDataLoaded();
+                }
+            }
+        });
+    }
+
+    private void showDataLoaded() {
+        orderStatusAdapter = new OrderAdapter(getContext(), orderList, this);
+        rvListOrder.setAdapter(orderStatusAdapter);
     }
 
     private void initView() {
@@ -92,6 +128,10 @@ public class OrderStatusFragment extends Fragment implements OrderStatusAdapter.
         rvListOrder.setLayoutManager(layoutManager);
         rvListOrder.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
         layoutAnimationController = AnimationUtils.loadLayoutAnimation(getContext(), R.anim.layout_item_from_left);
+        refreshLayout.setColorSchemeResources(R.color.colorPrimary,
+                android.R.color.holo_green_dark,
+                android.R.color.holo_orange_dark,
+                android.R.color.holo_blue_dark);
     }
 
     private void loadMoreData() {
@@ -99,16 +139,15 @@ public class OrderStatusFragment extends Fragment implements OrderStatusAdapter.
             int from = orderStatusAdapter.getItemCount() +1;
 //            orderList.add(null);
 //            orderStatusAdapter.notifyItemInserted(orderList.size() -1);
-            orderStatusAdapter.addNull();
+            orderStatusAdapter.addNull();isLoading = true;
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    loadAllOrders(from, from + 3);
+                    loadAllOrders(from, from + 10);
                 }
             }, 3000);
 
             orderStatusAdapter.notifyDataSetChanged();
-            isLoading = false;
         } else {
         }
     }
@@ -122,7 +161,8 @@ public class OrderStatusFragment extends Fragment implements OrderStatusAdapter.
                             if (maxOrderModel.isSuccess()) {
                                 if (maxOrderModel.getResult().size() > 0) {
                                     maxData = maxOrderModel.getResult().get(0).getMaxRowNum();
-                                    loadAllOrders(0, 3);
+                                    orderStatusAdapter = null;
+                                    loadAllOrders(0, 10);
                                 }
                             }
                             dialogUtils.dismissProgress();
@@ -132,10 +172,11 @@ public class OrderStatusFragment extends Fragment implements OrderStatusAdapter.
                             Toast.makeText(getContext(), "[ERROR]" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
                         }
                 ));
+        refreshLayout.setRefreshing(false);
     }
 
     private void loadAllOrders(int form, int to) {
-//        dialogUtils.showProgress(getContext());
+        dialogUtils.showProgress(getContext());
         compositeDisposable.add(anNgonAPI.getOrder(Common.API_KEY, Common.currentUser.getFbid(),
                 form, to)
                 .subscribeOn(Schedulers.io())
@@ -146,24 +187,25 @@ public class OrderStatusFragment extends Fragment implements OrderStatusAdapter.
                                     if (orderStatusAdapter == null) {
                                         orderList = new ArrayList<>();
                                         orderList = orderModel.getResult();
-                                        orderStatusAdapter = new OrderStatusAdapter(getContext(), orderList, this);
+                                        orderStatusAdapter = new OrderAdapter(getContext(), orderList, this);
                                         rvListOrder.setAdapter(orderStatusAdapter);
                                         rvListOrder.setLayoutAnimation(layoutAnimationController);
                                     } else {
-//                                        orderList.remove(orderList.size()-1);
-                                        orderStatusAdapter.removeNull();
+
                                         orderList = orderModel.getResult();
                                         orderStatusAdapter.addItem(orderList);
-                                        isLoading = false;
+
+
                                     }
                                 }
+                                loaded = true;
                             } else {
                                 orderStatusAdapter.notifyItemRemoved(orderStatusAdapter.getItemCount());
                             }
-//                            dialogUtils.dismissProgress();
+                            dialogUtils.dismissProgress();
                         }
                         , throwable -> {
-//                            dialogUtils.dismissProgress();
+                            dialogUtils.dismissProgress();
                             Toast.makeText(getContext(), "[ERROR]" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
                         }
                 ));
@@ -184,8 +226,9 @@ public class OrderStatusFragment extends Fragment implements OrderStatusAdapter.
 
                 if (!isLoading) {
                     if (linearLayoutManager != null && linearLayoutManager.findLastCompletelyVisibleItemPosition() == orderStatusAdapter.getItemCount() -1) {
-                        loadMoreData();
                         isLoading = true;
+                        loadMoreData();
+
                     }
                 }
             }

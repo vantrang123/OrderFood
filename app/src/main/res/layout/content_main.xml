@@ -21,10 +21,11 @@
         app:bbn_entries="@menu/nav_bottom"
         app:bbn_badgeProvider="com.trangdv.orderfood.providers.CustomBadgeProvider" />
 
-    <FrameLayout
-        android:id="@+id/fragment_container"
+    <androidx.viewpager.widget.ViewPager
+        android:id="@+id/vp_main"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        />
+        android:padding="0dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
 </LinearLayout>
