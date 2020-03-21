@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -42,7 +43,7 @@ import io.reactivex.schedulers.Schedulers;
 import static com.google.android.material.appbar.AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS;
 import static com.google.android.material.appbar.AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL;
 
-public class FoodListFragment extends Fragment implements FoodListAdapter.ItemListener {
+public class FoodListFragment extends Fragment implements FoodListAdapter.ItemListener, View.OnClickListener {
 
     IAnNgonAPI anNgonAPI;
     CompositeDisposable compositeDisposable = new CompositeDisposable();
@@ -56,39 +57,31 @@ public class FoodListFragment extends Fragment implements FoodListAdapter.ItemLi
     String categoryId = "";
     String categoryName = "";
     List<Food> foods = new ArrayList<>();
-    Toolbar toolbar;
+    private ImageView ivBack;
 
     private ShimmerFrameLayout mShimmerViewContainer;
-
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_food_list, container, false);
-        rvListFood = view.findViewById(R.id.rv_food);
 
-        toolbar = view.findViewById(R.id.toolbar);
+        findViewById(view);
+
         mShimmerViewContainer = view.findViewById(R.id.shimmer_view_container);
 
         if (getActivity().getIntent() != null) {
             categoryId = getActivity().getIntent().getStringExtra("CategoryId");
             categoryName = getActivity().getIntent().getStringExtra("CategoryName");
-            toolbar.setTitle(categoryName);
         }
 
-        toolbar.setNavigationIcon(getResources().getDrawable(R.drawable.ic_back, getActivity().getTheme()));
-        ((FoodActivity) getActivity()).setSupportActionBar(toolbar);
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                getActivity().onBackPressed();
-            }
-        });
-
-        AppBarLayout.LayoutParams toolbarLayoutParams = (AppBarLayout.LayoutParams) toolbar.getLayoutParams();
-        toolbarLayoutParams.setScrollFlags(SCROLL_FLAG_SCROLL | SCROLL_FLAG_ENTER_ALWAYS);
-
         return view;
+    }
+
+    private void findViewById(View view) {
+        rvListFood = view.findViewById(R.id.rv_food);
+        ivBack = view.findViewById(R.id.iv_back);
+        ivBack.setOnClickListener(this);
     }
 
     @Override
@@ -148,7 +141,6 @@ public class FoodListFragment extends Fragment implements FoodListAdapter.ItemLi
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     public void loadFoodListByCategory(FoodListEvent event) {
         if (event.isSuccess()) {
-            toolbar.setTitle(event.getCategory().getName());
             fetchData(event.getCategory().getId());
         } else {
 
@@ -187,5 +179,16 @@ public class FoodListFragment extends Fragment implements FoodListAdapter.ItemLi
             foodListAdapter.onStop();
         }
         super.onDestroy();
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.iv_back:
+                getActivity().onBackPressed();
+                break;
+            default:
+                break;
+        }
     }
 }

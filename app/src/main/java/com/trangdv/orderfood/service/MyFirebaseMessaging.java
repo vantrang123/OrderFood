@@ -18,16 +18,26 @@ import com.trangdv.orderfood.common.Common;
 import com.trangdv.orderfood.helper.NotificationHelper;
 import com.trangdv.orderfood.ui.main.OrderFragment;
 
+import java.util.Map;
 import java.util.Random;
 
 public class MyFirebaseMessaging extends FirebaseMessagingService {
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+        /*if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             sendNotificationAPI26(remoteMessage);
         else
-            sendNotification(remoteMessage);
+            sendNotification(remoteMessage);*/
+
+        Map<String,String> dataRecv = remoteMessage.getData();
+        if (dataRecv != null) {
+            Common.showNotification(this,
+                    new Random().nextInt(),
+                    dataRecv.get(Common.NOTIFI_TITLE),
+                    dataRecv.get(Common.NOTIFI_CONTENT),
+                    null);
+        }
     }
 
     private void sendNotificationAPI26(RemoteMessage remoteMessage) {

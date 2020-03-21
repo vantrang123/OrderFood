@@ -1,15 +1,16 @@
 package com.trangdv.orderfood.remote;
 
 
-import com.trangdv.orderfood.model.MyResponse;
-import com.trangdv.orderfood.model.Sender;
+import com.trangdv.orderfood.model.FCMSendData;
+import com.trangdv.orderfood.model.FCMResponse;
 
+import io.reactivex.Observable;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.Headers;
 import retrofit2.http.POST;
 
-public interface APIService {
+public interface IFCMService {
 
     @Headers(
             {
@@ -20,5 +21,5 @@ public interface APIService {
     )
 
     @POST("fcm/send")
-    Call<MyResponse> sendNotification(@Body Sender body);
+    Observable<FCMResponse> sendNotification(@Body FCMSendData body);
 }

@@ -10,20 +10,20 @@ import android.location.Location;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 
 import android.os.Handler;
 
-import android.util.Log;
 import android.view.GestureDetector;
-import android.view.MenuItem;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.material.appbar.AppBarLayout;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -32,13 +32,14 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.viewpager.widget.ViewPager;
 
-import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 import com.trangdv.orderfood.AppConstants;
 import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.adapters.ViewPagerAdapter;
@@ -54,9 +55,12 @@ import com.trangdv.orderfood.retrofit.RetrofitClient;
 import com.trangdv.orderfood.ui.ProfileActivity;
 import com.trangdv.orderfood.ui.SearchActivity;
 import com.trangdv.orderfood.ui.dialog.ClickItemCartDialog;
-import com.trangdv.orderfood.utils.GpsUtils;
+import com.trangdv.orderfood.utils.DialogUtils;
 import com.trangdv.orderfood.utils.SharedPrefs;
 
+import java.util.ArrayList;
+
+import io.paperdb.Paper;
 import io.reactivex.SingleObserver;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
@@ -64,8 +68,6 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import it.sephiroth.android.library.bottomnavigation.BottomNavigation;
 
-import static com.google.android.material.appbar.AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS;
-import static com.google.android.material.appbar.AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL;
 import static com.trangdv.orderfood.ui.LoginActivity.SAVE_USER;
 
 
@@ -77,6 +79,7 @@ public class MainActivity extends AppCompatActivity
     CompositeDisposable compositeDisposable;
     CustomBadgeProvider provider;
     CartDataSource cartDataSource;
+    DialogUtils dialogUtils;
 
     FragmentManager fragmentManager;
     Toolbar toolbar;
@@ -127,12 +130,16 @@ public class MainActivity extends AppCompatActivity
         InternetReceiver = new InternetConnector(this);
         broadcastIntent();
         countCart();
+        refreshToke();
+        loadFavorite();
     }
 
     private void init() {
+        Paper.init(this);
         anNgonAPI = RetrofitClient.getInstance(Common.API_ANNGON_ENDPOINT).create(IAnNgonAPI.class);
         cartDataSource = new LocalCartDataSource(CartDatabase.getInstance(this).cartDAO());
         compositeDisposable = new CompositeDisposable();
+        dialogUtils = new DialogUtils();
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
@@ -141,7 +148,7 @@ public class MainActivity extends AppCompatActivity
         locationRequest.setInterval(10 * 1000); // 10 seconds
         locationRequest.setFastestInterval(5 * 1000); // 5 seconds
 
-        new GpsUtils(this).turnGPSOn(new GpsUtils.onGpsListener() {
+        /*new GpsUtils(this).turnGPSOn(new GpsUtils.onGpsListener() {
             @Override
             public void gpsStatus(boolean isGPSEnable) {
                 // turn on GPS
@@ -149,7 +156,7 @@ public class MainActivity extends AppCompatActivity
                 isContinue = false;
                 getLocation();
             }
-        });
+        });*/
 
         locationCallback = new LocationCallback() {
             @Override
@@ -176,8 +183,6 @@ public class MainActivity extends AppCompatActivity
                 }
             }
         };
-
-//        viewPagerAdapter = new ViewPagerAdapter(this, 4);
     }
 
     public void getLocation() {
@@ -219,11 +224,15 @@ public class MainActivity extends AppCompatActivity
                     if (null != viewPager) {
                         viewPager.setCurrentItem(i1);
                     }
+
                 }
             }
 
             @Override
             public void onMenuItemReselect(int i, int i1, boolean b) {
+                if (getFragmentCurrent() instanceof HomeFragment) {
+                    ((HomeFragment) getFragmentCurrent()).scrollToTop();
+                }
 
             }
         });
@@ -239,11 +248,13 @@ public class MainActivity extends AppCompatActivity
                 public void onPageSelected(final int position) {
                     if (mBottomNavigation.getSelectedIndex() != position) {
                         mBottomNavigation.setSelectedIndex(position, false);
+                        mBottomNavigation.getBadgeProvider().remove(mBottomNavigation.getMenuItemId(position));
                     }
                 }
 
                 @Override
-                public void onPageScrollStateChanged(final int state) { }
+                public void onPageScrollStateChanged(final int state) {
+                }
             });
         });
 
@@ -324,12 +335,10 @@ public class MainActivity extends AppCompatActivity
 
                     @Override
                     public void onSuccess(Integer integer) {
-                        /*if (!(getFragmentCurrent() instanceof CartFragment)) {
+                        if (!(getFragmentCurrent() instanceof CartFragment)) {
                             if (integer != 0)
                                 provider.show(R.id.nav_cart, integer);
-                        }*/
-                        if (integer != 0)
-                            provider.show(R.id.nav_cart, integer);
+                        }
                     }
 
                     @Override
@@ -370,22 +379,62 @@ public class MainActivity extends AppCompatActivity
         registerReceiver(InternetReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
     }
 
+    private void refreshToke() {
+        Paper.book().write(Common.REMENBER_FBID, Common.currentUser.getFbid());
+        FirebaseInstanceId.getInstance()
+                .getInstanceId()
+                .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                        compositeDisposable.add(anNgonAPI.updateToken(Common.API_KEY,
+                                Common.currentUser.getFbid(),
+                                task.getResult().getToken())
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe(tokenModel -> {
+                                        }
+                                        , throwable -> {
+                                        }
+                                ));
+                    }
+                });
+    }
+
+    public void loadFavorite() {
+        dialogUtils.showProgress(this);
+
+        compositeDisposable.add(
+                anNgonAPI.getFavoriteOnlyId(Common.API_KEY, Common.currentUser.getFbid())
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(favoriteOnlyIdModel -> {
+                            if (favoriteOnlyIdModel.isSuccess()) {
+                                Common.currentFav = favoriteOnlyIdModel.getResult();
+                            } else {
+                                Common.currentFav = new ArrayList<>();
+                            }
+                            dialogUtils.dismissProgress();
+
+                        }, throwable -> {
+                            dialogUtils.dismissProgress();
+                        })
+        );
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
-//        broadcastIntent();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-//        unregisterReceiver(InternetReceiver);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-//        countCart();
+        countCart();
     }
 
     @Override
@@ -422,7 +471,6 @@ public class MainActivity extends AppCompatActivity
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode == AppConstants.GPS_REQUEST) {
-                Log.d(TAG, "onActivityResult : " + "GPSsssssss");
                 isContinue = false;
                 getLocation();
             }

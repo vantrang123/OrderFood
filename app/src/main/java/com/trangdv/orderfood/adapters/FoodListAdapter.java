@@ -1,7 +1,6 @@
 package com.trangdv.orderfood.adapters;
 
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,13 +27,9 @@ import com.trangdv.orderfood.database.CartItem;
 import com.trangdv.orderfood.database.LocalCartDataSource;
 import com.trangdv.orderfood.model.FavoriteOnlyId;
 import com.trangdv.orderfood.model.Food;
-import com.trangdv.orderfood.model.eventbus.FoodDetailEvent;
 import com.trangdv.orderfood.retrofit.IAnNgonAPI;
 import com.trangdv.orderfood.retrofit.RetrofitClient;
-import com.trangdv.orderfood.ui.fooddetail.FoodDetailActivity;
 import com.trangdv.orderfood.utils.DialogUtils;
-
-import org.greenrobot.eventbus.EventBus;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -117,7 +112,7 @@ public class FoodListAdapter extends RecyclerView.Adapter<FoodListAdapter.ViewHo
             holder.imgFood.setImageBitmap(foods.get(position).getBitmapImage());
         }
 
-        if (Common.currentFavOfRestaurant != null && Common.currentFavOfRestaurant.size() > 0) {
+        if (Common.currentFav != null && Common.currentFav.size() > 0) {
             if (Common.checkFavorite(foods.get(position).getId())) {
                 holder.ivFavorite.setImageResource(R.drawable.ic_favorite_red);
                 holder.ivFavorite.setTag(true);
@@ -146,9 +141,9 @@ public class FoodListAdapter extends RecyclerView.Adapter<FoodListAdapter.ViewHo
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             imgFood = itemView.findViewById(R.id.iv_food_image);
-            tvNameFood = itemView.findViewById(R.id.food_name);
-            tvPriceFood = itemView.findViewById(R.id.food_price);
-            tvDiscountFood = itemView.findViewById(R.id.food_discount);
+            tvNameFood = itemView.findViewById(R.id.tv_food_name);
+            tvPriceFood = itemView.findViewById(R.id.tv_food_price);
+            tvDiscountFood = itemView.findViewById(R.id.tv_food_discount);
             ivFavorite = itemView.findViewById(R.id.iv_favorite);
             ivCart = itemView.findViewById(R.id.iv_cart);
 
@@ -162,60 +157,13 @@ public class FoodListAdapter extends RecyclerView.Adapter<FoodListAdapter.ViewHo
             ivFavorite.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-
                     ImageView fav = (ImageView)v;
                     if ((Boolean) v.getTag()) {
                         dialogUtils.showProgress(context);
-
-                        compositeDisposable.add(
-                                anNgonAPI.removeFavorite(Common.API_KEY,
-                                        Common.currentUser.getFbid(),
-                                        foods.get(getAdapterPosition()).getId(),
-                                        Common.currentRestaurant.getId())
-                                        .subscribeOn(Schedulers.io())
-                                        .observeOn(AndroidSchedulers.mainThread())
-                                        .subscribe(favoriteModel -> {
-                                            if (favoriteModel.isSuccess() && favoriteModel.getMessage().contains("Success")) {
-                                                fav.setImageResource(R.drawable.ic_favorite_gray);
-                                                fav.setTag(false);
-                                                if (Common.currentFavOfRestaurant != null) {
-                                                    Common.removeFavorite(foods.get(getAdapterPosition()).getId());
-                                                }
-                                            }
-                                            dialogUtils.dismissProgress();
-                                        }, throwable -> {
-                                            Toast.makeText(context, "[REMOVE FAV]" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
-                                            dialogUtils.dismissProgress();
-                                        })
-                        );
+                        removeFavorite(getAdapterPosition(), fav);
                     } else {
                         dialogUtils.showProgress(context);
-
-                        compositeDisposable.add(
-                                anNgonAPI.insertFavorite(Common.API_KEY,
-                                        Common.currentUser.getFbid(),
-                                        foods.get(getAdapterPosition()).getId(),
-                                        Common.currentRestaurant.getId(),
-                                        Common.currentRestaurant.getName(),
-                                        foods.get(getAdapterPosition()).getName(),
-                                        foods.get(getAdapterPosition()).getImage(),
-                                        foods.get(getAdapterPosition()).getPrice())
-                                        .subscribeOn(Schedulers.io())
-                                        .observeOn(AndroidSchedulers.mainThread())
-                                        .subscribe(favoriteModel -> {
-                                            if (favoriteModel.isSuccess() && favoriteModel.getMessage().contains("Success")) {
-                                                fav.setImageResource(R.drawable.ic_favorite_red);
-                                                fav.setTag(true);
-                                                if (Common.currentFavOfRestaurant != null) {
-                                                    Common.currentFavOfRestaurant.add(new FavoriteOnlyId(foods.get(getAdapterPosition()).getId()));
-                                                }
-                                            }
-                                            dialogUtils.dismissProgress();
-                                        }, throwable -> {
-                                            Toast.makeText(context, "[ADD FAV]" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
-                                            dialogUtils.dismissProgress();
-                                        })
-                        );
+                        insertFavorite(getAdapterPosition(), fav);
                     }
                 }
             });
@@ -253,6 +201,57 @@ public class FoodListAdapter extends RecyclerView.Adapter<FoodListAdapter.ViewHo
                 }
             });
         }
+    }
+
+    private void removeFavorite(int adapterPosition, ImageView fav) {
+        compositeDisposable.add(
+                anNgonAPI.removeFavorite(Common.API_KEY,
+                        Common.currentUser.getFbid(),
+                        foods.get(adapterPosition).getId(),
+                        Common.currentRestaurant.getId())
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(favoriteModel -> {
+                            if (favoriteModel.isSuccess() && favoriteModel.getMessage().contains("Success")) {
+                                fav.setImageResource(R.drawable.ic_favorite_gray);
+                                fav.setTag(false);
+                                if (Common.currentFav != null) {
+                                    Common.removeFa(foods.get(adapterPosition).getId());
+                                }
+                            }
+                            dialogUtils.dismissProgress();
+                        }, throwable -> {
+                            dialogUtils.dismissProgress();
+                        })
+        );
+    }
+
+    private void insertFavorite(int position, ImageView fav) {
+        compositeDisposable.add(
+                anNgonAPI.insertFavorite(Common.API_KEY,
+                        Common.currentUser.getFbid(),
+                        foods.get(position).getId(),
+                        Common.currentRestaurant.getId(),
+                        Common.currentRestaurant.getName(),
+                        foods.get(position).getName(),
+                        foods.get(position).getImage(),
+                        foods.get(position).getPrice())
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(favoriteModel -> {
+                            if (favoriteModel.isSuccess() && favoriteModel.getMessage().contains("Success")) {
+                                fav.setImageResource(R.drawable.ic_favorite_red);
+                                fav.setTag(true);
+                                if (Common.currentFav != null) {
+                                    Common.currentFav.add(new FavoriteOnlyId(foods.get(position).getId()));
+                                }
+                            }
+                            dialogUtils.dismissProgress();
+                        }, throwable -> {
+                            Toast.makeText(context, "[ADD FAV]" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                            dialogUtils.dismissProgress();
+                        })
+        );
     }
 
     public void onStop() {

@@ -1,7 +1,7 @@
 package com.trangdv.orderfood.adapters;
 
 import android.content.Context;
-import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,7 +9,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.trangdv.orderfood.R;
@@ -22,6 +21,7 @@ import java.util.List;
 
 public class OrderAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
+    private static final String TAG = "OrderAdapter";
     private static final int VIEW_TYPE_LOADING = 1;
     private static final int VIEW_TYPE_ITEM = 0;
     private LayoutInflater mInflater;
@@ -41,9 +41,7 @@ public class OrderAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     public void addItem(List<Order> addedItems) {
         int startInsertedIndex = orderList.size();
         orderList.addAll(addedItems);
-        notifyItemInserted(startInsertedIndex-1);
-        removeNull(startInsertedIndex, addedItems.size());
-
+        notifyItemInserted(startInsertedIndex);
     }
 
     public void addNull() {
@@ -51,9 +49,13 @@ public class OrderAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         notifyItemInserted(orderList.size() - 1);
     }
 
-    public void removeNull(int size,int itemAdd) {
-        orderList.remove(size - itemAdd );
-        notifyItemRemoved(size - itemAdd );
+    public void removeNull() {
+        orderList.remove(orderList.size() - 1);
+        notifyItemRemoved(orderList.size());
+    }
+
+    public List<Order> getOrderList() {
+        return orderList;
     }
 
     @Override

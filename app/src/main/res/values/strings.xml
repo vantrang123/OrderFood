@@ -44,6 +44,8 @@
     <string name="txt_logout">Logout</string>
     <string name="txt_help">Help</string>
     <string name="txt_payments">Payments</string>
+    <string name="txt_menu">Menu</string>
+    <string name="txt_food_list">Danh sách món</string>
     <string name="txt_manage_addresses">Manage Addresses</string>
     <string name="txt_edit">Chỉnh sửa</string>
     <string name="txt_profile">Trang cá nhân</string>

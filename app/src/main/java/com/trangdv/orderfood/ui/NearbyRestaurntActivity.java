@@ -192,26 +192,31 @@ public class NearbyRestaurntActivity extends FragmentActivity implements OnMapRe
         mMap.setOnInfoWindowClickListener(marker -> {
             String id = marker.getTitle().substring(0, marker.getTitle().indexOf(","));
             if (!TextUtils.isEmpty(id)) {
-                compositeDisposable.add(
-                        anNgonAPI.getRestaurantById(Common.API_KEY, id)
-                                .subscribeOn(Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe(restaurantModel -> {
-                                            if (restaurantModel.isSuccess()) {
-                                                Common.currentRestaurant = restaurantModel.getResult().get(0);
-                                                EventBus.getDefault().postSticky(new MenuItemEvent(true, Common.currentRestaurant));
-                                                startActivity(new Intent(this, MenuActivity.class));
-                                                finish();
-                                            }
-                                            dialogUtils.dismissProgress();
-                                        },
-                                        throwable -> {
-                                            EventBus.getDefault().post(new RestaurantLoadEvent(false, throwable.getMessage()));
-                                            dialogUtils.dismissProgress();
-                                        })
-                );
+                getRestaurantById(id);
+
             }
         });
+    }
+
+    private void getRestaurantById(String id) {
+        compositeDisposable.add(
+                anNgonAPI.getRestaurantById(Common.API_KEY, id)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(restaurantModel -> {
+                                    if (restaurantModel.isSuccess()) {
+                                        Common.currentRestaurant = restaurantModel.getResult().get(0);
+                                        EventBus.getDefault().postSticky(new MenuItemEvent(true, Common.currentRestaurant));
+                                        startActivity(new Intent(this, MenuActivity.class));
+                                        finish();
+                                    }
+                                    dialogUtils.dismissProgress();
+                                },
+                                throwable -> {
+                                    EventBus.getDefault().post(new RestaurantLoadEvent(false, throwable.getMessage()));
+                                    dialogUtils.dismissProgress();
+                                })
+        );
     }
 
     @Override

@@ -14,6 +14,7 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -49,18 +50,18 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
 
-public class FoodDetailActivity extends AppCompatActivity {
+public class FoodDetailActivity extends AppCompatActivity implements View.OnClickListener {
     IAnNgonAPI anNgonAPI;
     CompositeDisposable compositeDisposable = new CompositeDisposable();
     CartDataSource cartDataSource;
     DialogUtils dialogUtils;
     Food selectedFood;
 
-    TextView tvFoodName, tvFoodPrice, tvFoodDescription, tvCart;
+    private TextView tvFoodName, tvFoodPrice, tvFoodDescription, tvCart, tvTitle;
     ImageView imgFoodImage;
     RadioGroup radioGroup;
     RecyclerView rvAddon;
-    Toolbar toolbar;
+    private ImageView ivBack;
     AppBarLayout appBarLayout;
     View lnSize, lnAddon;
 
@@ -78,6 +79,7 @@ public class FoodDetailActivity extends AppCompatActivity {
         findViewById();
         init();
         initView();
+
     }
 
     private void init() {
@@ -88,6 +90,9 @@ public class FoodDetailActivity extends AppCompatActivity {
     }
 
     private void findViewById() {
+        ivBack = findViewById(R.id.iv_back);
+        ivBack.setOnClickListener(this);
+        tvTitle = findViewById(R.id.tvTitle);
         tvFoodName = findViewById(R.id.tv_food_name);
         tvFoodPrice = findViewById(R.id.tv_food_price);
         tvFoodDescription = findViewById(R.id.tv_food_description);
@@ -95,8 +100,8 @@ public class FoodDetailActivity extends AppCompatActivity {
         radioGroup = findViewById(R.id.rdi_group_size);
         rvAddon = findViewById(R.id.rv_add_on);
         appBarLayout = findViewById(R.id.appbar_fd);
-        toolbar = findViewById(R.id.toolbar);
         tvCart = findViewById(R.id.tv_add_cart);
+        tvCart.setOnClickListener(this);
         tvFoodDescription = findViewById(R.id.tv_food_description);
         tvFoodName = findViewById(R.id.tv_food_name);
         tvFoodPrice = findViewById(R.id.tv_food_price);
@@ -106,14 +111,6 @@ public class FoodDetailActivity extends AppCompatActivity {
     }
 
     private void initView() {
-        toolbar.setTitle("Food Detail");
-        toolbar.setNavigationIcon(getResources().getDrawable(R.drawable.ic_back, this.getTheme()));
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onBackPressed();
-            }
-        });
 
         radioGroup.setOrientation(LinearLayout.HORIZONTAL);
 
@@ -122,47 +119,15 @@ public class FoodDetailActivity extends AppCompatActivity {
             public void onStateChanged(AppBarLayout appBarLayout, State state) {
                 switch (state) {
                     case COLLAPSED:
-                        toolbar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
-                        toolbar.setTitle(foodName);
+                        tvTitle.setText(foodName);
                         break;
                     case IDLE:
                     case EXPANDED:
-                        toolbar.setBackgroundColor(getResources().getColor(R.color.transparent));
-                        toolbar.setTitle("");
+                        tvTitle.setText("");
                         break;
                     default:
                         break;
                 }
-            }
-        });
-
-        tvCart.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                CartItem cartItem = new CartItem();
-                cartItem.setFoodId(selectedFood.getId());
-                cartItem.setFoodName(selectedFood.getName());
-                cartItem.setFoodPrice(selectedFood.getPrice());
-                cartItem.setFoodImage(selectedFood.getImage());
-                cartItem.setFoodQuantity(1);
-                cartItem.setUserPhone(Common.currentUser.getUserPhone());
-                cartItem.setRestaurantId(Common.currentRestaurant.getId());
-                cartItem.setFoodAddon(new Gson().toJson(Common.addonList));
-                cartItem.setFoodSize(sizeSelected);
-                cartItem.setFoodExtraPrice(extraPrice);
-                cartItem.setFbid(Common.currentUser.getFbid());
-
-                compositeDisposable.add(
-                        cartDataSource.insertOrReplaceAll(cartItem)
-                                .subscribeOn(Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe(() -> {
-                                            Toast.makeText(FoodDetailActivity.this," added to Cart", Toast.LENGTH_SHORT).show();
-                                        },
-                                        throwable -> {
-                                            Toast.makeText(FoodDetailActivity.this, "[ADD CART]" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
-                                        })
-                );
             }
         });
     }
@@ -170,7 +135,7 @@ public class FoodDetailActivity extends AppCompatActivity {
     private void setValue(Food food) {
         selectedFood = food;
         foodName = food.getName();
-        toolbar.setTitle(food.getName());
+        tvTitle.setText(foodName);
         tvFoodName.setText(food.getName());
         originalPrice = food.getPrice();
         tvFoodPrice.setText(String.valueOf(originalPrice));
@@ -329,7 +294,6 @@ public class FoodDetailActivity extends AppCompatActivity {
         } else {
             addonPrice -= event.getAddon().getExtraPrice();
         }
-
         catulatePrice();
     }
 
@@ -350,5 +314,51 @@ public class FoodDetailActivity extends AppCompatActivity {
     protected void onDestroy() {
         compositeDisposable.clear();
         super.onDestroy();
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.iv_back:
+                onBackPressed();
+                break;
+            case R.id.tv_add_cart:
+                addToCart();
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void addToCart() {
+        CartItem cartItem = new CartItem();
+        cartItem.setFoodId(selectedFood.getId());
+        cartItem.setFoodName(selectedFood.getName());
+        cartItem.setFoodPrice(selectedFood.getPrice());
+        cartItem.setFoodImage(selectedFood.getImage());
+        cartItem.setFoodQuantity(1);
+        cartItem.setUserPhone(Common.currentUser.getUserPhone());
+        if (Common.currentRestaurant != null) {
+            cartItem.setRestaurantId(Common.currentRestaurant.getId());
+        } else {
+            cartItem.setRestaurantId(1);
+        }
+
+        cartItem.setFoodAddon(new Gson().toJson(Common.addonList));
+        cartItem.setFoodSize(sizeSelected);
+        cartItem.setFoodExtraPrice(extraPrice);
+        cartItem.setFbid(Common.currentUser.getFbid());
+
+        compositeDisposable.add(
+                cartDataSource.insertOrReplaceAll(cartItem)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(() -> {
+                                    Toast.makeText(FoodDetailActivity.this," added to Cart", Toast.LENGTH_SHORT).show();
+                                },
+                                throwable -> {
+                                    Toast.makeText(FoodDetailActivity.this, "[ADD CART]" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                                })
+        );
     }
 }

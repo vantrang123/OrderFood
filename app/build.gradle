@@ -99,6 +99,8 @@ dependencies {
     // date time picker
     implementation 'com.wdullaer:materialdatetimepicker:4.2.3'
 
+    implementation 'io.paperdb:paperdb:2.6'
+
 }
 apply plugin: 'com.google.gms.google-services'
 repositories {

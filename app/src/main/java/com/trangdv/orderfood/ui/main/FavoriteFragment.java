@@ -71,7 +71,7 @@ public class FavoriteFragment extends Fragment implements FavoritesAdapter.ItemL
         ((MainActivity) getActivity()).getSupportActionBar().setTitle("Favorite");
         findViewById(view);
         initView();
-        init();
+
         return view;
     }
 
@@ -135,12 +135,10 @@ public class FavoriteFragment extends Fragment implements FavoritesAdapter.ItemL
                                 favoritesAdapter.notifyDataSetChanged();
                                 loaded = true;
                             } else {
-                                Toast.makeText(getActivity(), "[GET FAV]" + favoriteModel.getMessage(), Toast.LENGTH_SHORT).show();
                             }
                             dialogUtils.dismissProgress();
 
                         }, throwable -> {
-                            Toast.makeText(getActivity(), "[GET FAV]" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
                             dialogUtils.dismissProgress();
                         })
         );
@@ -150,7 +148,7 @@ public class FavoriteFragment extends Fragment implements FavoritesAdapter.ItemL
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-//        loadFavorite();
+        init();
     }
 
     @Override
@@ -167,7 +165,6 @@ public class FavoriteFragment extends Fragment implements FavoritesAdapter.ItemL
                             startActivity(new Intent(getContext(), FoodDetailActivity.class));
 
                         }, throwable -> {
-                            Toast.makeText(getActivity(), "[GET FOOD]" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
                             dialogUtils.dismissProgress();
                         })
         );

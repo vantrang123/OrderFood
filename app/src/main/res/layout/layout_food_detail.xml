@@ -26,14 +26,15 @@
                 android:contentDescription="@null"
                 android:scaleType="centerCrop"
                 app:layout_collapseMode="parallax" />
-            <androidx.appcompat.widget.Toolbar
+            <!--<androidx.appcompat.widget.Toolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 app:popupTheme="@style/AppTheme.PopupOverlay"
                 app:layout_collapseMode="pin"
                 app:titleTextColor="@color/colorWhite"
-                app:titleTextAppearance="@style/TextAppearance.AppCompat.Medium" />
+                app:titleTextAppearance="@style/TextAppearance.AppCompat.Medium" />-->
+
         </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -235,8 +236,6 @@
                         android:layout_height="match_parent" />
 
                 </com.github.florent37.expansionpanel.ExpansionLayout>
-
-
             </LinearLayout>
 
             <androidx.cardview.widget.CardView

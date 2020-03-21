@@ -5,6 +5,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -27,11 +28,14 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
 import com.trangdv.orderfood.R;
+import com.trangdv.orderfood.adapters.NewFeedAdapter;
 import com.trangdv.orderfood.adapters.RestaurantAdapter;
 import com.trangdv.orderfood.adapters.SuggestionAdapter;
 import com.trangdv.orderfood.common.Common;
+import com.trangdv.orderfood.listener.ILoadMore;
 import com.trangdv.orderfood.model.BannerData;
-import com.trangdv.orderfood.model.Order;
+import com.trangdv.orderfood.model.Food;
+import com.trangdv.orderfood.model.HotFood;
 import com.trangdv.orderfood.model.Restaurant;
 import com.trangdv.orderfood.model.Suggestion;
 import com.trangdv.orderfood.model.Token;
@@ -53,7 +57,6 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -62,7 +65,7 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
 
 public class HomeFragment extends Fragment implements SuggestionAdapter.ItemListener,
-        RestaurantAdapter.ItemListener {
+        RestaurantAdapter.ItemListener, NewFeedAdapter.ItemListener, ILoadMore {
     private static final String TAG = "HomeFragment";
 
     IAnNgonAPI anNgonAPI;
@@ -71,26 +74,28 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
 
     FirebaseDatabase database;
     DatabaseReference banner, suggestion;
-    RecyclerView recycler_suggestion, recycler_restaurant;
+    private RecyclerView rvSuggestion, rvRestaurant, rvNewFeed;
+    private NestedScrollView nestedScrollView;
 
-    RecyclerView.LayoutManager layoutManager;
+    RecyclerView.LayoutManager layoutManagerNewFeed;
     LinearLayoutManager linearLayoutManager;
     SwipeRefreshLayout refreshLayout;
 
-    SuggestionAdapter suggestionAdapter;
-    RestaurantAdapter restaurantAdapter;
+    private SuggestionAdapter suggestionAdapter;
+    private RestaurantAdapter restaurantAdapter;
+    private NewFeedAdapter newFeedAdapter;
 
-    List<Suggestion> suggestions = new ArrayList<>();
-    List<Restaurant> restaurantList = new ArrayList<>();
-    private BannerViewPager<BannerData, NetViewHolder> mViewPager;
-    List<BannerData> banners = new ArrayList<>();
+    private List<Suggestion> suggestions = new ArrayList<>();
+    private List<Restaurant> restaurantList = new ArrayList<>();
+    private List<Food> foodList = new ArrayList<>();
+    private BannerViewPager<HotFood, NetViewHolder> mViewPager;
+    private List<HotFood> hotFoodList = new ArrayList<>();
     IndicatorView mIndicatorView;
     RelativeLayout mRlIndicator;
     TextView mTvTitle;
-    View layoutRestaurant;
-    View layout_suggestion;
-    View layout_banner;
-    boolean loaded = false;
+    View layoutRestaurant, layoutNewFeed, layout_suggestion, layout_banner;
+    private boolean loaded = false;
+    private int maxData = 0;
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
@@ -115,20 +120,17 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
         findViewById(view);
+        initView();
         init();
         initBanner();
         return view;
     }
 
     private void findViewById(View view) {
-
-        recycler_suggestion = view.findViewById(R.id.rv_suggestion);
-        recycler_restaurant = view.findViewById(R.id.rv_restaurant);
+        rvSuggestion = view.findViewById(R.id.rv_suggestion);
+        rvRestaurant = view.findViewById(R.id.rv_restaurant);
+        rvNewFeed = view.findViewById(R.id.rv_new_feed);
         refreshLayout = view.findViewById(R.id.swr_menu);
-        refreshLayout.setColorSchemeResources(R.color.colorPrimary,
-                android.R.color.holo_green_dark,
-                android.R.color.holo_orange_dark,
-                android.R.color.holo_blue_dark);
         mRlIndicator = view.findViewById(R.id.layout_indicator);
         mViewPager = view.findViewById(R.id.banner_view);
         mTvTitle = view.findViewById(R.id.tv_title);
@@ -136,6 +138,18 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
         layoutRestaurant = view.findViewById(R.id.layout_restaurant);
         layout_suggestion = view.findViewById(R.id.layout_suggestion);
         layout_banner = view.findViewById(R.id.layout_banner);
+        layoutNewFeed = view.findViewById(R.id.layout_new_feed);
+        nestedScrollView = view.findViewById(R.id.nestedScrollView);
+    }
+
+    private void initView() {
+        refreshLayout.setColorSchemeResources(R.color.colorPrimary,
+                android.R.color.holo_green_dark,
+                android.R.color.holo_orange_dark,
+                android.R.color.holo_blue_dark);
+
+        layoutManagerNewFeed = new LinearLayoutManager(getActivity());
+        rvNewFeed.setLayoutManager(layoutManagerNewFeed);
     }
 
     private void init() {
@@ -169,11 +183,32 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
         );
     }
 
+    private void loadHotFood() {
+        dialogUtils.showProgress(getContext());
+        compositeDisposable.add(
+                anNgonAPI.getHotFood(Common.API_KEY)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(hotFoodModel -> {
+                                    if (hotFoodModel.isSuccess()) {
+                                        hotFoodList.clear();
+                                        hotFoodList.addAll(hotFoodModel.getResult());
+                                        mViewPager.create(hotFoodList);
+                                        layout_banner.setVisibility(View.VISIBLE);
+                                    } else {
+                                    }
+                                    dialogUtils.dismissProgress();
+                                },
+                                throwable -> {
+                                    dialogUtils.dismissProgress();
+                                })
+        );
+    }
+
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         database = FirebaseDatabase.getInstance();
-
         banner = database.getReference("Banner");
         suggestion = database.getReference("Suggestions");
 
@@ -190,29 +225,32 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
 
         //suggestion
         linearLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
-        recycler_suggestion.setLayoutManager(linearLayoutManager);
+        rvSuggestion.setLayoutManager(linearLayoutManager);
         suggestionAdapter = new SuggestionAdapter(getContext(), suggestions, this);
-        recycler_suggestion.setAdapter(suggestionAdapter);
+        rvSuggestion.setAdapter(suggestionAdapter);
 
-        // load restaurant
+        // restaurant near
         LinearLayoutManager restaurantLayout = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
-        recycler_restaurant.setLayoutManager(restaurantLayout);
+        rvRestaurant.setLayoutManager(restaurantLayout);
         restaurantAdapter = new RestaurantAdapter(getContext(), restaurantList, this);
-        recycler_restaurant.setAdapter(restaurantAdapter);
+        rvRestaurant.setAdapter(restaurantAdapter);
 
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                fetchData();
                 fetchNearRestaurant();
+                foodList.clear();
+                loadMaxFood();
+                loadHotFood();
             }
         });
         refreshLayout.post(new Runnable() {
             @Override
             public void run() {
-                fetchData();
                 if (!loaded) {
                     fetchNearRestaurant();
+                    loadMaxFood();
+                    loadHotFood();
                 } else {
                     showDataLoaded();
                 }
@@ -221,10 +259,24 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
         });
     }
 
+    public void scrollToTop() {
+        nestedScrollView.fullScroll(View.FOCUS_UP);
+        nestedScrollView.scrollTo(0,0);
+    }
+
     private void showDataLoaded() {
         layoutRestaurant.setVisibility(View.VISIBLE);
         restaurantAdapter = new RestaurantAdapter(getContext(), restaurantList, this);
-        recycler_restaurant.setAdapter(restaurantAdapter);
+        rvRestaurant.setAdapter(restaurantAdapter);
+
+        layoutNewFeed.setVisibility(View.VISIBLE);
+        newFeedAdapter = new NewFeedAdapter(getContext(), foodList, this, nestedScrollView, rvNewFeed);
+        rvNewFeed.setAdapter(newFeedAdapter);
+        newFeedAdapter.setiLoadMore(this);
+
+        mViewPager.create(hotFoodList);
+        layout_banner.setVisibility(View.VISIBLE);
+
     }
 
     private void fetchNearRestaurant() {
@@ -250,6 +302,7 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
         Log.e("HomeFragment", "onDetach: ");
     }
 
+/*
     public void fetchData() {
 //        dialogUtils.showProgress(getContext());
         banner.addValueEventListener(new ValueEventListener() {
@@ -273,27 +326,28 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
             }
         });
 
-        suggestion.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                suggestions.clear();
+//        suggestion.addValueEventListener(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//                suggestions.clear();
+//
+//                for (DataSnapshot dsp : dataSnapshot.getChildren()) {
+//                    Suggestion suggestion = dsp.getValue(Suggestion.class);
+//                    suggestion.setKey(dsp.getKey());
+//                    suggestions.add(suggestion);
+//                }
+//                suggestionAdapter.notifyDataSetChanged();
+//                layout_suggestion.setVisibility(View.VISIBLE);
+//            }
+//
+//            @Override
+//            public void onCancelled(@NonNull DatabaseError databaseError) {
+//
+//            }
+//        });
 
-                for (DataSnapshot dsp : dataSnapshot.getChildren()) {
-                    Suggestion suggestion = dsp.getValue(Suggestion.class);
-                    suggestion.setKey(dsp.getKey());
-                    suggestions.add(suggestion);
-                }
-                suggestionAdapter.notifyDataSetChanged();
-                layout_suggestion.setVisibility(View.VISIBLE);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-
-        /*if (currentLocation != null) {
+        */
+/*if (currentLocation != null) {
             requestNearbyRestaurant(currentLocation.getLatitude(), currentLocation.getLongitude(), 10);
         } else {
             try {
@@ -303,9 +357,67 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
 
             }
 
-        }*/
+        }*//*
 
+
+    }
+*/
+
+    private void loadMaxFood() {
+        dialogUtils.showProgress(getContext());
+        compositeDisposable.add(anNgonAPI.getMaxFood(Common.API_KEY)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(maxFoodModel -> {
+                            if (maxFoodModel.isSuccess()) {
+                                if (maxFoodModel.getResult().size() > 0) {
+                                    maxData = maxFoodModel.getResult().get(0).getMaxRowNum();
+                                    newFeedAdapter = null;
+                                    loadAllFoods(0, 10);
+                                }
+                            }
+                            dialogUtils.dismissProgress();
+                        }
+                        , throwable -> {
+                            dialogUtils.dismissProgress();
+                            Toast.makeText(getContext(), "[ERROR]" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                ));
         refreshLayout.setRefreshing(false);
+    }
+
+    private void loadAllFoods(int from, int to) {
+        compositeDisposable.add(anNgonAPI.getAllFood(Common.API_KEY,
+                from, to)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(foodModel -> {
+                            if (foodModel.isSuccess()) {
+                                if (foodModel.getResult().size() > 0) {
+                                    if (newFeedAdapter == null) {
+                                        foodList = new ArrayList<>();
+                                        foodList = foodModel.getResult();
+                                        newFeedAdapter = new NewFeedAdapter(getContext(), foodList, this, nestedScrollView, rvNewFeed);
+                                        newFeedAdapter.setiLoadMore(this);
+                                        rvNewFeed.setAdapter(newFeedAdapter);
+                                    } else {
+                                        newFeedAdapter.removeNull();
+                                        foodList = foodModel.getResult();
+                                        newFeedAdapter.addItem(foodList);
+                                        foodList.addAll(newFeedAdapter.getOrderList());
+                                    }
+                                }
+                                loaded = true;
+                                layoutNewFeed.setVisibility(View.VISIBLE);
+                            } else {
+                                newFeedAdapter.notifyItemRemoved(newFeedAdapter.getItemCount());
+                            }
+                            newFeedAdapter.setLoaded();
+                        }
+                        , throwable -> {
+                            newFeedAdapter.setLoaded();
+                        }
+                ));
     }
 
     private void fetchRestaurant() {
@@ -340,16 +452,16 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
                     @Override
                     public void onPageSelected(int position) {
                         super.onPageSelected(position);
-                        BannerData bannerData = mViewPager.getList().get(position);
-                        mTvTitle.setText(bannerData.getName());
+                        HotFood hotFood = mViewPager.getList().get(position);
+                        mTvTitle.setText(hotFood.getName());
                     }
                 })
                 .setOnPageClickListener(this::onPageClicked);
     }
 
     private void onPageClicked(int position) {
-        BannerData bannerData = mViewPager.getList().get(position);
-        Toast.makeText(getContext(), "position:" + position + " " + bannerData.getName(), Toast.LENGTH_SHORT).show();
+        HotFood hotFood = mViewPager.getList().get(position);
+        Toast.makeText(getContext(), "position:" + position + " " + hotFood.getName(), Toast.LENGTH_SHORT).show();
     }
 
     private void updateTokenShipper(String token) {
@@ -409,14 +521,23 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
     }
 
     @Override
+    public void dispatchToMenuList(int position) {
+        Common.currentRestaurant = restaurantList.get(position);
+        EventBus.getDefault().postSticky(new MenuItemEvent(true, restaurantList.get(position)));
+        getActivity().startActivity(new Intent(getContext(), MenuActivity.class));
+    }
+
+    @Override
     public void dispatchToFoodDetail(int position) {
 
     }
 
     @Override
-    public void dispatchToMenuList(int position) {
-        Common.currentRestaurant = restaurantList.get(position);
-        EventBus.getDefault().postSticky(new MenuItemEvent(true, restaurantList.get(position)));
-        getActivity().startActivity(new Intent(getContext(), MenuActivity.class));
+    public void onLoadMore() {
+        if (newFeedAdapter.getItemCount() < maxData) {
+            int from = newFeedAdapter.getItemCount() + 1;
+            newFeedAdapter.addNull();
+            loadAllFoods(from, from + 10);
+        }
     }
 }

@@ -5,11 +5,15 @@ import com.trangdv.orderfood.model.CreateOrderModel;
 import com.trangdv.orderfood.model.FavoriteModel;
 import com.trangdv.orderfood.model.FavoriteOnlyIdModel;
 import com.trangdv.orderfood.model.FoodModel;
+import com.trangdv.orderfood.model.HotFoodModel;
+import com.trangdv.orderfood.model.MaxFoodModel;
 import com.trangdv.orderfood.model.MaxOrderModel;
 import com.trangdv.orderfood.model.MenuModel;
 import com.trangdv.orderfood.model.OrderModel;
+import com.trangdv.orderfood.model.RestaurantIdModel;
 import com.trangdv.orderfood.model.RestaurantModel;
 import com.trangdv.orderfood.model.SizeModel;
+import com.trangdv.orderfood.model.TokenModel;
 import com.trangdv.orderfood.model.UpdateOrderModel;
 import com.trangdv.orderfood.model.UpdateUserModel;
 import com.trangdv.orderfood.model.UserModel;
@@ -40,6 +44,14 @@ public interface IAnNgonAPI {
     Observable<FoodModel> getFoodOfMenu(@Query("key") String apiKey,
                                         @Query("menuId") int menuId);
 
+    @GET("allfood")
+    Observable<FoodModel> getAllFood(@Query("key") String apiKey,
+                                       @Query("from") int from,
+                                       @Query("to") int to);
+
+    @GET("maxfood")
+    Observable<MaxFoodModel> getMaxFood(@Query("key") String apiKey);
+
     @GET("searchFood")
     Observable<FoodModel> searchFood(@Query("key") String apiKey,
                                      @Query("foodName") String foodName,
@@ -61,16 +73,18 @@ public interface IAnNgonAPI {
     Observable<FavoriteModel> getFavoriteByUser(@Query("key") String apiKey,
                                                 @Query("fbid") String fbid);
 
-    @GET("favoriteByRestaurant")
-    Observable<FavoriteOnlyIdModel> getFavoriteByRestaurant(@Query("key") String apiKey,
-                                                            @Query("fbid") String fbid,
-                                                            @Query("restaurantId") int restaurantId);
+    @GET("favorite")
+    Observable<FavoriteOnlyIdModel> getFavoriteOnlyId(@Query("key") String apiKey,
+                                                      @Query("fbid") String fbid);
 
     @GET("order")
     Observable<OrderModel> getOrder(@Query("key") String apiKey,
                                     @Query("orderFBID") String orderFBID,
                                     @Query("from") int from,
                                     @Query("to") int to);
+
+    @GET("hotfood")
+    Observable<HotFoodModel> getHotFood(@Query("key") String apiKey);
 
     @GET("maxorder")
     Observable<MaxOrderModel> getMaxOrder(@Query("key") String apiKey,
@@ -93,6 +107,9 @@ public interface IAnNgonAPI {
                                                @Field("userName") String userName,
                                                @Field("userAddress") String userAddress,
                                                @Field("fbid") String fbid);
+    @GET("findrestaurantid")
+    Observable<RestaurantIdModel> getRestaurantId(@Query("key") String apiKey,
+                                                  @Query("foodId") int foodId);
 
     @POST("favorite")
     @FormUrlEncoded
@@ -113,6 +130,7 @@ public interface IAnNgonAPI {
                                              @Field("orderName") String orderName,
                                              @Field("orderAddress") String orderAddress,
                                              @Field("orderDate") String orderDate,
+                                             @Field("restaurantId") int restaurantId,
                                              @Field("transactionId") String transactionId,
                                              @Field("cod") boolean cod,
                                              @Field("totalPrice") Double totalPrice,
@@ -130,5 +148,13 @@ public interface IAnNgonAPI {
                                              @Query("foodId") int foodId,
                                              @Query("restaurantId") int restaurantId);
 
+    @GET("token")
+    Observable<TokenModel> getToken(@Query("key") String apiKey,
+                                    @Query("fbid") String fbid);
 
+    @POST("token")
+    @FormUrlEncoded
+    Observable<TokenModel> updateToken(@Field("key") String apiKey,
+                                       @Field("fbid") String fbid,
+                                       @Field("token") String token);
 }

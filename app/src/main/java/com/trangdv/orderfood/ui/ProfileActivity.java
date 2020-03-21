@@ -26,7 +26,6 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
         setContentView(R.layout.activity_profile);
 
         findViewById();
-
         setData();
     }
 
@@ -57,7 +56,7 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
                 confirmLogout();
                 break;
             case R.id.iv_back:
-                finish();
+                onBackPressed();
                 break;
             default:
                 break;

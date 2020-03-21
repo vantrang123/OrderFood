@@ -2,6 +2,7 @@ package com.trangdv.orderfood.service;
 
 import android.app.Activity;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
@@ -13,38 +14,45 @@ import com.google.firebase.iid.InstanceIdResult;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.trangdv.orderfood.common.Common;
 import com.trangdv.orderfood.model.Token;
+import com.trangdv.orderfood.retrofit.IAnNgonAPI;
+import com.trangdv.orderfood.retrofit.RetrofitClient;
+
+import io.paperdb.Paper;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.schedulers.Schedulers;
 
 public class MyFirebaseIdService extends FirebaseMessagingService {
     private static final String TAG = "MyFirebaseIdService";
+    IAnNgonAPI anNgonAPI;
+    CompositeDisposable compositeDisposable;
 
     @Override
-    public void onNewToken(@NonNull String s) {
-        super.onNewToken(s);
-
-        FirebaseInstanceId.getInstance()
-                .getInstanceId()
-                .addOnSuccessListener(
-                        (Activity) getApplicationContext()
-                        , new OnSuccessListener<InstanceIdResult>() {
-                            @Override
-                            public void onSuccess(InstanceIdResult instanceIdResult) {
-                                String newToken = instanceIdResult.getToken();
-                                Log.e("newToken", newToken);
-                                if (Common.currentUser != null) {
-                                    updateToServer(newToken);
-                                }
-
-                            }
-                        });
+    public void onCreate() {
+        super.onCreate();
+        init();
     }
 
-    private void updateToServer(String refreshedToken) {
+    private void init() {
+        anNgonAPI = RetrofitClient.getInstance(Common.API_ANNGON_ENDPOINT).create(IAnNgonAPI.class);
+        compositeDisposable = new CompositeDisposable();
+    }
 
-        FirebaseDatabase db = FirebaseDatabase.getInstance();
-        DatabaseReference tokens = db.getReference("Tokens");
-        Token data = new Token(refreshedToken, false);
-        // false because token send from client app
+    @Override
+    public void onNewToken(@NonNull String newToken) {
+        super.onNewToken(newToken);
+        String fbid = Paper.book().read(Common.REMENBER_FBID);
+        String apiKey = Paper.book().read(Common.API_KEY_TAG);
 
-        tokens.child(Common.currentUser.getUserPhone()).setValue(data);
+        compositeDisposable.add(anNgonAPI.updateToken(apiKey,fbid,newToken)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(tokenModel -> {
+
+                        }
+                        , throwable -> {
+                            Toast.makeText(this, "[REFRESH TOKEN]" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                ));
     }
 }

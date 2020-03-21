@@ -20,10 +20,12 @@ import com.trangdv.orderfood.common.Common;
 import com.trangdv.orderfood.database.CartDataSource;
 import com.trangdv.orderfood.database.CartDatabase;
 import com.trangdv.orderfood.database.LocalCartDataSource;
-import com.trangdv.orderfood.model.eventbus.RestaurantLoadEvent;
+import com.trangdv.orderfood.model.FCMSendData;
 import com.trangdv.orderfood.model.eventbus.SendTotalCashEvent;
+import com.trangdv.orderfood.remote.IFCMService;
 import com.trangdv.orderfood.retrofit.IAnNgonAPI;
 import com.trangdv.orderfood.retrofit.RetrofitClient;
+import com.trangdv.orderfood.retrofit.RetrofitFCMClient;
 import com.trangdv.orderfood.ui.main.MainActivity;
 import com.trangdv.orderfood.utils.DialogUtils;
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
@@ -33,6 +35,8 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 
 import io.reactivex.SingleObserver;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -46,6 +50,8 @@ public class PlaceOrderActivity extends AppCompatActivity implements View.OnClic
     CompositeDisposable compositeDisposable;
     CartDataSource cartDataSource;
     DialogUtils dialogUtils;
+    IFCMService ifcmService;
+
 
     private ImageView ivBack;
     private EditText edtDate;
@@ -69,6 +75,7 @@ public class PlaceOrderActivity extends AppCompatActivity implements View.OnClic
         compositeDisposable = new CompositeDisposable();
         cartDataSource = new LocalCartDataSource(CartDatabase.getInstance(this).cartDAO());
         dialogUtils = new DialogUtils();
+        ifcmService = RetrofitFCMClient.getInstance(Common.fcmUrl).create(IFCMService.class);
     }
 
     private void findViewById() {
@@ -150,6 +157,7 @@ public class PlaceOrderActivity extends AppCompatActivity implements View.OnClic
     }
 
     private void getOrderNumber(boolean isOnlinePayment) {
+        dialogUtils.showProgress(this);
         if (!isOnlinePayment) {
             String address = ckbDefaultAddress.isChecked() ? tvUserAddress.getText().toString() : "???";
             compositeDisposable.add(cartDataSource.getAllCart(Common.currentUser.getFbid())
@@ -163,6 +171,7 @@ public class PlaceOrderActivity extends AppCompatActivity implements View.OnClic
                                                 Common.currentUser.getName(),
                                                 address,
                                                 edtDate.getText().toString(),
+                                                Common.currentRestaurant.getId(),
                                                 "NONE",
                                                 true,
                                                 Double.valueOf(tvPrice.getText().toString()),
@@ -192,29 +201,51 @@ public class PlaceOrderActivity extends AppCompatActivity implements View.OnClic
 
                                                                                                             @Override
                                                                                                             public void onSuccess(Integer integer) {
-                                                                                                                Intent intent = new Intent(PlaceOrderActivity.this, MainActivity.class);
+                                                                                                                /*Intent intent = new Intent(PlaceOrderActivity.this, MainActivity.class);
                                                                                                                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                                                                                                                 startActivity(intent);
-                                                                                                                finish();
+                                                                                                                finish();*/
+                                                                                                                Map<String,String> dataSend = new HashMap<>();
+                                                                                                                dataSend.put(Common.NOTIFI_TITLE, "New Order");
+                                                                                                                dataSend.put(Common.NOTIFI_CONTENT, "You have new order" + createOrderModel.getResult().get(0));
+
+                                                                                                                FCMSendData sendData = new FCMSendData(Common.createTopicSender(
+                                                                                                                        Common.getTopicChannel(
+                                                                                                                                Common.currentRestaurant.getId()
+                                                                                                                        )), dataSend);
+
+                                                                                                                compositeDisposable.add(ifcmService.sendNotification(sendData)
+                                                                                                                        .subscribeOn(Schedulers.io())
+                                                                                                                        .observeOn(AndroidSchedulers.mainThread())
+                                                                                                                        .subscribe(fcmResponse -> {
+                                                                                                                            Intent intent = new Intent(PlaceOrderActivity.this, MainActivity.class);
+                                                                                                                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                                                                                                            startActivity(intent);
+                                                                                                                            finish();
+                                                                                                                            dialogUtils.dismissProgress();
+                                                                                                                        }, throwable -> {
+                                                                                                                            Intent intent = new Intent(PlaceOrderActivity.this, MainActivity.class);
+                                                                                                                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                                                                                                            startActivity(intent);
+                                                                                                                            finish();
+                                                                                                                            dialogUtils.dismissProgress();
+                                                                                                                        } )
+                                                                                                                );
                                                                                                             }
 
                                                                                                             @Override
                                                                                                             public void onError(Throwable e) {
-                                                                                                                Toast.makeText(PlaceOrderActivity.this, "[ERROR]" + e.getMessage(), Toast.LENGTH_SHORT).show();
-
+                                                                                                                dialogUtils.dismissProgress();
                                                                                                             }
                                                                                                         });
-
                                                                                             }
-                                                                                            dialogUtils.dismissProgress();
+
                                                                                         },
                                                                                         throwable -> {
-//                                                                                            Toast.makeText(this, "[ERROR]" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
                                                                                             dialogUtils.dismissProgress();
                                                                                         })
                                                                 );
                                                             }
-                                                            dialogUtils.dismissProgress();
                                                         },
                                                         throwable -> {
                                                             dialogUtils.dismissProgress();
@@ -223,7 +254,7 @@ public class PlaceOrderActivity extends AppCompatActivity implements View.OnClic
                                 );
                             },
                             throwable -> {
-//                                Toast.makeText(this, "[ERROR]" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                                Toast.makeText(this, "[ERROR]" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
                                 dialogUtils.dismissProgress();
                             }));
         }
@@ -253,6 +284,7 @@ public class PlaceOrderActivity extends AppCompatActivity implements View.OnClic
 
     @Override
     protected void onStop() {
+        dialogUtils.dismissProgress();
         EventBus.getDefault().unregister(this);
         super.onStop();
     }

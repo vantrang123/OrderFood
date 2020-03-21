@@ -21,7 +21,6 @@ import com.bumptech.glide.request.target.Target;
 import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.common.Common;
 import com.trangdv.orderfood.model.Favorite;
-import com.trangdv.orderfood.model.Restaurant;
 import com.trangdv.orderfood.retrofit.IAnNgonAPI;
 import com.trangdv.orderfood.retrofit.RetrofitClient;
 import com.trangdv.orderfood.utils.DialogUtils;
@@ -107,9 +106,9 @@ public class FavoritesAdapter extends RecyclerView.Adapter<FavoritesAdapter.View
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             imgFood = itemView.findViewById(R.id.iv_food_image);
-            tvNameFood = itemView.findViewById(R.id.food_name);
-            tvPriceFood = itemView.findViewById(R.id.food_price);
-            tvDiscountFood = itemView.findViewById(R.id.food_discount);
+            tvNameFood = itemView.findViewById(R.id.tv_food_name);
+            tvPriceFood = itemView.findViewById(R.id.tv_food_price);
+            tvDiscountFood = itemView.findViewById(R.id.tv_food_discount);
             ivFavorite = itemView.findViewById(R.id.iv_favorite);
 
             itemView.setOnClickListener(new View.OnClickListener() {
@@ -134,11 +133,13 @@ public class FavoritesAdapter extends RecyclerView.Adapter<FavoritesAdapter.View
                                     .observeOn(AndroidSchedulers.mainThread())
                                     .subscribe(favoriteModel -> {
                                         if (favoriteModel.isSuccess() && favoriteModel.getMessage().contains("Success")) {
+                                            if (Common.currentFav != null) {
+                                                Common.removeFa(favoritesList.get(getAdapterPosition()).getFoodId());
+                                            }
                                             removeItem(getAdapterPosition());
                                         }
                                         dialogUtils.dismissProgress();
                                     }, throwable -> {
-                                        Toast.makeText(context, "[REMOVE FAV]" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
                                         dialogUtils.dismissProgress();
                                     })
                     );

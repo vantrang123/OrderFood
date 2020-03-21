@@ -3,6 +3,7 @@ package com.trangdv.orderfood.ui.menu;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -38,7 +39,7 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-public class MenuActivity extends AppCompatActivity implements MenuAdapter.ItemListener {
+public class MenuActivity extends AppCompatActivity implements MenuAdapter.ItemListener, View.OnClickListener {
 
     IAnNgonAPI anNgonAPI;
     CompositeDisposable compositeDisposable = new CompositeDisposable();
@@ -48,7 +49,7 @@ public class MenuActivity extends AppCompatActivity implements MenuAdapter.ItemL
     private MenuAdapter menuAdapter;
     private ShimmerFrameLayout mShimmerViewContainer;
 
-    private Toolbar toolbar;
+    private ImageView ivBack;
     private RecyclerView rvMenu;
     private RecyclerView.LayoutManager layoutManager;
 
@@ -58,39 +59,13 @@ public class MenuActivity extends AppCompatActivity implements MenuAdapter.ItemL
         setContentView(R.layout.activity_menu);
 
         findViewById();
-
         init();
-        setupToolBar();
-
-        countCartByRestaurant();
-        loadFavByRes();
-    }
-
-    private void loadFavByRes() {
-
-        compositeDisposable.add(
-                anNgonAPI.getFavoriteByRestaurant(Common.API_KEY, Common.currentUser.getFbid(), Common.currentRestaurant.getId())
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(favoriteOnlyIdModel -> {
-                            if (favoriteOnlyIdModel.isSuccess()) {
-                                if (favoriteOnlyIdModel.getResult() != null && favoriteOnlyIdModel.getResult().size() >0) {
-                                    Common.currentFavOfRestaurant = favoriteOnlyIdModel.getResult();
-                                }
-                            } else {
-                                Common.currentFavOfRestaurant = new ArrayList<>();
-                            }
-
-                        }, throwable -> {
-                            Toast.makeText(MenuActivity.this, "[GET FAV BY RES]" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
-
-                        })
-        );
     }
 
     private void findViewById() {
         rvMenu = findViewById(R.id.rv_menu);
-        toolbar = findViewById(R.id.toolbar);
+        ivBack = findViewById(R.id.iv_back);
+        ivBack.setOnClickListener(this);
         mShimmerViewContainer = findViewById(R.id.shimmer_view_container);
     }
 
@@ -101,45 +76,9 @@ public class MenuActivity extends AppCompatActivity implements MenuAdapter.ItemL
         rvMenu.setAdapter(menuAdapter);
 
         anNgonAPI = RetrofitClient.getInstance(Common.API_ANNGON_ENDPOINT).create(IAnNgonAPI.class);
-
         cartDataSource = new LocalCartDataSource(CartDatabase.getInstance(this).cartDAO());
 
     }
-
-    private void setupToolBar() {
-        toolbar.setTitle("Menu");
-        toolbar.setNavigationIcon(getResources().getDrawable(R.drawable.ic_back, this.getTheme()));
-        setSupportActionBar(toolbar);
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onBackPressed();
-            }
-        });
-    }
-
-    private void countCartByRestaurant() {
-        cartDataSource.countCart(Common.currentUser.getFbid())
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new SingleObserver<Integer>() {
-                    @Override
-                    public void onSubscribe(Disposable d) {
-
-                    }
-
-                    @Override
-                    public void onSuccess(Integer integer) {
-//                        Toast.makeText(MenuActivity.this, "[COUNT CART]" + String.valueOf(integer), Toast.LENGTH_SHORT).show();
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-//                        Toast.makeText(MenuActivity.this, "[COUNT CART]" + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                });
-    }
-
 
     @Override
     public void onStart() {
@@ -151,7 +90,6 @@ public class MenuActivity extends AppCompatActivity implements MenuAdapter.ItemL
     @Override
     protected void onResume() {
         super.onResume();
-//        countCartByRestaurant();
     }
 
     @Override
@@ -175,7 +113,6 @@ public class MenuActivity extends AppCompatActivity implements MenuAdapter.ItemL
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     public void loadMenuByRestaurant(MenuItemEvent event) {
         if (event.isSuccess()) {
-            toolbar.setTitle(event.getRestaurant().getName());
             // request category by restaurant id
             compositeDisposable.add(
                     anNgonAPI.getCategories(Common.API_KEY, event.getRestaurant().getId())
@@ -203,5 +140,16 @@ public class MenuActivity extends AppCompatActivity implements MenuAdapter.ItemL
     public void dispatchToFoodList(int position) {
         EventBus.getDefault().postSticky(new FoodListEvent(true, categoryList.get(position)));
         startActivity(new Intent(this, FoodActivity.class));
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.iv_back:
+                onBackPressed();
+                break;
+            default:
+                break;
+        }
     }
 }

@@ -1,7 +1,6 @@
 package com.trangdv.orderfood.ui.main;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -33,24 +32,19 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.material.snackbar.Snackbar;
 import com.trangdv.orderfood.R;
-import com.trangdv.orderfood.adapters.FoodListAdapter;
 import com.trangdv.orderfood.common.Common;
 import com.trangdv.orderfood.database.CartDataSource;
 import com.trangdv.orderfood.database.CartDatabase;
 import com.trangdv.orderfood.database.CartItem;
 import com.trangdv.orderfood.database.LocalCartDataSource;
-import com.trangdv.orderfood.model.Food;
 import com.trangdv.orderfood.model.Order;
 import com.trangdv.orderfood.adapters.CartAdapter;
 import com.trangdv.orderfood.model.eventbus.CaculatePriceEvent;
-import com.trangdv.orderfood.model.eventbus.FoodDetailEvent;
 import com.trangdv.orderfood.model.eventbus.SendTotalCashEvent;
-import com.trangdv.orderfood.remote.APIService;
+import com.trangdv.orderfood.remote.IFCMService;
 import com.trangdv.orderfood.retrofit.IAnNgonAPI;
 import com.trangdv.orderfood.retrofit.RetrofitClient;
 import com.trangdv.orderfood.ui.PlaceOrderActivity;
-import com.trangdv.orderfood.ui.dialog.ClickItemCartDialog;
-import com.trangdv.orderfood.ui.fooddetail.FoodDetailActivity;
 import com.trangdv.orderfood.utils.DialogUtils;
 
 import org.greenrobot.eventbus.EventBus;
@@ -59,7 +53,6 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 import io.reactivex.SingleObserver;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -72,7 +65,6 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
         CartAdapter.ItemListener {
 
 
-    APIService mService;
     IAnNgonAPI anNgonAPI;
     CompositeDisposable compositeDisposable = new CompositeDisposable();
     DialogUtils dialogUtils;
@@ -147,8 +139,6 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
         recyclerView.setLayoutManager(layoutManager);
 //        loadListFood();
         getAllItemInCart();
-
-        mService = Common.getFCMClient();
     }
 
     @Override

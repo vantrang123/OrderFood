@@ -125,36 +125,8 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void authLogin() {
-//        table_user.addValueEventListener(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-//                //check if user not exist in firebaseDatabase
-//                if (dataSnapshot.child(phonenumber).exists()) {
-//                    User user = dataSnapshot.child(phonenumber).getValue(User.class);
-//           }         user.setPhone(phonenumber);
-////
-////                    if (user.getPassword().equals(password)) {
-////                        SharedPrefs.getInstance().put(SplashActivity.CHECK_ALREADLY_LOGIN, 1);
-////
-////                        //save user in share pref
-////                        SharedPrefs.getInstance().put(SAVE_USER, user);
-////                        intoHome(user);
-////                    } else {
-////                        Toast.makeText(LoginActivity.this, "Wrong Password !", Toast.LENGTH_SHORT).show();
-////                    }
-////                } else {
-////                    Toast.makeText(LoginActivity.this, "User not exist in Database !", Toast.LENGTH_SHORT).show();
-////                }
-////            }
-////
-////            @Override
-////            public void onCancelled(@NonNull DatabaseError databaseError) {
-////
-////
-//        });
-
             compositeDisposable.add(
-                    anNgonAPI.getUser(Common.API_KEY, "2739799736047038")
+                    anNgonAPI.getUser(Common.API_KEY, "Uav4Km2CPpbUVj2ZVbFGDfjAolw1")
                             .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe(userModel -> {

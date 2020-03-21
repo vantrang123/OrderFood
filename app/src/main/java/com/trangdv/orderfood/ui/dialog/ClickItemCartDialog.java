@@ -12,11 +12,9 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.common.Common;
-import com.trangdv.orderfood.database.CartDatabase;
-import com.trangdv.orderfood.database.LocalCartDataSource;
 import com.trangdv.orderfood.model.Food;
 import com.trangdv.orderfood.model.eventbus.FoodDetailEvent;
-import com.trangdv.orderfood.remote.APIService;
+import com.trangdv.orderfood.remote.IFCMService;
 import com.trangdv.orderfood.retrofit.IAnNgonAPI;
 import com.trangdv.orderfood.retrofit.RetrofitClient;
 import com.trangdv.orderfood.ui.fooddetail.FoodDetailActivity;
@@ -37,7 +35,7 @@ public class ClickItemCartDialog extends BottomSheetDialogFragment implements Vi
     private int position;
     private int foodId;
     DialogUtils dialogUtils;
-    APIService mService;
+    IFCMService mService;
     IAnNgonAPI anNgonAPI;
     CompositeDisposable compositeDisposable = new CompositeDisposable();
 
