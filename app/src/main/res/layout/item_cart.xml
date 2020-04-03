@@ -37,7 +37,7 @@
         android:layout_width="26dp"
         android:layout_height="26dp"
         android:src="@drawable/ic_sub"
-        android:tint="@color/colorOrange"
+        android:tint="@color/colorAccent"
         android:background="@drawable/bg_circle_button"
         app:layout_constraintRight_toLeftOf="@id/tv_quantity"
         app:layout_constraintTop_toTopOf="parent"

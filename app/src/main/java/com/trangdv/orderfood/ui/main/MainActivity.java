@@ -74,6 +74,7 @@ import static com.trangdv.orderfood.ui.LoginActivity.SAVE_USER;
 public class MainActivity extends AppCompatActivity
         implements InternetConnector.BroadcastListener, View.OnClickListener {
     private static final String TAG = "MainActivity";
+    public static final String KEY_CHANGE_STATUS = "change status";
 
     IAnNgonAPI anNgonAPI;
     CompositeDisposable compositeDisposable;
@@ -323,7 +324,7 @@ public class MainActivity extends AppCompatActivity
         return getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.vp_main + ":" + viewPager.getCurrentItem());
     }
 
-    private void countCart() {
+    public void countCart() {
         cartDataSource.countCart(Common.currentUser.getFbid())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -454,10 +455,12 @@ public class MainActivity extends AppCompatActivity
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.rlSearchBg:
+                dialogUtils.showProgress(this);
                 Intent intent = new Intent(this, SearchActivity.class);
                 startActivity(intent);
                 break;
             case R.id.iv_user:
+                dialogUtils.showProgress(this);
                 Intent intent1 = new Intent(this, ProfileActivity.class);
                 startActivity(intent1);
                 break;
@@ -475,5 +478,11 @@ public class MainActivity extends AppCompatActivity
                 getLocation();
             }
         }
+    }
+
+    @Override
+    protected void onStop() {
+        dialogUtils.dismissProgress();
+        super.onStop();
     }
 }

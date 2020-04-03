@@ -136,7 +136,7 @@ public class FoodListAdapter extends RecyclerView.Adapter<FoodListAdapter.ViewHo
         public TextView tvNameFood;
         public TextView tvPriceFood;
         public TextView tvDiscountFood;
-        public ImageView ivFavorite, ivCart;
+        public ImageView ivFavorite;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -145,7 +145,6 @@ public class FoodListAdapter extends RecyclerView.Adapter<FoodListAdapter.ViewHo
             tvPriceFood = itemView.findViewById(R.id.tv_food_price);
             tvDiscountFood = itemView.findViewById(R.id.tv_food_discount);
             ivFavorite = itemView.findViewById(R.id.iv_favorite);
-            ivCart = itemView.findViewById(R.id.iv_cart);
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -168,38 +167,6 @@ public class FoodListAdapter extends RecyclerView.Adapter<FoodListAdapter.ViewHo
                 }
             });
 
-            ivCart.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    dialogUtils.showProgress(context);
-                    CartItem cartItem = new CartItem();
-                    cartItem.setFoodId(foods.get(getLayoutPosition()).getId());
-                    cartItem.setFoodName(foods.get(getLayoutPosition()).getName());
-                    cartItem.setFoodPrice(foods.get(getLayoutPosition()).getPrice());
-                    cartItem.setFoodImage(foods.get(getLayoutPosition()).getImage());
-                    cartItem.setFoodQuantity(1);
-                    cartItem.setUserPhone(Common.currentUser.getUserPhone());
-                    cartItem.setRestaurantId(Common.currentRestaurant.getId());
-                    cartItem.setFoodAddon("NOMAL");
-                    cartItem.setFoodSize("NOMAL");
-                    cartItem.setFoodExtraPrice(0.0);
-                    cartItem.setFbid(Common.currentUser.getFbid());
-
-                    compositeDisposable.add(
-                            cartDataSource.insertOrReplaceAll(cartItem)
-                                    .subscribeOn(Schedulers.io())
-                                    .observeOn(AndroidSchedulers.mainThread())
-                                    .subscribe(() -> {
-                                                Toast.makeText(context, " added to Cart", Toast.LENGTH_SHORT).show();
-                                                dialogUtils.dismissProgress();
-                                            },
-                                            throwable -> {
-                                                Toast.makeText(context, "[ADD CART]" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
-                                                dialogUtils.dismissProgress();
-                                            })
-                    );
-                }
-            });
         }
     }
 
@@ -216,7 +183,7 @@ public class FoodListAdapter extends RecyclerView.Adapter<FoodListAdapter.ViewHo
                                 fav.setImageResource(R.drawable.ic_favorite_gray);
                                 fav.setTag(false);
                                 if (Common.currentFav != null) {
-                                    Common.removeFa(foods.get(adapterPosition).getId());
+                                    Common.removeFav(foods.get(adapterPosition).getId());
                                 }
                             }
                             dialogUtils.dismissProgress();
@@ -232,7 +199,6 @@ public class FoodListAdapter extends RecyclerView.Adapter<FoodListAdapter.ViewHo
                         Common.currentUser.getFbid(),
                         foods.get(position).getId(),
                         Common.currentRestaurant.getId(),
-                        Common.currentRestaurant.getName(),
                         foods.get(position).getName(),
                         foods.get(position).getImage(),
                         foods.get(position).getPrice())
@@ -248,7 +214,6 @@ public class FoodListAdapter extends RecyclerView.Adapter<FoodListAdapter.ViewHo
                             }
                             dialogUtils.dismissProgress();
                         }, throwable -> {
-                            Toast.makeText(context, "[ADD FAV]" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
                             dialogUtils.dismissProgress();
                         })
         );

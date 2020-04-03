@@ -1,13 +1,22 @@
 package com.trangdv.orderfood.model;
 
 public class User {
-    private String fbid, userPhone, name, address;
+    private String fbid, userPhone, name, address, password;
 
-    public User(String fbid, String userPhone, String name, String address) {
+    public User(String fbid, String userPhone, String name, String address, String password) {
         this.fbid = fbid;
         this.userPhone = userPhone;
         this.name = name;
         this.address = address;
+        this.password = password;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public String getFbid() {

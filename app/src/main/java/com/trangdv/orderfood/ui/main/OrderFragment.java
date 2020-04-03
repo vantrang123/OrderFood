@@ -1,5 +1,6 @@
 package com.trangdv.orderfood.ui.main;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.LayoutInflater;
@@ -23,6 +24,7 @@ import com.trangdv.orderfood.common.Common;
 import com.trangdv.orderfood.model.Order;
 import com.trangdv.orderfood.retrofit.IAnNgonAPI;
 import com.trangdv.orderfood.retrofit.RetrofitClient;
+import com.trangdv.orderfood.ui.orderdetail.OrderDetailActivity;
 import com.trangdv.orderfood.utils.DialogUtils;
 
 import java.util.ArrayList;
@@ -34,6 +36,7 @@ import io.reactivex.schedulers.Schedulers;
 
 public class OrderFragment extends Fragment implements OrderAdapter.ItemListener {
     private static final String TAG = "OrderFragment";
+    private static final int REQUEST_CODE_ORDER_DETAIL = 2020;
     IAnNgonAPI anNgonAPI;
     CompositeDisposable compositeDisposable;
     DialogUtils dialogUtils;
@@ -46,6 +49,7 @@ public class OrderFragment extends Fragment implements OrderAdapter.ItemListener
     private int maxData = 0;
     boolean isLoading = false;
     boolean loaded = false;
+    private int idItemSelected;
 
     LayoutAnimationController layoutAnimationController;
 
@@ -124,7 +128,7 @@ public class OrderFragment extends Fragment implements OrderAdapter.ItemListener
     private void initView() {
         layoutManager = new LinearLayoutManager(getActivity());
         rvListOrder.setLayoutManager(layoutManager);
-        rvListOrder.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
+//        rvListOrder.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
         layoutAnimationController = AnimationUtils.loadLayoutAnimation(getContext(), R.anim.layout_item_from_left);
         refreshLayout.setColorSchemeResources(R.color.colorPrimary,
                 android.R.color.holo_green_dark,
@@ -158,7 +162,7 @@ public class OrderFragment extends Fragment implements OrderAdapter.ItemListener
                         }
                         , throwable -> {
                             dialogUtils.dismissProgress();
-                            Toast.makeText(getContext(), "[ERROR]" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getContext(), "[ERROR LOAD MAX ORDER]" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
                         }
                 ));
         refreshLayout.setRefreshing(false);
@@ -231,6 +235,7 @@ public class OrderFragment extends Fragment implements OrderAdapter.ItemListener
 
     @Override
     public void onStop() {
+        dialogUtils.dismissProgress();
         super.onStop();
     }
 
@@ -247,6 +252,8 @@ public class OrderFragment extends Fragment implements OrderAdapter.ItemListener
 
     @Override
     public void dispatchToOrderDetail(int position) {
-
+        dialogUtils.showProgress(getContext());
+        idItemSelected = position;
+        startActivityForResult(new Intent(getContext(), OrderDetailActivity.class), REQUEST_CODE_ORDER_DETAIL);
     }
 }

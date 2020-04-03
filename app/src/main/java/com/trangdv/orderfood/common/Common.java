@@ -14,6 +14,7 @@ import androidx.core.app.NotificationCompat;
 import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.model.Addon;
 import com.trangdv.orderfood.model.FavoriteOnlyId;
+import com.trangdv.orderfood.model.Order;
 import com.trangdv.orderfood.model.Restaurant;
 import com.trangdv.orderfood.model.User;
 
@@ -25,6 +26,7 @@ public class Common {
     public static final String API_KEY = "1234";
     public static User currentUser;
     public static Restaurant currentRestaurant;
+    public static Order currentOrder;
     public static int currentRestaurantId;
     public static final String DELETE = "Delete";
     public static String PHONE_TEXT = "userPhone";
@@ -43,15 +45,15 @@ public class Common {
     public static String convertCodeToStatus(int code) {
         switch (code) {
             case 0:
-                return "Placed";
+                return "Đã đặt";
             case 1:
-                return "Shipping";
+                return "Đang giao";
             case 2:
-                return "Shipped";
+                return "Đã giao";
             case -1:
-                return "Cancelled";
+                return "Đã hủy";
             default:
-                return "Cancelled";
+                return "Đã hủy";
         }
     }
 
@@ -65,7 +67,7 @@ public class Common {
         return result;
     }
 
-    public static void removeFa(int id) {
+    public static void removeFav(int id) {
         for (FavoriteOnlyId item : currentFav) {
             if (item.getFoodId() == id) {
                 currentFav.remove(item);

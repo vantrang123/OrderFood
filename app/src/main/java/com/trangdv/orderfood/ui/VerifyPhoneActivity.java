@@ -25,6 +25,7 @@ import com.trangdv.orderfood.common.Common;
 import com.trangdv.orderfood.retrofit.IAnNgonAPI;
 import com.trangdv.orderfood.retrofit.RetrofitClient;
 import com.trangdv.orderfood.ui.main.MainActivity;
+import com.trangdv.orderfood.utils.DialogUtils;
 import com.trangdv.orderfood.utils.SharedPrefs;
 
 import java.util.Locale;
@@ -40,6 +41,7 @@ public class VerifyPhoneActivity extends AppCompatActivity {
 
     private String verificationId;
     private String phoneNumber;
+    private String phoneFormat;
     private String userName;
     private String password;
     private FirebaseAuth mAuth;
@@ -50,6 +52,7 @@ public class VerifyPhoneActivity extends AppCompatActivity {
 
     IAnNgonAPI anNgonAPI;
     CompositeDisposable compositeDisposable = new CompositeDisposable();
+    DialogUtils dialogUtils;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,9 +68,10 @@ public class VerifyPhoneActivity extends AppCompatActivity {
             phoneNumber = bundle.getString("phoneNumber", "");
             userName = bundle.getString("userName", "");
             password = bundle.getString("password", "");
+            phoneFormat = bundle.getString("phoneFormat", "");
         }
 //        phoneNumber = getIntent().getStringExtra("phoneNumber");
-        sendVerificationCode(phoneNumber);
+        sendVerificationCode(phoneFormat);
 
         /*// save phone number
         SharedPreferences prefs = getApplicationContext().getSharedPreferences("USER_PREF",
@@ -105,6 +109,7 @@ public class VerifyPhoneActivity extends AppCompatActivity {
 
     private void init() {
         anNgonAPI = RetrofitClient.getInstance(Common.API_ANNGON_ENDPOINT).create(IAnNgonAPI.class);
+        dialogUtils = new DialogUtils();
     }
 
     private void verifyCode(String code) {
@@ -146,21 +151,23 @@ public class VerifyPhoneActivity extends AppCompatActivity {
     }
 
     private void updateUserInfo(String phoneNumber, String userName, String password) {
+        dialogUtils.showProgress(this);
         FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         if (firebaseUser != null) {
             compositeDisposable.add(
                     anNgonAPI.updateUserInfo(Common.API_KEY,
                             phoneNumber,
                             userName,
-                            password,
-                            firebaseUser.getUid())
+                            "",
+                            firebaseUser.getUid(),
+                            password)
                             .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe(updateUserModel -> {
                                         if (updateUserModel.isSuccess()) {
                                             // save curreentUser
                                             compositeDisposable.add(
-                                                    anNgonAPI.getUser(Common.API_KEY, firebaseUser.getUid())
+                                                    anNgonAPI.getUser(Common.API_KEY, phoneNumber, password)
                                                             .subscribeOn(Schedulers.io())
                                                             .observeOn(AndroidSchedulers.mainThread())
                                                             .subscribe(userModel -> {
@@ -177,27 +184,31 @@ public class VerifyPhoneActivity extends AppCompatActivity {
                                                                             gotoMainActivity();
                                                                         } else {
                                                                             Toast.makeText(this, "[GET USER API ERROR]", Toast.LENGTH_SHORT).show();
+                                                                            dialogUtils.dismissProgress();
                                                                         }
 
                                                                     },
                                                                     throwable -> {
+                                                                        dialogUtils.dismissProgress();
                                                                         Toast.makeText(this, "[GET USER API]" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
                                                                     }
                                                             ));
-                                            Toast.makeText(this, "[UPDATE USER API SUCCESS!!!]" + updateUserModel.getMessage(), Toast.LENGTH_SHORT).show();
+//                                            Toast.makeText(this, "[UPDATE USER API SUCCESS!!!]" + updateUserModel.getMessage(), Toast.LENGTH_SHORT).show();
 //                                            getCurrentUser();
                                         } else {
                                             Toast.makeText(this, "[UPDATE USER API RETURN]" + updateUserModel.getMessage(), Toast.LENGTH_SHORT).show();
+                                            dialogUtils.dismissProgress();
                                         }
                                     },
                                     throwable -> {
                                         Toast.makeText(this, "[UPDATE USER API]" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                                        dialogUtils.dismissProgress();
                                     }
                             )
             );
         } else {
 //            sendResult();
-            Toast.makeText(this, "[xxxxxxxxxxxxxxxxxxxx]", Toast.LENGTH_SHORT).show();
+
         }
     }
 
@@ -246,6 +257,12 @@ public class VerifyPhoneActivity extends AppCompatActivity {
             progressBar.setVisibility(View.GONE);
         }
     };
+
+    @Override
+    protected void onStop() {
+        dialogUtils.dismissProgress();
+        super.onStop();
+    }
 
     @Override
     protected void onDestroy() {

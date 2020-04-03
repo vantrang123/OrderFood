@@ -2,6 +2,9 @@ package com.trangdv.orderfood.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.text.format.DateUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.CheckBox;
@@ -19,38 +22,52 @@ import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.common.Common;
 import com.trangdv.orderfood.database.CartDataSource;
 import com.trangdv.orderfood.database.CartDatabase;
+import com.trangdv.orderfood.database.CartItem;
 import com.trangdv.orderfood.database.LocalCartDataSource;
+import com.trangdv.orderfood.model.CreateOrder;
+import com.trangdv.orderfood.model.CreateOrderModel;
 import com.trangdv.orderfood.model.FCMSendData;
 import com.trangdv.orderfood.model.eventbus.SendTotalCashEvent;
+import com.trangdv.orderfood.presenter.placeorder.IPlaceOrderPresenter;
+import com.trangdv.orderfood.presenter.placeorder.PlaceOrderPresenter;
 import com.trangdv.orderfood.remote.IFCMService;
 import com.trangdv.orderfood.retrofit.IAnNgonAPI;
 import com.trangdv.orderfood.retrofit.RetrofitClient;
 import com.trangdv.orderfood.retrofit.RetrofitFCMClient;
 import com.trangdv.orderfood.ui.main.MainActivity;
 import com.trangdv.orderfood.utils.DialogUtils;
+import com.trangdv.orderfood.view.IPlaceOrderView;
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import cn.pedant.SweetAlert.SweetAlertDialog;
 import io.reactivex.SingleObserver;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-public class PlaceOrderActivity extends AppCompatActivity implements View.OnClickListener, DatePickerDialog.OnDateSetListener {
-
+public class PlaceOrderActivity extends AppCompatActivity implements View.OnClickListener, DatePickerDialog.OnDateSetListener, IPlaceOrderView {
+    private static final String TAG = "PlaceOrderActivity";
     IAnNgonAPI anNgonAPI;
     CompositeDisposable compositeDisposable;
     CartDataSource cartDataSource;
     DialogUtils dialogUtils;
     IFCMService ifcmService;
+    IPlaceOrderPresenter iPlaceOrderPresenter;
 
 
     private ImageView ivBack;
@@ -59,7 +76,11 @@ public class PlaceOrderActivity extends AppCompatActivity implements View.OnClic
     private CheckBox ckbDefaultAddress;
     private RadioButton rdiCod, rdiOnlinePayment;
     boolean isSelectedDate = false, isAddNewAddress = false;
-
+    public List<Integer> restaurantIds;
+    public List<CartItem> cartItemList;
+    private List<CreateOrder> createOrderList;
+    private int cartItemSize;
+    private int count = 0;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -76,6 +97,7 @@ public class PlaceOrderActivity extends AppCompatActivity implements View.OnClic
         cartDataSource = new LocalCartDataSource(CartDatabase.getInstance(this).cartDAO());
         dialogUtils = new DialogUtils();
         ifcmService = RetrofitFCMClient.getInstance(Common.fcmUrl).create(IFCMService.class);
+        iPlaceOrderPresenter = new PlaceOrderPresenter(this, anNgonAPI, compositeDisposable);
     }
 
     private void findViewById() {
@@ -130,6 +152,23 @@ public class PlaceOrderActivity extends AppCompatActivity implements View.OnClic
         if (!isAddNewAddress) {
             if (!ckbDefaultAddress.isChecked()) {
                 return;
+            } else {
+                String dateString = edtDate.getText().toString();
+                DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
+                try {
+                    Date orderDate = dateFormat.parse(dateString);
+                    Calendar calendar = Calendar.getInstance();
+                    Date currentDate = dateFormat.parse(dateFormat.format(calendar.getTime()));
+                    if (!DateUtils.isToday(orderDate.getTime())) {
+                        if (orderDate.before(currentDate)) {
+                            Toast.makeText(this, getResources().getString(R.string.txt_noti_choise_date_valid), Toast.LENGTH_SHORT).show();
+                            dialogUtils.dismissProgress();
+                            return;
+                        }
+                    }
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
             }
             if (rdiCod.isChecked()) {
                 getOrderNumber(false);
@@ -160,104 +199,58 @@ public class PlaceOrderActivity extends AppCompatActivity implements View.OnClic
         dialogUtils.showProgress(this);
         if (!isOnlinePayment) {
             String address = ckbDefaultAddress.isChecked() ? tvUserAddress.getText().toString() : "???";
+            String date = edtDate.getText().toString();
+            Double totalPrice = Double.valueOf(tvPrice.getText().toString());
             compositeDisposable.add(cartDataSource.getAllCart(Common.currentUser.getFbid())
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(cartItems -> {
-                                compositeDisposable.add(
-                                        anNgonAPI.createOrder(Common.API_KEY,
-                                                Common.currentUser.getFbid(),
-                                                Common.currentUser.getUserPhone(),
-                                                Common.currentUser.getName(),
-                                                address,
-                                                edtDate.getText().toString(),
-                                                Common.currentRestaurant.getId(),
-                                                "NONE",
-                                                true,
-                                                Double.valueOf(tvPrice.getText().toString()),
-                                                cartItems.size()
-                                        )
-                                                .subscribeOn(Schedulers.io())
-                                                .observeOn(AndroidSchedulers.mainThread())
-                                                .subscribe(createOrderModel -> {
-                                                            if (createOrderModel.isSuccess()) {
-                                                                compositeDisposable.add(
-                                                                        anNgonAPI.updateOrder(Common.API_KEY,
-                                                                                String.valueOf(createOrderModel.getResult().get(0).getOrderNumber()),
-                                                                                new Gson().toJson(cartItems)
-                                                                        )
-                                                                                .subscribeOn(Schedulers.io())
-                                                                                .observeOn(AndroidSchedulers.mainThread())
-                                                                                .subscribe(updateOrderModel -> {
-                                                                                            if (updateOrderModel.isSuccess()) {
-                                                                                                cartDataSource.cleanCart(Common.currentUser.getFbid())
-                                                                                                        .subscribeOn(Schedulers.io())
-                                                                                                        .observeOn(AndroidSchedulers.mainThread())
-                                                                                                        .subscribe(new SingleObserver<Integer>() {
-                                                                                                            @Override
-                                                                                                            public void onSubscribe(Disposable d) {
+                        cartItemSize = cartItems.size();
+                        restaurantIds = new ArrayList<>();
+                        for (int i = 0; i < cartItems.size(); i++) {
+                            cartItemList = new ArrayList<>();
+                            int restaurantId = cartItems.get(i).getRestaurantId();
+                            if (!restaurantIds.contains(restaurantId)) {
+                                restaurantIds.add(restaurantId);
+                                for (CartItem cartItem : cartItems) {
+                                    if (cartItem.getRestaurantId() == restaurantId)
+                                        cartItemList.add(cartItem);
+                                }
+//                                iPlaceOrderPresenter.createOrder(address, date, totalPrice, cartItemList, restaurantId);
+                                createOrder(address, date, totalPrice, cartItemList, restaurantId);
+                            }
 
-                                                                                                            }
-
-                                                                                                            @Override
-                                                                                                            public void onSuccess(Integer integer) {
-                                                                                                                /*Intent intent = new Intent(PlaceOrderActivity.this, MainActivity.class);
-                                                                                                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                                                                                                startActivity(intent);
-                                                                                                                finish();*/
-                                                                                                                Map<String,String> dataSend = new HashMap<>();
-                                                                                                                dataSend.put(Common.NOTIFI_TITLE, "New Order");
-                                                                                                                dataSend.put(Common.NOTIFI_CONTENT, "You have new order" + createOrderModel.getResult().get(0));
-
-                                                                                                                FCMSendData sendData = new FCMSendData(Common.createTopicSender(
-                                                                                                                        Common.getTopicChannel(
-                                                                                                                                Common.currentRestaurant.getId()
-                                                                                                                        )), dataSend);
-
-                                                                                                                compositeDisposable.add(ifcmService.sendNotification(sendData)
-                                                                                                                        .subscribeOn(Schedulers.io())
-                                                                                                                        .observeOn(AndroidSchedulers.mainThread())
-                                                                                                                        .subscribe(fcmResponse -> {
-                                                                                                                            Intent intent = new Intent(PlaceOrderActivity.this, MainActivity.class);
-                                                                                                                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                                                                                                            startActivity(intent);
-                                                                                                                            finish();
-                                                                                                                            dialogUtils.dismissProgress();
-                                                                                                                        }, throwable -> {
-                                                                                                                            Intent intent = new Intent(PlaceOrderActivity.this, MainActivity.class);
-                                                                                                                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                                                                                                            startActivity(intent);
-                                                                                                                            finish();
-                                                                                                                            dialogUtils.dismissProgress();
-                                                                                                                        } )
-                                                                                                                );
-                                                                                                            }
-
-                                                                                                            @Override
-                                                                                                            public void onError(Throwable e) {
-                                                                                                                dialogUtils.dismissProgress();
-                                                                                                            }
-                                                                                                        });
-                                                                                            }
-
-                                                                                        },
-                                                                                        throwable -> {
-                                                                                            dialogUtils.dismissProgress();
-                                                                                        })
-                                                                );
-                                                            }
-                                                        },
-                                                        throwable -> {
-                                                            dialogUtils.dismissProgress();
-//                                                            Toast.makeText(this, "[ERROR]" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
-                                                        })
-                                );
-                            },
-                            throwable -> {
-                                Toast.makeText(this, "[ERROR]" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
-                                dialogUtils.dismissProgress();
-                            }));
+                        }
+                        }, throwable -> {
+                        dialogUtils.dismissProgress();
+                    }));
         }
+    }
+
+    private void createOrder(String address, String date, Double totalPrice, List<CartItem> cartItemList, int restaurantId) {
+        compositeDisposable.add(
+                anNgonAPI.createOrder(Common.API_KEY,
+                        Common.currentUser.getFbid(),
+                        Common.currentUser.getUserPhone(),
+                        Common.currentUser.getName(),
+                        address,
+                        date,
+                        "NONE",
+                        true,
+                        totalPrice,
+                        cartItemList.size(),
+                        restaurantId
+                )
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(createOrderModel -> {
+                                    if (createOrderModel.isSuccess()) {
+                                        updateOrder(createOrderModel.getResult().get(0).getOrderNumber(), cartItemList);
+                                    }
+                                },
+                                throwable -> {
+                                })
+        );
     }
 
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
@@ -294,5 +287,92 @@ public class PlaceOrderActivity extends AppCompatActivity implements View.OnClic
     protected void onDestroy() {
         compositeDisposable.clear();
         super.onDestroy();
+    }
+
+    @Override
+    public void onCreateOrderSuccess(CreateOrderModel createOrderModel, List<CartItem> cartItems) {
+    }
+
+    private void updateOrder(int orderNumber, List<CartItem> cartItems) {
+        compositeDisposable.add(
+                anNgonAPI.updateOrder(Common.API_KEY,
+                        String.valueOf(orderNumber),
+                        new Gson().toJson(cartItems)
+                )
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(updateOrderModel -> {
+                                    if (updateOrderModel.isSuccess()) {
+                                        sendNotificatonToRestaurant(cartItems.get(0).getRestaurantId());
+
+                                        cartDataSource.cleanCart(Common.currentUser.getFbid())
+                                                .subscribeOn(Schedulers.io())
+                                                .observeOn(AndroidSchedulers.mainThread())
+                                                .subscribe(new SingleObserver<Integer>() {
+                                                    @Override
+                                                    public void onSubscribe(Disposable d) {
+
+                                                    }
+
+                                                    @Override
+                                                    public void onSuccess(Integer integer) {
+                                                        count++;
+                                                        while (count == restaurantIds.size()) {
+                                                            Intent intent = new Intent(PlaceOrderActivity.this, MainActivity.class);
+                                                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                                            new SweetAlertDialog(PlaceOrderActivity.this, SweetAlertDialog.SUCCESS_TYPE)
+                                                                .setTitleText(getResources().getString(R.string.title_dialog_order_success))
+                                                                .setContentText(getResources().getString(R.string.content_dialog_order_success))
+                                                                .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                                                                    @Override
+                                                                    public void onClick(SweetAlertDialog sweetAlertDialog) {
+                                                                        startActivity(intent);
+                                                                        finish();
+                                                                    }
+                                                                })
+                                                                .show();
+                                                            break;
+                                                        }
+                                                    }
+
+                                                    @Override
+                                                    public void onError(Throwable e) {
+                                                        dialogUtils.dismissProgress();
+
+                                                    }
+                                                });
+                                    }
+
+                                },
+                                throwable -> {
+                                    dialogUtils.dismissProgress();
+                                })
+        );
+    }
+
+    private void sendNotificatonToRestaurant(int i) {
+        Map<String, String> dataSend = new HashMap<>();
+        dataSend.put(Common.NOTIFI_TITLE, "New Order");
+        dataSend.put(Common.NOTIFI_CONTENT, "You have new order" /*+ createOrderModel.getResult().get(0)*/);
+
+        FCMSendData sendData = new FCMSendData(Common.createTopicSender(
+                Common.getTopicChannel(
+                        i
+                )), dataSend);
+
+        compositeDisposable.add(ifcmService.sendNotification(sendData)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(fcmResponse -> {
+                    dialogUtils.dismissProgress();
+                }, throwable -> {
+                    dialogUtils.dismissProgress();
+                })
+        );
+    }
+
+    @Override
+    public void onCreateOrderError(String message) {
+
     }
 }

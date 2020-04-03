@@ -16,7 +16,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:usesCleartextTraffic="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        tools:replace="android:icon">
 
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
@@ -70,6 +71,8 @@
         <activity
             android:name=".ui.PlaceOrderActivity"
             android:theme="@style/AppTheme.GradientStatusBar" />
+        <activity android:name=".ui.orderdetail.OrderDetailActivity"
+            android:theme="@style/AppTheme.GradientStatusBar"/>
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />

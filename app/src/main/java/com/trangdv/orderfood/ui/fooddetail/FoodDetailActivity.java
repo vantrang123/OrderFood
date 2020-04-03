@@ -13,7 +13,6 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -46,6 +45,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import cn.pedant.SweetAlert.SweetAlertDialog;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
@@ -57,17 +57,17 @@ public class FoodDetailActivity extends AppCompatActivity implements View.OnClic
     DialogUtils dialogUtils;
     Food selectedFood;
 
-    private TextView tvFoodName, tvFoodPrice, tvFoodDescription, tvCart, tvTitle;
+    private TextView tvFoodName, tvFoodPrice, tvFoodDescription, tvTitle;
+    private ImageView ivCart, ivBack, ivLike, ivShare;
     ImageView imgFoodImage;
     RadioGroup radioGroup;
     RecyclerView rvAddon;
-    private ImageView ivBack;
     AppBarLayout appBarLayout;
     View lnSize, lnAddon;
 
     Double originalPrice;
     private double sizePrice = 0.0;
-    private String sizeSelected;
+    private String sizeSelected = "";
     private Double addonPrice = 0.0;
     private String foodName;
     private double extraPrice;
@@ -100,8 +100,8 @@ public class FoodDetailActivity extends AppCompatActivity implements View.OnClic
         radioGroup = findViewById(R.id.rdi_group_size);
         rvAddon = findViewById(R.id.rv_add_on);
         appBarLayout = findViewById(R.id.appbar_fd);
-        tvCart = findViewById(R.id.tv_add_cart);
-        tvCart.setOnClickListener(this);
+        ivCart = findViewById(R.id.iv_add_cart);
+        ivCart.setOnClickListener(this);
         tvFoodDescription = findViewById(R.id.tv_food_description);
         tvFoodName = findViewById(R.id.tv_food_name);
         tvFoodPrice = findViewById(R.id.tv_food_price);
@@ -240,8 +240,6 @@ public class FoodDetailActivity extends AppCompatActivity implements View.OnClic
         if (event.isSuccess()) {
             setValue(event.getFood());
         } else {
-
-
         }
     }
 
@@ -255,12 +253,9 @@ public class FoodDetailActivity extends AppCompatActivity implements View.OnClic
                     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                         if (isChecked) {
                             sizePrice = size.getExtraPrice();
-                        } else {
-                            sizePrice = -size.getExtraPrice();
+                            sizeSelected = size.getDescription();
                         }
-
                         catulatePrice();
-                        sizeSelected = size.getDescription();
                     }
                 });
 
@@ -270,9 +265,6 @@ public class FoodDetailActivity extends AppCompatActivity implements View.OnClic
                 radioButton.setTag(size.getExtraPrice());
                 radioGroup.addView(radioButton);
             }
-
-        } else {
-
         }
     }
 
@@ -322,15 +314,43 @@ public class FoodDetailActivity extends AppCompatActivity implements View.OnClic
             case R.id.iv_back:
                 onBackPressed();
                 break;
-            case R.id.tv_add_cart:
-                addToCart();
+            case R.id.iv_add_cart:
+                dialogUtils.showProgress(this);
+                if (selectedFood.isSize() && sizeSelected.equals("")) {
+                    dialogUtils.dismissProgress();
+                    new SweetAlertDialog(this)
+                            .setContentText("Bạn chưa chọn size cho món!")
+                            .setTitleText("Opps..")
+                            .show();
+                } else if (!selectedFood.isSize()) {
+                    sizeSelected = "NORMAL";
+                    getRestaurantId();
+                } else {
+                    getRestaurantId();
+                }
                 break;
             default:
                 break;
         }
     }
 
-    private void addToCart() {
+    private void getRestaurantId() {
+        compositeDisposable.add(
+                anNgonAPI.getRestaurantId(Common.API_KEY,
+                        selectedFood.getId())
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(restaurantIdModel -> {
+                            if (restaurantIdModel.isSuccess()) {
+                                int currentRestaurantId = restaurantIdModel.getResult().get(0).getRestaurantId();
+                                addToCart(currentRestaurantId);
+                            }
+                        }, throwable -> {
+                            dialogUtils.dismissProgress();
+                        }));
+    }
+
+    private void addToCart(int restaurantId) {
         CartItem cartItem = new CartItem();
         cartItem.setFoodId(selectedFood.getId());
         cartItem.setFoodName(selectedFood.getName());
@@ -338,14 +358,15 @@ public class FoodDetailActivity extends AppCompatActivity implements View.OnClic
         cartItem.setFoodImage(selectedFood.getImage());
         cartItem.setFoodQuantity(1);
         cartItem.setUserPhone(Common.currentUser.getUserPhone());
-        if (Common.currentRestaurant != null) {
-            cartItem.setRestaurantId(Common.currentRestaurant.getId());
-        } else {
-            cartItem.setRestaurantId(1);
-        }
+        cartItem.setRestaurantId(restaurantId);
 
-        cartItem.setFoodAddon(new Gson().toJson(Common.addonList));
         cartItem.setFoodSize(sizeSelected);
+
+        if (selectedFood.isAddon() && !(new Gson().toJson(Common.addonList).equals("[]"))) {
+            cartItem.setFoodAddon(new Gson().toJson(Common.addonList));
+        } else {
+            cartItem.setFoodAddon("NORMAL");
+        }
         cartItem.setFoodExtraPrice(extraPrice);
         cartItem.setFbid(Common.currentUser.getFbid());
 
@@ -354,11 +375,18 @@ public class FoodDetailActivity extends AppCompatActivity implements View.OnClic
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(() -> {
-                                    Toast.makeText(FoodDetailActivity.this," added to Cart", Toast.LENGTH_SHORT).show();
+                                    new SweetAlertDialog(this, SweetAlertDialog.SUCCESS_TYPE)
+                                            .setTitleText(getResources().getString(R.string.title_dialog_add_cart_success))
+                                            .setContentText(getResources().getString(R.string.content_dialog_add_cart_success))
+                                            .show();
+                                    ivCart.setColorFilter(ContextCompat.getColor(this, R.color.colorAccent), android.graphics.PorterDuff.Mode.SRC_IN);
+                                    dialogUtils.dismissProgress();
                                 },
                                 throwable -> {
                                     Toast.makeText(FoodDetailActivity.this, "[ADD CART]" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                                    dialogUtils.dismissProgress();
                                 })
         );
+
     }
 }

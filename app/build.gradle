@@ -99,7 +99,11 @@ dependencies {
     // date time picker
     implementation 'com.wdullaer:materialdatetimepicker:4.2.3'
 
+    // paper
     implementation 'io.paperdb:paperdb:2.6'
+
+    // Sweet Alert Dialog
+    implementation 'com.github.f0ris.sweetalert:library:1.5.6'
 
 }
 apply plugin: 'com.google.gms.google-services'

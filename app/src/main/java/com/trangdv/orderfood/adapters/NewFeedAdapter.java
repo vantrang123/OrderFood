@@ -28,11 +28,11 @@ import com.trangdv.orderfood.database.CartDatabase;
 import com.trangdv.orderfood.database.CartItem;
 import com.trangdv.orderfood.database.LocalCartDataSource;
 import com.trangdv.orderfood.listener.ILoadMore;
-import com.trangdv.orderfood.model.Favorite;
 import com.trangdv.orderfood.model.FavoriteOnlyId;
 import com.trangdv.orderfood.model.Food;
 import com.trangdv.orderfood.retrofit.IAnNgonAPI;
 import com.trangdv.orderfood.retrofit.RetrofitClient;
+import com.trangdv.orderfood.ui.main.MainActivity;
 import com.trangdv.orderfood.utils.DialogUtils;
 
 import java.text.NumberFormat;
@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import cn.pedant.SweetAlert.SweetAlertDialog;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
@@ -64,7 +65,7 @@ public class NewFeedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     DialogUtils dialogUtils;
     NestedScrollView nestedScrollView;
     RecyclerView rvNewFeed;
-    private int totalItemCount = 0, lastVisibleItem = 0, visbleThreshold = 10, visibleItemCount, pastVisibleItems;
+    private int totalItemCount = 0, visibleItemCount, pastVisibleItems;
     private boolean iLoading = false;
 
     public NewFeedAdapter(Context context, List<Food> foods, ItemListener itemListener, NestedScrollView nestedScrollView, RecyclerView rvNewFeed) {
@@ -122,7 +123,7 @@ public class NewFeedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         View itemView;
         mInflater = LayoutInflater.from(parent.getContext());
         if (viewType == VIEW_TYPE_ITEM) {
-            itemView = mInflater.inflate(R.layout.item_food, parent, false);
+            itemView = mInflater.inflate(R.layout.item_new_feed, parent, false);
             return new ViewHolder(itemView);
         } else {
             itemView = mInflater.inflate(R.layout.layout_loading_item, parent, false);
@@ -199,7 +200,7 @@ public class NewFeedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         public TextView tvNameFood;
         public TextView tvPriceFood;
         public TextView tvDiscountFood;
-        public ImageView ivFavorite, ivCart;
+        public ImageView ivFavorite;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -208,7 +209,6 @@ public class NewFeedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             tvPriceFood = itemView.findViewById(R.id.tv_food_price);
             tvDiscountFood = itemView.findViewById(R.id.tv_food_discount);
             ivFavorite = itemView.findViewById(R.id.iv_favorite);
-            ivCart = itemView.findViewById(R.id.iv_cart);
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -225,39 +225,6 @@ public class NewFeedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     getRestaurantId(getAdapterPosition(), v, fav);
                 }
             });
-
-            ivCart.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    dialogUtils.showProgress(context);
-                    CartItem cartItem = new CartItem();
-                    cartItem.setFoodId(foodList.get(getLayoutPosition()).getId());
-                    cartItem.setFoodName(foodList.get(getLayoutPosition()).getName());
-                    cartItem.setFoodPrice(foodList.get(getLayoutPosition()).getPrice());
-                    cartItem.setFoodImage(foodList.get(getLayoutPosition()).getImage());
-                    cartItem.setFoodQuantity(1);
-                    cartItem.setUserPhone(Common.currentUser.getUserPhone());
-                    cartItem.setRestaurantId(Common.currentRestaurant.getId());
-                    cartItem.setFoodAddon("NOMAL");
-                    cartItem.setFoodSize("NOMAL");
-                    cartItem.setFoodExtraPrice(0.0);
-                    cartItem.setFbid(Common.currentUser.getFbid());
-
-                    compositeDisposable.add(
-                            cartDataSource.insertOrReplaceAll(cartItem)
-                                    .subscribeOn(Schedulers.io())
-                                    .observeOn(AndroidSchedulers.mainThread())
-                                    .subscribe(() -> {
-                                                Toast.makeText(context, " added to Cart", Toast.LENGTH_SHORT).show();
-                                                dialogUtils.dismissProgress();
-                                            },
-                                            throwable -> {
-                                                Toast.makeText(context, "[ADD CART]" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
-                                                dialogUtils.dismissProgress();
-                                            })
-                    );
-                }
-            });
         }
     }
 
@@ -269,90 +236,24 @@ public class NewFeedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(restaurantIdModel -> {
                             if (restaurantIdModel.isSuccess()) {
-                                getRestaurantById(String.valueOf(restaurantIdModel.getResult().get(0).getRestaurantId()),
-                                        adapterPosition, v, fav);
+                                int currentRestaurantId = restaurantIdModel.getResult().get(0).getRestaurantId();
+                                if ((Boolean) v.getTag()) {
+                                    removeFavorite(adapterPosition, fav, currentRestaurantId);
+                                } else {
+                                    insertFavorite(adapterPosition, fav, currentRestaurantId);
+                                }
                             }
                         }, throwable -> {
-
                             dialogUtils.dismissProgress();
                         }));
     }
 
-    private void getRestaurantById(String id,int adapterPosition, View v, ImageView fav) {
-        compositeDisposable.add(
-                anNgonAPI.getRestaurantById(Common.API_KEY, id)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(restaurantModel -> {
-                                    if (restaurantModel.isSuccess()) {
-                                        Common.currentRestaurant = restaurantModel.getResult().get(0);
-                                        if ((Boolean) v.getTag()) {
-                                            removeFavorite(adapterPosition, fav);
-                        /*compositeDisposable.add(
-                                anNgonAPI.removeFavorite(Common.API_KEY,
-                                        Common.currentUser.getFbid(),
-                                        foodList.get(getAdapterPosition()).getId(),
-                                        Common.currentRestaurant.getId())
-                                        .subscribeOn(Schedulers.io())
-                                        .observeOn(AndroidSchedulers.mainThread())
-                                        .subscribe(favoriteModel -> {
-                                            if (favoriteModel.isSuccess() && favoriteModel.getMessage().contains("Success")) {
-                                                fav.setImageResource(R.drawable.ic_favorite_gray);
-                                                fav.setTag(false);
-                                                if (Common.currentFavOfRestaurant != null) {
-                                                    Common.removeFavorite(foodList.get(getAdapterPosition()).getId());
-                                                }
-                                            }
-                                            dialogUtils.dismissProgress();
-                                        }, throwable -> {
-                                            Toast.makeText(context, "[REMOVE FAV]" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
-                                            dialogUtils.dismissProgress();
-                                        })
-                        );*/
-                                        } else {
-                                            insertFavorite(adapterPosition, fav);
-                        /*compositeDisposable.add(
-                                anNgonAPI.insertFavorite(Common.API_KEY,
-                                        Common.currentUser.getFbid(),
-                                        foodList.get(getAdapterPosition()).getId(),
-                                        Common.currentRestaurant.getId(),
-                                        Common.currentRestaurant.getName(),
-                                        foodList.get(getAdapterPosition()).getName(),
-                                        foodList.get(getAdapterPosition()).getImage(),
-                                        foodList.get(getAdapterPosition()).getPrice())
-                                        .subscribeOn(Schedulers.io())
-                                        .observeOn(AndroidSchedulers.mainThread())
-                                        .subscribe(favoriteModel -> {
-                                            if (favoriteModel.isSuccess() && favoriteModel.getMessage().contains("Success")) {
-                                                fav.setImageResource(R.drawable.ic_favorite_red);
-                                                fav.setTag(true);
-                                                if (Common.currentFavOfRestaurant != null) {
-                                                    Common.currentFavOfRestaurant.add(new FavoriteOnlyId(foodList.get(getAdapterPosition()).getId()));
-                                                }
-                                            }
-                                            dialogUtils.dismissProgress();
-                                        }, throwable -> {
-                                            Toast.makeText(context, "[ADD FAV]" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
-                                            dialogUtils.dismissProgress();
-                                        })
-                        );*/
-                                        }
-                                    }
-                                    dialogUtils.dismissProgress();
-                                },
-                                throwable -> {
-                                    dialogUtils.dismissProgress();
-                                })
-        );
-    }
-
-    private void insertFavorite(int position, ImageView fav) {
+    private void insertFavorite(int position, ImageView fav, int currentRestaurantId) {
         compositeDisposable.add(
                 anNgonAPI.insertFavorite(Common.API_KEY,
                         Common.currentUser.getFbid(),
                         foodList.get(position).getId(),
-                        Common.currentRestaurant.getId(),
-                        Common.currentRestaurant.getName(),
+                        currentRestaurantId,
                         foodList.get(position).getName(),
                         foodList.get(position).getImage(),
                         foodList.get(position).getPrice())
@@ -374,12 +275,12 @@ public class NewFeedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         );
     }
 
-    private void removeFavorite(int adapterPosition, ImageView fav) {
+    private void removeFavorite(int adapterPosition, ImageView fav, int currentRestaurantId) {
         compositeDisposable.add(
                 anNgonAPI.removeFavorite(Common.API_KEY,
                         Common.currentUser.getFbid(),
                         foodList.get(adapterPosition).getId(),
-                        Common.currentRestaurant.getId())
+                        currentRestaurantId)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(favoriteModel -> {
@@ -387,12 +288,12 @@ public class NewFeedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                                 fav.setImageResource(R.drawable.ic_favorite_gray);
                                 fav.setTag(false);
                                 if (Common.currentFav != null) {
-                                    Common.removeFa(foodList.get(adapterPosition).getId());
+                                    Common.removeFav(foodList.get(adapterPosition).getId());
                                 }
                             }
                             dialogUtils.dismissProgress();
                         }, throwable -> {
-                            Toast.makeText(context, "[REMOVE FAV]" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
+
                             dialogUtils.dismissProgress();
                         })
         );

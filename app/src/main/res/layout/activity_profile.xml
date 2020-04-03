@@ -29,9 +29,9 @@
         >
 
         <ImageView android:id="@+id/iv_back"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:background="@color/transparent"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="@drawable/button_effect_oval"
             android:tint="@color/colorWhite"
             android:layout_marginLeft="5dp"
             android:src="@drawable/ic_back"
@@ -71,10 +71,11 @@
         android:layout_height="wrap_content"
         android:text="@string/txt_edit"
         android:textSize="13sp"
-        android:paddingRight="@dimen/dimen_16dp"
+        android:layout_marginRight="@dimen/dimen_16dp"
+        android:background="@drawable/button_effect_retangle"
         android:layout_marginTop="@dimen/dimens_10dp"
         android:textStyle="bold"
-        android:textColor="@color/colorOrange"
+        android:textColor="@color/colorAccent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/toolbar_header" />
 
@@ -86,6 +87,14 @@
         android:paddingLeft="@dimen/dimen_16dp"
         app:layout_constraintTop_toBottomOf="@id/tv_userName"
         app:layout_constraintLeft_toLeftOf="parent" />
+    <TextView
+        android:id="@+id/tv_user_address"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/dimen_16dp"
+        app:layout_constraintTop_toBottomOf="@id/tv_userPhone"
+        app:layout_constraintLeft_toLeftOf="parent"
+        tools:text="@string/txt_yes"/>
 
     <LinearLayout
         android:layout_width="match_parent"

@@ -39,7 +39,7 @@ public class AddonAdapter extends RecyclerView.Adapter<AddonAdapter.ViewHolder> 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         holder.ckbAddon.setText(new StringBuilder(addonList.get(position).getName())
-        .append(" +(" +context.getString(R.string.menu_my))
+        .append(" +(" +context.getString(R.string.txt_dola))
         .append(addonList.get(position).getExtraPrice())
         .append(")"));
 
@@ -50,8 +50,8 @@ public class AddonAdapter extends RecyclerView.Adapter<AddonAdapter.ViewHolder> 
                     Common.addonList.add(addonList.get(position));
                     EventBus.getDefault().postSticky(new AddonEventChange(true, addonList.get(position)));
                 } else {
-                    Common.addonList.remove(addonList.get(position));
-                    EventBus.getDefault().postSticky(new AddonEventChange(false, addonList.get(position)));
+//                    Common.addonList.remove(addonList.get(position));
+//                    EventBus.getDefault().postSticky(new AddonEventChange(false, addonList.get(position)));
                 }
             }
         });

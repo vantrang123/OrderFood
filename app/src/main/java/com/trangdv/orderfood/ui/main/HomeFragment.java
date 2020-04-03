@@ -20,11 +20,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
 import com.trangdv.orderfood.R;
@@ -33,20 +30,25 @@ import com.trangdv.orderfood.adapters.RestaurantAdapter;
 import com.trangdv.orderfood.adapters.SuggestionAdapter;
 import com.trangdv.orderfood.common.Common;
 import com.trangdv.orderfood.listener.ILoadMore;
-import com.trangdv.orderfood.model.BannerData;
 import com.trangdv.orderfood.model.Food;
+import com.trangdv.orderfood.model.FoodModel;
 import com.trangdv.orderfood.model.HotFood;
 import com.trangdv.orderfood.model.Restaurant;
 import com.trangdv.orderfood.model.Suggestion;
 import com.trangdv.orderfood.model.Token;
+import com.trangdv.orderfood.model.eventbus.FoodDetailEvent;
 import com.trangdv.orderfood.model.eventbus.MenuItemEvent;
 import com.trangdv.orderfood.model.eventbus.RestaurantLoadEvent;
+import com.trangdv.orderfood.presenter.home.HomePresenter;
+import com.trangdv.orderfood.presenter.home.IHomePresenter;
 import com.trangdv.orderfood.retrofit.IAnNgonAPI;
 import com.trangdv.orderfood.retrofit.RetrofitClient;
+import com.trangdv.orderfood.ui.fooddetail.FoodDetailActivity;
 import com.trangdv.orderfood.utils.DialogUtils;
 import com.trangdv.orderfood.ui.menu.MenuActivity;
 import com.trangdv.orderfood.utils.GpsUtils;
 
+import com.trangdv.orderfood.view.IHomeView;
 import com.trangdv.orderfood.viewholder.NetViewHolder;
 import com.zhpan.bannerview.BannerViewPager;
 import com.zhpan.bannerview.adapter.OnPageChangeListenerAdapter;
@@ -65,9 +67,9 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
 
 public class HomeFragment extends Fragment implements SuggestionAdapter.ItemListener,
-        RestaurantAdapter.ItemListener, NewFeedAdapter.ItemListener, ILoadMore {
+        RestaurantAdapter.ItemListener, NewFeedAdapter.ItemListener, ILoadMore, IHomeView {
     private static final String TAG = "HomeFragment";
-
+    IHomePresenter iHomePresenter;
     IAnNgonAPI anNgonAPI;
     CompositeDisposable compositeDisposable;
     DialogUtils dialogUtils;
@@ -155,6 +157,7 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
     private void init() {
         compositeDisposable = new CompositeDisposable();
         anNgonAPI = RetrofitClient.getInstance(Common.API_ANNGON_ENDPOINT).create(IAnNgonAPI.class);
+        iHomePresenter = new HomePresenter(this, anNgonAPI, compositeDisposable);
         dialogUtils = new DialogUtils();
     }
 
@@ -240,7 +243,8 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
             public void onRefresh() {
                 fetchNearRestaurant();
                 foodList.clear();
-                loadMaxFood();
+                iHomePresenter.getNumOfFood();
+                refreshLayout.setRefreshing(false);
                 loadHotFood();
             }
         });
@@ -249,7 +253,8 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
             public void run() {
                 if (!loaded) {
                     fetchNearRestaurant();
-                    loadMaxFood();
+                    iHomePresenter.getNumOfFood();
+                    refreshLayout.setRefreshing(false);
                     loadHotFood();
                 } else {
                     showDataLoaded();
@@ -302,142 +307,6 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
         Log.e("HomeFragment", "onDetach: ");
     }
 
-/*
-    public void fetchData() {
-//        dialogUtils.showProgress(getContext());
-        banner.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                banners.clear();
-
-                for (DataSnapshot dsp : dataSnapshot.getChildren()) {
-                    BannerData bannerData = dsp.getValue(BannerData.class);
-                    bannerData.setKey(dsp.getKey());
-                    banners.add(bannerData);
-                }
-
-                mViewPager.create(banners);
-                layout_banner.setVisibility(View.VISIBLE);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-
-//        suggestion.addValueEventListener(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-//                suggestions.clear();
-//
-//                for (DataSnapshot dsp : dataSnapshot.getChildren()) {
-//                    Suggestion suggestion = dsp.getValue(Suggestion.class);
-//                    suggestion.setKey(dsp.getKey());
-//                    suggestions.add(suggestion);
-//                }
-//                suggestionAdapter.notifyDataSetChanged();
-//                layout_suggestion.setVisibility(View.VISIBLE);
-//            }
-//
-//            @Override
-//            public void onCancelled(@NonNull DatabaseError databaseError) {
-//
-//            }
-//        });
-
-        */
-/*if (currentLocation != null) {
-            requestNearbyRestaurant(currentLocation.getLatitude(), currentLocation.getLongitude(), 10);
-        } else {
-            try {
-                Location lastLocation = SharedPrefs.getInstance().get(Common.SAVE_LOCATION, Location.class);
-                requestNearbyRestaurant(lastLocation.getLatitude(), lastLocation.getLongitude(), 10);
-            } catch (Exception e) {
-
-            }
-
-        }*//*
-
-
-    }
-*/
-
-    private void loadMaxFood() {
-        dialogUtils.showProgress(getContext());
-        compositeDisposable.add(anNgonAPI.getMaxFood(Common.API_KEY)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(maxFoodModel -> {
-                            if (maxFoodModel.isSuccess()) {
-                                if (maxFoodModel.getResult().size() > 0) {
-                                    maxData = maxFoodModel.getResult().get(0).getMaxRowNum();
-                                    newFeedAdapter = null;
-                                    loadAllFoods(0, 10);
-                                }
-                            }
-                            dialogUtils.dismissProgress();
-                        }
-                        , throwable -> {
-                            dialogUtils.dismissProgress();
-                            Toast.makeText(getContext(), "[ERROR]" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
-                        }
-                ));
-        refreshLayout.setRefreshing(false);
-    }
-
-    private void loadAllFoods(int from, int to) {
-        compositeDisposable.add(anNgonAPI.getAllFood(Common.API_KEY,
-                from, to)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(foodModel -> {
-                            if (foodModel.isSuccess()) {
-                                if (foodModel.getResult().size() > 0) {
-                                    if (newFeedAdapter == null) {
-                                        foodList = new ArrayList<>();
-                                        foodList = foodModel.getResult();
-                                        newFeedAdapter = new NewFeedAdapter(getContext(), foodList, this, nestedScrollView, rvNewFeed);
-                                        newFeedAdapter.setiLoadMore(this);
-                                        rvNewFeed.setAdapter(newFeedAdapter);
-                                    } else {
-                                        newFeedAdapter.removeNull();
-                                        foodList = foodModel.getResult();
-                                        newFeedAdapter.addItem(foodList);
-                                        foodList.addAll(newFeedAdapter.getOrderList());
-                                    }
-                                }
-                                loaded = true;
-                                layoutNewFeed.setVisibility(View.VISIBLE);
-                            } else {
-                                newFeedAdapter.notifyItemRemoved(newFeedAdapter.getItemCount());
-                            }
-                            newFeedAdapter.setLoaded();
-                        }
-                        , throwable -> {
-                            newFeedAdapter.setLoaded();
-                        }
-                ));
-    }
-
-    private void fetchRestaurant() {
-        dialogUtils.showProgress(getContext());
-        restaurantList.clear();
-        compositeDisposable.add(
-          anNgonAPI.getRestaurant(Common.API_KEY)
-                  .subscribeOn(Schedulers.io())
-                  .observeOn(AndroidSchedulers.mainThread())
-                  .subscribe(restaurantModel -> {
-                              EventBus.getDefault().post(new RestaurantLoadEvent(true, restaurantModel.getResult()));
-                              dialogUtils.dismissProgress();
-                  },
-                          throwable -> {
-                              EventBus.getDefault().post(new RestaurantLoadEvent(false, throwable.getMessage()));
-                              dialogUtils.dismissProgress();
-                          })
-        );
-    }
-
     private void initBanner() {
         mViewPager
                 .setAutoPlay(true)
@@ -446,7 +315,7 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
                 .setScrollDuration(1200)
                 .setIndicatorRadius(getResources().getDimensionPixelSize(R.dimen.dp_3))
                 .setIndicatorView(mIndicatorView)
-                .setIndicatorColor(getResources().getColor(R.color.colorOrange), getResources().getColor(R.color.colorPrimary))
+                .setIndicatorColor(getResources().getColor(R.color.colorAccent), getResources().getColor(R.color.colorPrimary))
                 .setHolderCreator(NetViewHolder::new)
                 .setOnPageChangeListener(new OnPageChangeListenerAdapter() {
                     @Override
@@ -461,7 +330,8 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
 
     private void onPageClicked(int position) {
         HotFood hotFood = mViewPager.getList().get(position);
-        Toast.makeText(getContext(), "position:" + position + " " + hotFood.getName(), Toast.LENGTH_SHORT).show();
+        dialogUtils.showProgress(getContext());
+        iHomePresenter.getFoodById(hotFood.getItemId());
     }
 
     private void updateTokenShipper(String token) {
@@ -502,7 +372,7 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
     @Override
     public void onStop() {
         EventBus.getDefault().unregister(this);
-//        dialogUtils.dismissProgress();
+        dialogUtils.dismissProgress();
         super.onStop();
     }
 
@@ -522,6 +392,7 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
 
     @Override
     public void dispatchToMenuList(int position) {
+        dialogUtils.showProgress(getContext());
         Common.currentRestaurant = restaurantList.get(position);
         EventBus.getDefault().postSticky(new MenuItemEvent(true, restaurantList.get(position)));
         getActivity().startActivity(new Intent(getContext(), MenuActivity.class));
@@ -529,7 +400,9 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
 
     @Override
     public void dispatchToFoodDetail(int position) {
-
+        dialogUtils.showProgress(getContext());
+        EventBus.getDefault().postSticky(new FoodDetailEvent(true, foodList.get(position)));
+        startActivity(new Intent(getContext(), FoodDetailActivity.class));
     }
 
     @Override
@@ -537,7 +410,56 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
         if (newFeedAdapter.getItemCount() < maxData) {
             int from = newFeedAdapter.getItemCount() + 1;
             newFeedAdapter.addNull();
-            loadAllFoods(from, from + 10);
+//            getTenItemFood(from, from + 10);
+            iHomePresenter.getTenItemFood(from, from + 10);
         }
+    }
+
+    @Override
+    public void onGetNumFoodSuccess(int num) {
+        maxData = num;
+        newFeedAdapter = null;
+//        getTenItemFood(0, 10);
+        iHomePresenter.getTenItemFood(0, 10);
+    }
+
+    @Override
+    public void onGetTenItemFoodSuccess(FoodModel foodModel) {
+        if (foodModel.getResult().size() > 0) {
+            if (newFeedAdapter == null) {
+                foodList = new ArrayList<>();
+                foodList = foodModel.getResult();
+                newFeedAdapter = new NewFeedAdapter(getContext(), foodList, this, nestedScrollView, rvNewFeed);
+                newFeedAdapter.setiLoadMore(this);
+                rvNewFeed.setAdapter(newFeedAdapter);
+            } else {
+                newFeedAdapter.removeNull();
+                foodList = foodModel.getResult();
+                newFeedAdapter.addItem(foodList);
+                foodList.clear();
+                foodList.addAll(newFeedAdapter.getOrderList());
+            }
+        }
+        loaded = true;
+        layoutNewFeed.setVisibility(View.VISIBLE);
+        newFeedAdapter.setLoaded();
+    }
+
+    @Override
+    public void onError(String message) {
+        newFeedAdapter.notifyItemRemoved(newFeedAdapter.getItemCount());
+        newFeedAdapter.setLoaded();
+    }
+
+    @Override
+    public void onGetFoodSuccess(Food food) {
+        EventBus.getDefault().postSticky(new FoodDetailEvent(true, food));
+        startActivity(new Intent(getContext(), FoodDetailActivity.class));
+    }
+
+    @Override
+    public void onGetFoodError(String message) {
+        Toast.makeText(getActivity(), "[GET FOOD]" + message, Toast.LENGTH_SHORT).show();
+        dialogUtils.dismissProgress();
     }
 }

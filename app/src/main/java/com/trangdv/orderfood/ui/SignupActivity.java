@@ -62,13 +62,15 @@ public class SignupActivity extends AppCompatActivity {
     }
 
     private void gotoVerification() {
-        String phoneNumber = "+" + code + phonenumber;
+
+        String  phoneFormat = "+" + code + phonenumber;
 
         Intent intent = new Intent(SignupActivity.this, VerifyPhoneActivity.class);
         Bundle bundle = new Bundle();
-        bundle.putString("phoneNumber", phoneNumber);
+        bundle.putString("phoneNumber", phonenumber);
         bundle.putString("userName", userName);
         bundle.putString("password", password);
+        bundle.putString("phoneFormat", phoneFormat);
         intent.putExtras(bundle);
 //        intent.putExtra("phoneNumber", phoneNumber);
         startActivity(intent);

@@ -25,6 +25,7 @@ import com.trangdv.orderfood.model.eventbus.MenuItemEvent;
 import com.trangdv.orderfood.retrofit.IAnNgonAPI;
 import com.trangdv.orderfood.retrofit.RetrofitClient;
 import com.trangdv.orderfood.ui.food.FoodActivity;
+import com.trangdv.orderfood.utils.DialogUtils;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -44,6 +45,7 @@ public class MenuActivity extends AppCompatActivity implements MenuAdapter.ItemL
     IAnNgonAPI anNgonAPI;
     CompositeDisposable compositeDisposable = new CompositeDisposable();
     CartDataSource cartDataSource;
+    DialogUtils dialogUtils;
 
     private List<Category> categoryList = new ArrayList<>();
     private MenuAdapter menuAdapter;
@@ -77,6 +79,7 @@ public class MenuActivity extends AppCompatActivity implements MenuAdapter.ItemL
 
         anNgonAPI = RetrofitClient.getInstance(Common.API_ANNGON_ENDPOINT).create(IAnNgonAPI.class);
         cartDataSource = new LocalCartDataSource(CartDatabase.getInstance(this).cartDAO());
+        dialogUtils = new DialogUtils();
 
     }
 
@@ -95,6 +98,7 @@ public class MenuActivity extends AppCompatActivity implements MenuAdapter.ItemL
     @Override
     public void onStop() {
         EventBus.getDefault().unregister(this);
+        dialogUtils.dismissProgress();
         super.onStop();
     }
 
@@ -119,6 +123,7 @@ public class MenuActivity extends AppCompatActivity implements MenuAdapter.ItemL
                             .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe(menuModel -> {
+                                categoryList.clear();
                                 categoryList.addAll(menuModel.getResult());
                                 menuAdapter.notifyDataSetChanged();
                                 mShimmerViewContainer.stopShimmerAnimation();
@@ -138,6 +143,7 @@ public class MenuActivity extends AppCompatActivity implements MenuAdapter.ItemL
 
     @Override
     public void dispatchToFoodList(int position) {
+        dialogUtils.showProgress(this);
         EventBus.getDefault().postSticky(new FoodListEvent(true, categoryList.get(position)));
         startActivity(new Intent(this, FoodActivity.class));
     }

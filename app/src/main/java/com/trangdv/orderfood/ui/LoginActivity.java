@@ -15,25 +15,26 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.common.Common;
+import com.trangdv.orderfood.model.User;
+import com.trangdv.orderfood.presenter.login.ILoginPresenter;
+import com.trangdv.orderfood.presenter.login.LoginPresenter;
 import com.trangdv.orderfood.retrofit.IAnNgonAPI;
 import com.trangdv.orderfood.retrofit.RetrofitClient;
 import com.trangdv.orderfood.ui.main.MainActivity;
 import com.trangdv.orderfood.utils.DialogUtils;
 import com.trangdv.orderfood.utils.SharedPrefs;
+import com.trangdv.orderfood.view.ILoginView;
 
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.schedulers.Schedulers;
 
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends AppCompatActivity implements ILoginView {
 
     IAnNgonAPI anNgonAPI;
-    CompositeDisposable compositeDisposable = new CompositeDisposable();
+    CompositeDisposable compositeDisposable;
+    ILoginPresenter iLoginPresenter;
 
     public static final int REQUEST_CODE = 2019;
     public static final String KEY_PHONENUMBER = "key phonenumber address";
@@ -49,9 +50,6 @@ public class LoginActivity extends AppCompatActivity {
     private String phonenumber;
     private String password;
 
-    FirebaseDatabase database = FirebaseDatabase.getInstance();
-    final DatabaseReference table_user = database.getReference("User");
-
     DialogUtils dialogUtils;
 
     @Override
@@ -59,11 +57,14 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        inits();
+        init();
     }
 
-    private void inits() {
+    private void init() {
         anNgonAPI = RetrofitClient.getInstance(Common.API_ANNGON_ENDPOINT).create(IAnNgonAPI.class);
+        compositeDisposable = new CompositeDisposable();
+        iLoginPresenter = new LoginPresenter(this, anNgonAPI, compositeDisposable);
+        dialogUtils = new DialogUtils();
 
         dispatch_signup = findViewById(R.id.dispatch_signup);
         setClickDispatchSignup();
@@ -71,9 +72,6 @@ public class LoginActivity extends AppCompatActivity {
         setOnClickFab();
         edt_phonenumber = findViewById(R.id.phonenumber_edt_login);
         edt_password = findViewById(R.id.password_edt_login);
-
-        dialogUtils = new DialogUtils();
-
     }
 
     private void setClickDispatchSignup() {
@@ -86,6 +84,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void dispatchSignup() {
+        dialogUtils.showProgress(this);
         Intent intent = new Intent(LoginActivity.this, SignupActivity.class);
 //        startActivityForResult(intent, REQUEST_CODE);
         startActivity(intent);
@@ -111,8 +110,7 @@ public class LoginActivity extends AppCompatActivity {
 
                 if (phonenumber.equals("")==false && password.equals("")==false) {
                     dialogUtils.showProgress(LoginActivity.this);
-                    authLogin();
-
+                    iLoginPresenter.onLogin(phonenumber, password);
                 }
 
             }
@@ -122,38 +120,6 @@ public class LoginActivity extends AppCompatActivity {
     private void getTextfromEdt() {
         phonenumber = edt_phonenumber.getText().toString();
         password = edt_password.getText().toString();
-    }
-
-    private void authLogin() {
-            compositeDisposable.add(
-                    anNgonAPI.getUser(Common.API_KEY, "Uav4Km2CPpbUVj2ZVbFGDfjAolw1")
-                            .subscribeOn(Schedulers.io())
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe(userModel -> {
-                                        if (userModel.isSuccess()) {
-                                            // save curreentUser
-                                            Common.currentUser = userModel.getResult().get(0);
-
-                                            SharedPrefs.getInstance().put(SplashActivity.CHECK_ALREADLY_LOGIN, 2);
-
-                                            //save user in share pref
-                                            SharedPrefs.getInstance().put(SAVE_USER, Common.currentUser);
-
-                                            Toast.makeText(this, "[GET USER API SUCCESS]" + Common.currentUser.getUserPhone(), Toast.LENGTH_SHORT).show();
-
-                                            gotoMainActivity();
-
-                                        } else {
-                                            Toast.makeText(this, "[GET USER API NOT DATABASE]", Toast.LENGTH_SHORT).show();
-                                        }
-                                        dialogUtils.dismissProgress();
-
-                                    },
-                                    throwable -> {
-                                        Toast.makeText(this, "[GET USER API]" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
-                                        dialogUtils.dismissProgress();
-                                    }
-                            ));
     }
 
     private void gotoMainActivity() {
@@ -166,6 +132,12 @@ public class LoginActivity extends AppCompatActivity {
     private void setTextintoEdt() {
         edt_phonenumber.setText(phonenumber);
         edt_password.setText(password);
+    }
+
+    @Override
+    protected void onStop() {
+        dialogUtils.dismissProgress();
+        super.onStop();
     }
 
     @Override
@@ -182,5 +154,25 @@ public class LoginActivity extends AppCompatActivity {
             imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
         }
         return super.dispatchTouchEvent(ev);
+    }
+
+    @Override
+    public void onLoginSuccess(User user) {
+        dialogUtils.dismissProgress();
+        // save curreentUser
+        Common.currentUser = user;
+
+        SharedPrefs.getInstance().put(SplashActivity.CHECK_ALREADLY_LOGIN, 2);
+
+        //save user in share pref
+        SharedPrefs.getInstance().put(SAVE_USER, Common.currentUser);
+
+        gotoMainActivity();
+    }
+
+    @Override
+    public void onLoginError(String message) {
+        Toast.makeText(this, "[ERROR]" + message, Toast.LENGTH_SHORT).show();
+        dialogUtils.dismissProgress();
     }
 }

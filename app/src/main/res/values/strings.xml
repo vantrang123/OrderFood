@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">OrderFood</string>
+    <string name="app_name">Ăn Ngon</string>
     <string name="sologan">Đừng bỏ bữa, bạn nhé!</string>
     <string name="text_login">Login</string>
     <string name="text_signup">Signup</string>
@@ -26,6 +26,11 @@
     <string name="menu_my">Tôi</string>
     <string name="menu_receipt">Đơn hàng</string>
     <string name="menu_setting">Cài đặt</string>
+    <string name="txt_order_placed">Đã đặt hàng</string>
+    <string name="txt_shipping">Đang giao</string>
+    <string name="txt_shipped">Đã giao</string>
+    <string name="txt_cancelled">Đã hủy</string>
+    <string name="txt_order_detail">Chi tiết đơn hàng</string>
 
     <string name="added_to_cart">Added to Cart</string>
     <string name="delete">DELETE</string>
@@ -33,6 +38,7 @@
     <string name="order_was_updated_but_failed_to_send_notification">Đặt hàng thành công nhưng không gửi được thông báo!</string>
 
     <string name="txt_confirm_logout">Bạn có chắc chắn muốn đăng xuất không?</string>
+    <string name="title_dialog_confirm_update_status">Thay đổi trạng thái đơn hàng?</string>
     <string name="txt_yes">Có</string>
     <string name="txt_no">Không</string>
 
@@ -43,7 +49,6 @@
     <string name="txt_my_order">My Orders</string>
     <string name="txt_logout">Logout</string>
     <string name="txt_help">Help</string>
-    <string name="txt_payments">Payments</string>
     <string name="txt_menu">Menu</string>
     <string name="txt_food_list">Danh sách món</string>
     <string name="txt_manage_addresses">Manage Addresses</string>
@@ -52,16 +57,30 @@
     <string name="txt_place_order">Đặt món</string>
     <string name="txt_order">Đặt hàng</string>
     <string name="txt_cart_empty">Giỏ hàng rỗng!!!</string>
+    <string name="txt_dola">$</string>
     <string name="txt_date">Date</string>
     <string name="txt_seleted_date">Selected Date</string>
-    <string name="txt_address">Address</string>
+    <string name="txt_add_to_cart">Thêm vào giỏ hàng</string>
+    <string name="txt_like">Yêu thích</string>
+    <string name="txt_share">Chia sẻ</string>
     <string name="txt_add_new_address">Add New Address</string>
     <string name="txt_cash_on_deliver">Thanh toán khi nhận hàng</string>
     <string name="txt_online_payment">Thanh toán Online</string>
     <string name="txt_proceed">Tiến hành</string>
     <string name="title_activity_nearby_restaurnt">Map</string>
     <string name="title_dialog_gps">Reminder</string>
+    <string name="title_dialog_order_success">Đặt hàng thành công</string>
+    <string name="content_dialog_order_success">Cảm ơn bạn đã sử dụng ứng dụng</string>
+    <string name="title_dialog_add_cart_success">Đã thêm vào giỏ hàng</string>
+    <string name="content_dialog_add_cart_success">Bạn có thể đặt hàng tại giỏ hàng</string>
     <string name="txt_body_dialog_gps">Bạn nên mở dịch vụ truy cập vị trí cho ứng dụng để hiển thị địa điểm lân cận</string>
-
+    <string name="txt_noti_choise_date_valid">Vui lòng chọn ngày tháng hiện tại hoặc tương lai!</string>
+    <string name="txt_money">Tổng tiền</string>
+    <string name="txt_order_on">Ngày đặt hàng</string>
+    <string name="txt_address">Địa chỉ</string>
+    <string name="txt_num_of_item">Số món</string>
+    <string name="txt_payments">Phương thức thanh toán</string>
+    <string name="txt_phone">Số điện thoại</string>
+    <string name="txt_status">Trạng thái</string>
 
 </resources>

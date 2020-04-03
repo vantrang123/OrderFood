@@ -7,7 +7,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -134,7 +133,7 @@ public class FavoritesAdapter extends RecyclerView.Adapter<FavoritesAdapter.View
                                     .subscribe(favoriteModel -> {
                                         if (favoriteModel.isSuccess() && favoriteModel.getMessage().contains("Success")) {
                                             if (Common.currentFav != null) {
-                                                Common.removeFa(favoritesList.get(getAdapterPosition()).getFoodId());
+                                                Common.removeFav(favoritesList.get(getAdapterPosition()).getFoodId());
                                             }
                                             removeItem(getAdapterPosition());
                                         }

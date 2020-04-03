@@ -9,6 +9,8 @@ import com.trangdv.orderfood.model.HotFoodModel;
 import com.trangdv.orderfood.model.MaxFoodModel;
 import com.trangdv.orderfood.model.MaxOrderModel;
 import com.trangdv.orderfood.model.MenuModel;
+import com.trangdv.orderfood.model.OrderDetailModel;
+import com.trangdv.orderfood.model.OrderIdModel;
 import com.trangdv.orderfood.model.OrderModel;
 import com.trangdv.orderfood.model.RestaurantIdModel;
 import com.trangdv.orderfood.model.RestaurantModel;
@@ -26,12 +28,14 @@ import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
+import retrofit2.http.PUT;
 import retrofit2.http.Query;
 
 public interface IAnNgonAPI {
     @GET("user")
     Observable<UserModel> getUser(@Query("key") String apiKey,
-                                  @Query("fbid") String fbid);
+                                  @Query("userPhone") String userPhone,
+                                  @Query("password") String password);
 
     @GET("restaurant")
     Observable<RestaurantModel> getRestaurant(@Query("key") String apiKey);
@@ -83,6 +87,21 @@ public interface IAnNgonAPI {
                                     @Query("from") int from,
                                     @Query("to") int to);
 
+    @GET("orderId")
+    Observable<OrderIdModel> getOrderId(@Query("key") String apiKey,
+                                        @Query("orderFBID") String orderFBID);
+
+    @GET("orderdetailbyrestaurant")
+    Observable<OrderDetailModel> getOrderDetailModel(@Query("key") String apiKey,
+                                                     @Query("orderId") int orderId,
+                                                     @Query("restaurantId") int restaurantId);
+
+    @PUT("updateOrder")
+    @FormUrlEncoded
+    Observable<UpdateOrderModel> updateOrderStatus(@Field("key") String apiKey,
+                                                   @Field("orderId") int orderId,
+                                                   @Field("orderStatus") int orderStatus);
+
     @GET("hotfood")
     Observable<HotFoodModel> getHotFood(@Query("key") String apiKey);
 
@@ -106,7 +125,8 @@ public interface IAnNgonAPI {
                                                @Field("userPhone") String userPhone,
                                                @Field("userName") String userName,
                                                @Field("userAddress") String userAddress,
-                                               @Field("fbid") String fbid);
+                                               @Field("fbid") String fbid,
+                                               @Field("userPassword") String userPassword);
     @GET("findrestaurantid")
     Observable<RestaurantIdModel> getRestaurantId(@Query("key") String apiKey,
                                                   @Query("foodId") int foodId);
@@ -117,7 +137,6 @@ public interface IAnNgonAPI {
                                              @Field("fbid") String fbid,
                                              @Field("foodId") int foodId,
                                              @Field("restaurantId") int restaurantId,
-                                             @Field("restaurantName") String restaurantName,
                                              @Field("foodName") String foodName,
                                              @Field("foodImage") String foodImage,
                                              @Field("price") double price);
@@ -130,11 +149,11 @@ public interface IAnNgonAPI {
                                              @Field("orderName") String orderName,
                                              @Field("orderAddress") String orderAddress,
                                              @Field("orderDate") String orderDate,
-                                             @Field("restaurantId") int restaurantId,
                                              @Field("transactionId") String transactionId,
                                              @Field("cod") boolean cod,
                                              @Field("totalPrice") Double totalPrice,
-                                             @Field("numOfItem") int numOfItem);
+                                             @Field("numOfItem") int numOfItem,
+                                             @Field("restaurantId") int restaurantId);
 
     @POST("updateOrder")
     @FormUrlEncoded

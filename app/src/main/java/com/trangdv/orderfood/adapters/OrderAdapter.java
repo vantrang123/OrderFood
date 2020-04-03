@@ -124,6 +124,7 @@ public class OrderAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    Common.currentOrder = orderList.get(getLayoutPosition());
                     listener.dispatchToOrderDetail(getLayoutPosition());
                 }
             });
