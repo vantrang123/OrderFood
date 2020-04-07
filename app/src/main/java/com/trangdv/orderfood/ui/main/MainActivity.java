@@ -70,7 +70,6 @@ import it.sephiroth.android.library.bottomnavigation.BottomNavigation;
 
 import static com.trangdv.orderfood.ui.LoginActivity.SAVE_USER;
 
-
 public class MainActivity extends AppCompatActivity
         implements InternetConnector.BroadcastListener, View.OnClickListener {
     private static final String TAG = "MainActivity";

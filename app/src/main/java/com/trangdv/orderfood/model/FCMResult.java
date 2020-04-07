@@ -1,9 +1,5 @@
 package com.trangdv.orderfood.model;
 
-/**
- * Created by dell on 4/26/2018.
- */
-
 public class FCMResult {
     public String message_id;
 
