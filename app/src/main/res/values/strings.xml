@@ -26,10 +26,11 @@
     <string name="menu_my">Tôi</string>
     <string name="menu_receipt">Đơn hàng</string>
     <string name="menu_setting">Cài đặt</string>
-    <string name="txt_order_placed">Đã đặt hàng</string>
+    <string name="txt_order_placed">Đã chấp nhận</string>
     <string name="txt_shipping">Đang giao</string>
     <string name="txt_shipped">Đã giao</string>
     <string name="txt_cancelled">Đã hủy</string>
+    <string name="txt_cancel">Hủy</string>
     <string name="txt_order_detail">Chi tiết đơn hàng</string>
 
     <string name="added_to_cart">Added to Cart</string>

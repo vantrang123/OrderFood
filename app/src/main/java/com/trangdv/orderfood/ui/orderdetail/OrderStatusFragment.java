@@ -135,13 +135,13 @@ public class OrderStatusFragment extends Fragment implements View.OnClickListene
             case -1:
                 ivCancelled.setBackground(getResources().getDrawable(R.drawable.bg_iv_status));
                 ivCancelled.setClickable(false);
-            case 2:
+            case 5:
                 ivShipped.setBackground(getResources().getDrawable(R.drawable.bg_iv_status));
                 ivShipped.setClickable(false);
-            case 1:
+            case 4:
                 ivShipping.setBackground(getResources().getDrawable(R.drawable.bg_iv_status));
                 ivShipping.setClickable(false);
-            case 0:
+            case 1:
                 ivOrderPlaced.setBackground(getResources().getDrawable(R.drawable.bg_iv_status));
                 ivOrderPlaced.setClickable(false);
                 break;

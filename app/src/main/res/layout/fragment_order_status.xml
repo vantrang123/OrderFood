@@ -119,7 +119,7 @@
         android:layout_marginLeft="@dimen/dimens_20dp"
         android:textSize="15sp"
         android:textColor="@color/black"
-        android:text="@string/txt_cancelled"/>
+        android:text="@string/txt_cancel"/>
 
     <!--<TextView
         android:id="@+id/tv_update_status"

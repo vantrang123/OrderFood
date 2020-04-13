@@ -5,14 +5,14 @@
     <RelativeLayout
         android:id="@+id/rlSearch"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:background="@color/colorWhite"
         >
 
         <RelativeLayout
             android:id="@+id/rlSearchBg"
             android:layout_width="match_parent"
-            android:layout_height="28dp"
+            android:layout_height="35dp"
             android:layout_centerVertical="true"
             android:layout_toLeftOf="@+id/iv_search"
             android:layout_toRightOf="@id/iv_user"
@@ -22,7 +22,7 @@
             <TextView
                 android:id="@+id/edt_Search"
                 android:layout_width="match_parent"
-                android:layout_height="32dp"
+                android:layout_height="35dp"
                 android:gravity="center_vertical"
                 android:background="@null"
                 android:hint="@string/tv_search"
@@ -43,23 +43,25 @@
 
         <ImageView
             android:id="@+id/iv_search"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="27dp"
+            android:layout_height="27dp"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="5dp"
+            android:layout_marginLeft="@dimen/dimens_5dp"
             android:background="@drawable/button_effect_oval"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentBottom="true"
             android:layout_alignParentRight="true"
             android:src="@drawable/ic_notifications"
             android:tint="@color/grey_40"/>
 
         <ImageView
             android:id="@+id/iv_user"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="27dp"
+            android:layout_height="27dp"
+            android:layout_marginLeft="@dimen/dimens_5dp"
             android:background="@drawable/button_effect_oval"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentBottom="true"
+            android:layout_centerVertical="true"
             android:layout_alignParentLeft="true"
+            android:layout_marginRight="@dimen/dimens_5dp"
             android:src="@drawable/ic_person"
             android:tint="@color/grey_40"/>
     </RelativeLayout>

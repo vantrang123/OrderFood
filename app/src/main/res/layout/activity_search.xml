@@ -19,10 +19,8 @@
         <RelativeLayout
             android:id="@+id/rlSearchBg"
             android:layout_width="match_parent"
-            android:layout_height="38dp"
+            android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_marginStart="@dimen/dimens_10dp"
-            android:layout_marginEnd="@dimen/dimens_10dp"
             android:layout_toLeftOf="@+id/iv_search"
             android:layout_toRightOf="@id/iv_back"
             android:background="@drawable/bg_border_rectangle_not_color">
@@ -46,25 +44,26 @@
 
         <ImageView
             android:id="@+id/iv_search"
-            android:layout_width="26dp"
-            android:layout_height="26dp"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentBottom="true"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="@dimen/dimens_5dp"
             android:layout_alignParentRight="true"
-            android:layout_marginEnd="@dimen/dimens_10dp"
+            android:background="@drawable/button_effect_oval"
+            android:layout_marginEnd="5dp"
             android:src="@drawable/ic_search"
             android:tint="@color/grey_40"/>
 
         <ImageView
             android:id="@+id/iv_back"
-            android:layout_width="26dp"
-            android:layout_height="26dp"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentBottom="true"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="@dimen/dimens_5dp"
             android:layout_alignParentLeft="true"
-            android:layout_marginStart="@dimen/dimens_10dp"
+            android:background="@drawable/button_effect_oval"
             android:src="@drawable/ic_back"
-            android:tint="@color/grey_40"/>
+            android:tint="@color/grey_40" />
     </RelativeLayout>
 
     <androidx.recyclerview.widget.RecyclerView
