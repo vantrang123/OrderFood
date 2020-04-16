@@ -252,7 +252,6 @@ public class OrderFragment extends Fragment implements OrderAdapter.ItemListener
 
     @Override
     public void dispatchToOrderDetail(int position) {
-        dialogUtils.showProgress(getContext());
         idItemSelected = position;
         startActivityForResult(new Intent(getContext(), OrderDetailActivity.class), REQUEST_CODE_ORDER_DETAIL);
     }

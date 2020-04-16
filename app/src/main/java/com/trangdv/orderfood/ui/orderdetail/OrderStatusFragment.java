@@ -63,9 +63,9 @@ public class OrderStatusFragment extends Fragment implements View.OnClickListene
         ivOrderPlaced = view.findViewById(R.id.iv_order_placed);
         ivOrderPlaced.setOnClickListener(this);
         ivShipping = view.findViewById(R.id.iv_shipping);
-        ivShipping.setOnClickListener(this);
+//        ivShipping.setOnClickListener(this);
         ivShipped = view.findViewById(R.id.iv_shipped);
-        ivShipped.setOnClickListener(this);
+//        ivShipped.setOnClickListener(this);
         ivCancelled = view.findViewById(R.id.iv_cancelled);
         ivCancelled.setOnClickListener(this);
 //        tvUpdateStatus = view.findViewById(R.id.tv_update_status);
@@ -75,6 +75,7 @@ public class OrderStatusFragment extends Fragment implements View.OnClickListene
     public void initStatus() {
         int id = Common.currentOrder.getOrderStatus();
         updateCorlorStatus(id);
+
     }
     public void updateOrderStatus() {
         dialogUtils.showProgress(getContext());
@@ -135,15 +136,19 @@ public class OrderStatusFragment extends Fragment implements View.OnClickListene
             case -1:
                 ivCancelled.setBackground(getResources().getDrawable(R.drawable.bg_iv_status));
                 ivCancelled.setClickable(false);
+                break;
             case 5:
                 ivShipped.setBackground(getResources().getDrawable(R.drawable.bg_iv_status));
                 ivShipped.setClickable(false);
             case 4:
                 ivShipping.setBackground(getResources().getDrawable(R.drawable.bg_iv_status));
                 ivShipping.setClickable(false);
+            case 2:
+            case 3:
             case 1:
                 ivOrderPlaced.setBackground(getResources().getDrawable(R.drawable.bg_iv_status));
                 ivOrderPlaced.setClickable(false);
+                ivCancelled.setClickable(false);
                 break;
             default:
                 break;
@@ -163,24 +168,20 @@ public class OrderStatusFragment extends Fragment implements View.OnClickListene
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.iv_order_placed:
+            /*case R.id.iv_order_placed:
                 statusId = 0;
-//                ivOrderPlaced.setClickable(true);
                 showConfirmDialog();
                 break;
             case R.id.iv_shipping:
                 statusId = 1;
-//                ivShipping.setClickable(true);
                 showConfirmDialog();
                 break;
             case R.id.iv_shipped:
                 statusId = 2;
-//                ivShipped.setClickable(true);
                 showConfirmDialog();
-                break;
+                break;*/
             case R.id.iv_cancelled:
                 statusId = -1;
-//                ivCancelled.setClickable(true);
                 showConfirmDialog();
                 break;
             default:

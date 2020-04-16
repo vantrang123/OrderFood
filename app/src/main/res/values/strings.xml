@@ -42,6 +42,7 @@
     <string name="title_dialog_confirm_update_status">Thay đổi trạng thái đơn hàng?</string>
     <string name="txt_yes">Có</string>
     <string name="txt_no">Không</string>
+    <string name="txt_update">Cập nhật</string>
 
     <string name="txt_near_you">Gần bạn</string>
     <string name="txt_suggestion">Gợi ý</string>
@@ -69,7 +70,7 @@
     <string name="txt_online_payment">Thanh toán Online</string>
     <string name="txt_proceed">Tiến hành</string>
     <string name="title_activity_nearby_restaurnt">Map</string>
-    <string name="title_dialog_gps">Reminder</string>
+    <string name="title_dialog_gps">Cập nhật thông tin</string>
     <string name="title_dialog_order_success">Đặt hàng thành công</string>
     <string name="content_dialog_order_success">Cảm ơn bạn đã sử dụng ứng dụng</string>
     <string name="title_dialog_add_cart_success">Đã thêm vào giỏ hàng</string>
@@ -79,6 +80,7 @@
     <string name="txt_money">Tổng tiền</string>
     <string name="txt_order_on">Ngày đặt hàng</string>
     <string name="txt_address">Địa chỉ</string>
+    <string name="txt_address_info">Địa chỉ:</string>
     <string name="txt_num_of_item">Số món</string>
     <string name="txt_payments">Phương thức thanh toán</string>
     <string name="txt_phone">Số điện thoại</string>

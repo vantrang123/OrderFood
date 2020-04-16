@@ -1,6 +1,5 @@
 package com.trangdv.orderfood.ui;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
@@ -8,21 +7,22 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 
 import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.common.Common;
 import com.trangdv.orderfood.retrofit.IAnNgonAPI;
 import com.trangdv.orderfood.retrofit.RetrofitClient;
 import com.trangdv.orderfood.ui.dialog.ConfirmLogoutDialog;
+import com.trangdv.orderfood.ui.dialog.UpdateInfoDialog;
 import com.trangdv.orderfood.utils.DialogUtils;
 import com.trangdv.orderfood.utils.SharedPrefs;
 
-import java.util.zip.DeflaterInputStream;
-
+import cn.pedant.SweetAlert.SweetAlertDialog;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
+
+import static com.trangdv.orderfood.ui.LoginActivity.SAVE_USER;
 
 public class ProfileActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -51,14 +51,14 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
     private void setData() {
         tvUserName.setText(Common.currentUser.getName());
         tvUserPhone.setText(new StringBuffer("Số điện thoại: ").append(Common.currentUser.getUserPhone()));
-        tvUserAddress.setText(new StringBuilder("Địa chỉ: ").append(Common.currentUser.getAddress()));
+        tvUserAddress.setText(Common.currentUser.getAddress());
     }
 
     private void findViewById() {
         tvEdit = findViewById(R.id.tv_edit);
         tvUserName = findViewById(R.id.tv_userName);
         tvUserPhone = findViewById(R.id.tv_userPhone);
-        tvUserAddress = findViewById(R.id.tv_user_address);
+        tvUserAddress = findViewById(R.id.tv_user_address_info);
         tvLogout = findViewById(R.id.tv_logout);
         ivBack = findViewById(R.id.iv_back);
 
@@ -81,20 +81,21 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
                 onBackPressed();
                 break;
             case R.id.tv_edit:
-                dialogUtils.showProgress(this);
-                updateUserInfo();
+                new UpdateInfoDialog(tvUserName.getText().toString(), tvUserAddress.getText().toString())
+                        .show(getSupportFragmentManager(), "edit info dialog");
                 break;
             default:
                 break;
         }
     }
 
-    private void updateUserInfo() {
+    public void updateUserInfo(String name, String address) {
+        dialogUtils.showProgress(this);
         compositeDisposable.add(
                 anNgonAPI.updateUserInfo(Common.API_KEY,
                         Common.currentUser.getUserPhone(),
-                        Common.currentUser.getName(),
-                        "",
+                        name,
+                        address,
                         Common.currentUser.getFbid(),
                         Common.currentUser.getPassword())
                         .subscribeOn(Schedulers.io())
@@ -102,6 +103,15 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
                         .subscribe(updateUserModel -> {
                             if (updateUserModel.isSuccess()) {
                                 dialogUtils.dismissProgress();
+                                new SweetAlertDialog(this, SweetAlertDialog.SUCCESS_TYPE)
+                                        .setTitleText("Cập nhật thông tin")
+                                        .setContentText("Thành công")
+                                        .show();
+                                Common.currentUser.setName(name);
+                                Common.currentUser.setAddress(address);
+                                //save user in share pref
+                                SharedPrefs.getInstance().put(SAVE_USER, Common.currentUser);
+                                setData();
                             }
                         }, throwable -> {
                             dialogUtils.dismissProgress();

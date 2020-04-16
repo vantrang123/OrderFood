@@ -47,8 +47,14 @@ public class Common {
             case 0:
                 return "Đã đặt";
             case 1:
-                return "Đang giao";
+                return "Đã chấp nhận";
             case 2:
+                return "Đã chấp nhận";
+            case 3:
+                return "Đã chấp nhận";
+            case 4:
+                return "Đang giao";
+            case 5:
                 return "Đã giao";
             case -1:
                 return "Đã hủy";

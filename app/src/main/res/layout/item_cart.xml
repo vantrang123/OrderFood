@@ -6,7 +6,8 @@
     android:id="@+id/container_food_item"
     android:background="@color/colorWhite"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:foreground="?selectableItemBackgroundBorderless">
 
     <ImageView
         android:id="@+id/iv_increase"

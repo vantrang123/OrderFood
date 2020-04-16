@@ -143,7 +143,6 @@ public class MenuActivity extends AppCompatActivity implements MenuAdapter.ItemL
 
     @Override
     public void dispatchToFoodList(int position) {
-        dialogUtils.showProgress(this);
         EventBus.getDefault().postSticky(new FoodListEvent(true, categoryList.get(position)));
         startActivity(new Intent(this, FoodActivity.class));
     }

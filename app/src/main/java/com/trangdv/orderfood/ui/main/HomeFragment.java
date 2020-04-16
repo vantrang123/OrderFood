@@ -330,7 +330,6 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
 
     private void onPageClicked(int position) {
         HotFood hotFood = mViewPager.getList().get(position);
-        dialogUtils.showProgress(getContext());
         iHomePresenter.getFoodById(hotFood.getItemId());
     }
 
@@ -392,7 +391,6 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
 
     @Override
     public void dispatchToMenuList(int position) {
-        dialogUtils.showProgress(getContext());
         Common.currentRestaurant = restaurantList.get(position);
         EventBus.getDefault().postSticky(new MenuItemEvent(true, restaurantList.get(position)));
         getActivity().startActivity(new Intent(getContext(), MenuActivity.class));
@@ -400,7 +398,6 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
 
     @Override
     public void dispatchToFoodDetail(int position) {
-        dialogUtils.showProgress(getContext());
         EventBus.getDefault().postSticky(new FoodDetailEvent(true, foodList.get(position)));
         startActivity(new Intent(getContext(), FoodDetailActivity.class));
     }

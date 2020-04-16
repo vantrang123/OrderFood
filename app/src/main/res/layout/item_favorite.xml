@@ -8,7 +8,8 @@
     android:layout_marginTop="@dimen/dimens_5dp"
     android:layout_marginLeft="@dimen/dimens_10dp"
     android:layout_marginRight="@dimen/dimens_10dp"
-    android:background="@drawable/bg_bottom_line">
+    android:background="@drawable/bg_bottom_line"
+    android:foreground="?selectableItemBackgroundBorderless">
 
     <androidx.cardview.widget.CardView
         android:id="@+id/cv_food_image"
