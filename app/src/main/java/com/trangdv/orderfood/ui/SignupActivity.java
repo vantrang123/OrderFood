@@ -74,6 +74,7 @@ public class SignupActivity extends AppCompatActivity {
         intent.putExtras(bundle);
 //        intent.putExtra("phoneNumber", phoneNumber);
         startActivity(intent);
+        overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
     }
 
     private void createUser() {

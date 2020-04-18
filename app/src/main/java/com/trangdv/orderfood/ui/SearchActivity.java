@@ -105,7 +105,7 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.iv_back:
-                finish();
+                onBackPressed();
                 break;
             case R.id.iv_search:
                 String keySearch = edtSearch.getText().toString().trim();
@@ -139,6 +139,13 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
     public void dispatchToFoodDetail(int position) {
         EventBus.getDefault().postSticky(new FoodDetailEvent(true, foodList.get(position)));
         startActivity(new Intent(this, FoodDetailActivity.class));
+        overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        overridePendingTransition(0, R.anim.right_to_left);
     }
 }
 

@@ -168,6 +168,7 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
                     EventBus.getDefault().postSticky(new SendTotalCashEvent(tvTotalPrice.getText().toString()));
 //                    showAlertDialog();
                     startActivity(new Intent(getContext(), PlaceOrderActivity.class));
+                    getActivity().overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
                 } else {
                     Toast.makeText(getActivity(), getString(R.string.txt_cart_empty), Toast.LENGTH_SHORT).show();
                 }

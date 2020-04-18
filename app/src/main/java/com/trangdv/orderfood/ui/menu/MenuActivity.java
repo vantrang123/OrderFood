@@ -145,6 +145,7 @@ public class MenuActivity extends AppCompatActivity implements MenuAdapter.ItemL
     public void dispatchToFoodList(int position) {
         EventBus.getDefault().postSticky(new FoodListEvent(true, categoryList.get(position)));
         startActivity(new Intent(this, FoodActivity.class));
+        overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
     }
 
     @Override
@@ -156,5 +157,11 @@ public class MenuActivity extends AppCompatActivity implements MenuAdapter.ItemL
             default:
                 break;
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        overridePendingTransition(0, R.anim.right_to_left);
     }
 }

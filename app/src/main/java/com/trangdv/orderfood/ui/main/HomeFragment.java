@@ -394,12 +394,14 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
         Common.currentRestaurant = restaurantList.get(position);
         EventBus.getDefault().postSticky(new MenuItemEvent(true, restaurantList.get(position)));
         getActivity().startActivity(new Intent(getContext(), MenuActivity.class));
+        getActivity().overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
     }
 
     @Override
     public void dispatchToFoodDetail(int position) {
         EventBus.getDefault().postSticky(new FoodDetailEvent(true, foodList.get(position)));
         startActivity(new Intent(getContext(), FoodDetailActivity.class));
+        getActivity().overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
     }
 
     @Override
@@ -452,6 +454,7 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
     public void onGetFoodSuccess(Food food) {
         EventBus.getDefault().postSticky(new FoodDetailEvent(true, food));
         startActivity(new Intent(getContext(), FoodDetailActivity.class));
+        getActivity().overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
     }
 
     @Override

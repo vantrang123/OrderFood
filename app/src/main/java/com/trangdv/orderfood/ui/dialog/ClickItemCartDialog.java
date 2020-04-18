@@ -110,6 +110,7 @@ public class ClickItemCartDialog extends BottomSheetDialogFragment implements Vi
                             dialogUtils.dismissProgress();
                             EventBus.getDefault().postSticky(new FoodDetailEvent(true, foodModel.getResult().get(0)));
                             startActivity(new Intent(getContext(), FoodDetailActivity.class));
+                            getActivity().overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
 
                         }, throwable -> {
                             Toast.makeText(getActivity(), "[GET FOOD]" + throwable.getMessage(), Toast.LENGTH_SHORT).show();

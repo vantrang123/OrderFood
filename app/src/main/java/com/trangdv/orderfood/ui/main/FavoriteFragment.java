@@ -163,7 +163,7 @@ public class FavoriteFragment extends Fragment implements FavoritesAdapter.ItemL
                             dialogUtils.dismissProgress();
                             EventBus.getDefault().postSticky(new FoodDetailEvent(true, foodModel.getResult().get(0)));
                             startActivity(new Intent(getContext(), FoodDetailActivity.class));
-
+                            getActivity().overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
                         }, throwable -> {
                             dialogUtils.dismissProgress();
                         })

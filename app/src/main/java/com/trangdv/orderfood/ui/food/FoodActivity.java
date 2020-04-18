@@ -38,6 +38,9 @@ public class FoodActivity extends AppCompatActivity {
                 .commit();
     }
 
-
-
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        overridePendingTransition(0, R.anim.right_to_left);
+    }
 }

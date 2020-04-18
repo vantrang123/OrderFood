@@ -129,4 +129,10 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
         compositeDisposable.clear();
         super.onDestroy();
     }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        overridePendingTransition(0, R.anim.right_to_left);
+    }
 }

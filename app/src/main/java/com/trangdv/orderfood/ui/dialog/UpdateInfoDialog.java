@@ -1,6 +1,5 @@
 package com.trangdv.orderfood.ui.dialog;
 
-import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -20,9 +19,6 @@ import androidx.fragment.app.DialogFragment;
 import com.google.android.material.textfield.TextInputEditText;
 import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.ui.ProfileActivity;
-import com.trangdv.orderfood.ui.SplashActivity;
-
-import static android.app.Activity.RESULT_OK;
 
 public class UpdateInfoDialog extends DialogFragment implements View.OnClickListener {
     String action = Settings.ACTION_LOCATION_SOURCE_SETTINGS;
@@ -47,7 +43,7 @@ public class UpdateInfoDialog extends DialogFragment implements View.OnClickList
             getDialog().getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
             this.getDialog().setCanceledOnTouchOutside(true);
         }
-        View view = inflater.inflate(R.layout.dialog_require_turn_on_gps, container, false);
+        View view = inflater.inflate(R.layout.dialog_update_info, container, false);
         findViewById(view);
 
         init();

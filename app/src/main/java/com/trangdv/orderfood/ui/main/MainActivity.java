@@ -454,14 +454,14 @@ public class MainActivity extends AppCompatActivity
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.rlSearchBg:
-                dialogUtils.showProgress(this);
                 Intent intent = new Intent(this, SearchActivity.class);
                 startActivity(intent);
+                overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
                 break;
             case R.id.iv_user:
-                dialogUtils.showProgress(this);
                 Intent intent1 = new Intent(this, ProfileActivity.class);
                 startActivity(intent1);
+                overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
                 break;
             default:
                 break;
