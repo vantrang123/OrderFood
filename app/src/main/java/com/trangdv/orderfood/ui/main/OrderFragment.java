@@ -254,5 +254,6 @@ public class OrderFragment extends Fragment implements OrderAdapter.ItemListener
     public void dispatchToOrderDetail(int position) {
         idItemSelected = position;
         startActivityForResult(new Intent(getContext(), OrderDetailActivity.class), REQUEST_CODE_ORDER_DETAIL);
+        Common.animateStart(getContext());
     }
 }

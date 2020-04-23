@@ -29,7 +29,6 @@ import com.trangdv.orderfood.view.ILoginView;
 
 import io.reactivex.disposables.CompositeDisposable;
 
-
 public class LoginActivity extends AppCompatActivity implements ILoginView {
 
     IAnNgonAPI anNgonAPI;
@@ -88,7 +87,7 @@ public class LoginActivity extends AppCompatActivity implements ILoginView {
         Intent intent = new Intent(LoginActivity.this, SignupActivity.class);
 //        startActivityForResult(intent, REQUEST_CODE);
         startActivity(intent);
-        overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
+        Common.animateStart(this);
     }
 
     @Override

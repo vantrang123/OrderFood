@@ -134,6 +134,7 @@ public class FoodListFragment extends Fragment implements FoodListAdapter.ItemLi
     public void dispatchToFoodDetail(int position) {
         EventBus.getDefault().postSticky(new FoodDetailEvent(true, foods.get(position)));
         startActivity(new Intent(getContext(), FoodDetailActivity.class));
+        Common.animateStart(getContext());
 
     }
 
@@ -186,6 +187,7 @@ public class FoodListFragment extends Fragment implements FoodListAdapter.ItemLi
         switch (view.getId()) {
             case R.id.iv_back:
                 getActivity().onBackPressed();
+                Common.animateFinish(getContext());
                 break;
             default:
                 break;
