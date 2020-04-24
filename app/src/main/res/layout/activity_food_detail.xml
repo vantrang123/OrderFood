@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/colorWhiteSmoke">
 
     <com.trangdv.orderfood.ui.BaseStatusBar
         android:id="@+id/base_status_bar"

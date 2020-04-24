@@ -108,6 +108,9 @@ dependencies {
     // Photo view
     implementation 'com.github.chrisbanes:PhotoView:2.3.0'
 
+    // swipe close
+    implementation 'com.r0adkll:slidableactivity:2.1.0'
+
 }
 apply plugin: 'com.google.gms.google-services'
 repositories {

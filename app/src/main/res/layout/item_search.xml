@@ -43,8 +43,8 @@
 
         <ImageView
             android:id="@+id/iv_search"
-            android:layout_width="27dp"
-            android:layout_height="27dp"
+            android:layout_width="29dp"
+            android:layout_height="29dp"
             android:layout_centerVertical="true"
             android:layout_marginRight="5dp"
             android:layout_marginLeft="@dimen/dimens_5dp"
@@ -55,8 +55,8 @@
 
         <ImageView
             android:id="@+id/iv_user"
-            android:layout_width="27dp"
-            android:layout_height="27dp"
+            android:layout_width="29dp"
+            android:layout_height="29dp"
             android:layout_marginLeft="@dimen/dimens_5dp"
             android:background="@drawable/button_effect_oval"
             android:layout_centerVertical="true"

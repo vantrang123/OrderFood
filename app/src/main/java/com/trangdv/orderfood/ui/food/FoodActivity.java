@@ -8,6 +8,8 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.r0adkll.slidr.Slidr;
+import com.r0adkll.slidr.model.SlidrInterface;
 import com.trangdv.orderfood.R;
 
 import com.trangdv.orderfood.model.Food;
@@ -18,12 +20,13 @@ public class FoodActivity extends AppCompatActivity {
 
     FirebaseRecyclerAdapter<Food, FoodViewHolder> adapter;
     FragmentManager fragmentManager;
+    private SlidrInterface slidr;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_food);
-
+        slidr = Slidr.attach(this);
         fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction()
                 .replace(R.id.fragment_container_food, new FoodListFragment())

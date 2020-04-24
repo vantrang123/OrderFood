@@ -24,6 +24,8 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.gson.Gson;
+import com.r0adkll.slidr.Slidr;
+import com.r0adkll.slidr.model.SlidrInterface;
 import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.adapters.AddonAdapter;
 import com.trangdv.orderfood.common.Common;
@@ -56,7 +58,7 @@ public class FoodDetailActivity extends AppCompatActivity implements View.OnClic
     CartDataSource cartDataSource;
     DialogUtils dialogUtils;
     Food selectedFood;
-
+    private SlidrInterface slidr;
     private TextView tvFoodName, tvFoodPrice, tvFoodDescription, tvTitle;
     private ImageView ivCart, ivBack, ivLike, ivShare;
     ImageView imgFoodImage;
@@ -85,8 +87,8 @@ public class FoodDetailActivity extends AppCompatActivity implements View.OnClic
     private void init() {
         anNgonAPI = RetrofitClient.getInstance(Common.API_ANNGON_ENDPOINT).create(IAnNgonAPI.class);
         cartDataSource = new LocalCartDataSource(CartDatabase.getInstance(this).cartDAO());
-
         dialogUtils = new DialogUtils();
+        slidr = Slidr.attach(this);
     }
 
     private void findViewById() {

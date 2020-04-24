@@ -13,6 +13,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.facebook.shimmer.ShimmerFrameLayout;
+import com.r0adkll.slidr.Slidr;
+import com.r0adkll.slidr.model.SlidrInterface;
 import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.adapters.MenuAdapter;
 import com.trangdv.orderfood.common.Common;
@@ -46,6 +48,7 @@ public class MenuActivity extends AppCompatActivity implements MenuAdapter.ItemL
     CompositeDisposable compositeDisposable = new CompositeDisposable();
     CartDataSource cartDataSource;
     DialogUtils dialogUtils;
+    private SlidrInterface slidr;
 
     private List<Category> categoryList = new ArrayList<>();
     private MenuAdapter menuAdapter;
@@ -76,11 +79,10 @@ public class MenuActivity extends AppCompatActivity implements MenuAdapter.ItemL
         rvMenu.setLayoutManager(layoutManager);
         menuAdapter = new MenuAdapter(this, categoryList, this);
         rvMenu.setAdapter(menuAdapter);
-
         anNgonAPI = RetrofitClient.getInstance(Common.API_ANNGON_ENDPOINT).create(IAnNgonAPI.class);
         cartDataSource = new LocalCartDataSource(CartDatabase.getInstance(this).cartDAO());
         dialogUtils = new DialogUtils();
-
+        slidr = Slidr.attach(this);
     }
 
     @Override

@@ -14,6 +14,8 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.material.tabs.TabLayout;
+import com.r0adkll.slidr.Slidr;
+import com.r0adkll.slidr.model.SlidrInterface;
 import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.adapters.OrderItemAdapter;
 import com.trangdv.orderfood.adapters.PagerOrderDetailAdapger;
@@ -37,6 +39,7 @@ public class OrderDetailActivity extends AppCompatActivity implements OrderItemA
     private SwipeRefreshLayout refreshLayout;
     private ViewPager viewPager;
     private TabLayout tabLayout;
+    private SlidrInterface slidr;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -75,7 +78,7 @@ public class OrderDetailActivity extends AppCompatActivity implements OrderItemA
         anNgonAPI = RetrofitClient.getInstance(Common.API_ANNGON_ENDPOINT).create(IAnNgonAPI.class);
         compositeDisposable = new CompositeDisposable();
         dialogUtils = new DialogUtils();
-
+        slidr = Slidr.attach(this);
         refreshLayout.setColorSchemeResources(R.color.colorPrimary,
                 android.R.color.holo_green_dark,
                 android.R.color.holo_orange_dark,

@@ -13,6 +13,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.hbb20.CountryCodePicker;
 import com.trangdv.orderfood.R;
+import com.trangdv.orderfood.common.Common;
 
 public class SignupActivity extends AppCompatActivity {
 
@@ -129,5 +130,9 @@ public class SignupActivity extends AppCompatActivity {
         finish();
     }
 
-
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        Common.animateFinish(this);
+    }
 }

@@ -13,6 +13,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.r0adkll.slidr.Slidr;
+import com.r0adkll.slidr.model.SlidrInterface;
 import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.adapters.FoodListAdapter;
 import com.trangdv.orderfood.common.Common;
@@ -45,14 +47,13 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
     private FoodListAdapter foodListAdapter;
     private ImageView ivBack, ivSearch;
     private EditText edtSearch;
+    private SlidrInterface slidr;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
-
         findViewById();
-
         init();
     }
 
@@ -69,13 +70,12 @@ public class SearchActivity extends AppCompatActivity implements View.OnClickLis
 
     private void init() {
         anNgonAPI = RetrofitClient.getInstance(Common.API_ANNGON_ENDPOINT).create(IAnNgonAPI.class);
-
         layoutManager = new LinearLayoutManager(this);
         rvSearch.setLayoutManager(layoutManager);
         foodListAdapter = new FoodListAdapter(SearchActivity.this, foodList, this);
         rvSearch.setAdapter(foodListAdapter);
-
         dialogUtils = new DialogUtils();
+        slidr = Slidr.attach(this);
     }
 
     private void searchFood(int menuId, String keySearch) {

@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorWhiteSmoke">
 
     <com.trangdv.orderfood.ui.BaseStatusBar
         android:id="@+id/base_status_bar"
@@ -69,8 +71,7 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_search"
         android:layout_marginTop="@dimen/padd_10"
-        android:layout_marginHorizontal="@dimen/dimen_16dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="match_parent" />
 
 </LinearLayout>

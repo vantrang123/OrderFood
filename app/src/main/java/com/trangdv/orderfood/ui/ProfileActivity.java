@@ -8,6 +8,8 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.r0adkll.slidr.Slidr;
+import com.r0adkll.slidr.model.SlidrInterface;
 import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.common.Common;
 import com.trangdv.orderfood.retrofit.IAnNgonAPI;
@@ -31,7 +33,8 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
     DialogUtils dialogUtils;
 
     private TextView tvUserName, tvUserPhone, tvUserAddress,  tvEdit, tvLogout;
-        private ImageView ivBack;
+    private ImageView ivBack;
+    private SlidrInterface slidr;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -46,6 +49,7 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
         anNgonAPI = RetrofitClient.getInstance(Common.API_ANNGON_ENDPOINT).create(IAnNgonAPI.class);
         compositeDisposable = new CompositeDisposable();
         dialogUtils = new DialogUtils();
+        slidr = Slidr.attach(this);
     }
 
     private void setData() {

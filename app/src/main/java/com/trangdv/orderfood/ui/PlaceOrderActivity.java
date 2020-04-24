@@ -18,6 +18,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.gson.Gson;
+import com.r0adkll.slidr.Slidr;
+import com.r0adkll.slidr.model.SlidrInterface;
 import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.common.Common;
 import com.trangdv.orderfood.database.CartDataSource;
@@ -69,7 +71,7 @@ public class PlaceOrderActivity extends AppCompatActivity implements View.OnClic
     IFCMService ifcmService;
     IPlaceOrderPresenter iPlaceOrderPresenter;
 
-
+    private SlidrInterface slidr;
     private ImageView ivBack;
     private EditText edtDate;
     private TextView tvProceed, tvPhone, tvPrice, tvUserAddress, tvAddNewAddress;
@@ -98,6 +100,7 @@ public class PlaceOrderActivity extends AppCompatActivity implements View.OnClic
         dialogUtils = new DialogUtils();
         ifcmService = RetrofitFCMClient.getInstance(Common.fcmUrl).create(IFCMService.class);
         iPlaceOrderPresenter = new PlaceOrderPresenter(this, anNgonAPI, compositeDisposable);
+        slidr = Slidr.attach(this);
     }
 
     private void findViewById() {
