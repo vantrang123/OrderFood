@@ -149,7 +149,8 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> im
 
                             @Override
                             public void onSuccess(Integer integer) {
-                                notifyItemRemoved(integer);
+                                cartItemList.remove(integer-1);
+                                notifyItemRemoved(integer-1);
                                 EventBus.getDefault().postSticky(new CaculatePriceEvent());
                             }
 

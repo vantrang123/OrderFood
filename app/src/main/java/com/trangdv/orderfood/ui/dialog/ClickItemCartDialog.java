@@ -7,6 +7,8 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.fragment.app.Fragment;
+
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
@@ -18,6 +20,8 @@ import com.trangdv.orderfood.remote.IFCMService;
 import com.trangdv.orderfood.retrofit.IAnNgonAPI;
 import com.trangdv.orderfood.retrofit.RetrofitClient;
 import com.trangdv.orderfood.ui.fooddetail.FoodDetailActivity;
+import com.trangdv.orderfood.ui.main.CartFragment;
+import com.trangdv.orderfood.ui.main.MainActivity;
 import com.trangdv.orderfood.utils.DialogUtils;
 
 import org.greenrobot.eventbus.EventBus;
@@ -121,11 +125,11 @@ public class ClickItemCartDialog extends BottomSheetDialogFragment implements Vi
     }
 
     private void onDelete() {
-        /*Fragment fragment = ((MainActivity)getActivity()).getFragmentCurrent();
+        Fragment fragment = ((MainActivity)getActivity()).getFragmentCurrent();
         if (fragment instanceof CartFragment) {
-            ((CartFragment) fragment).removeItem(position, food.getProductId());
-            ((CartFragment) fragment).showUndoDelete(food.getProductName(), position, food);
-        }*/
+            ((CartFragment) fragment).removeItem(position);
+//            ((CartFragment) fragment).showUndoDelete(food.getProductName(), position, food);
+        }
     }
 
     private void closeBottomSheet() {

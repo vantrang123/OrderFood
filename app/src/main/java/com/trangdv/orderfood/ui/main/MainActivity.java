@@ -237,6 +237,7 @@ public class MainActivity extends AppCompatActivity
             }
         });
         mBottomNavigation.setMenuChangedListener(parent -> {
+            viewPager.setOffscreenPageLimit(4);
             viewPager.setAdapter(new ViewPagerAdapter(MainActivity.this, parent.getMenuItemCount()));
             viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
                 @Override

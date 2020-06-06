@@ -120,31 +120,54 @@ public class FavoritesAdapter extends RecyclerView.Adapter<FavoritesAdapter.View
             ivFavorite.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    ImageView fav = (ImageView)v;
                     dialogUtils.showProgress(context);
-
-                    compositeDisposable.add(
-                            anNgonAPI.removeFavorite(Common.API_KEY,
-                                    Common.currentUser.getFbid(),
-                                    favoritesList.get(getAdapterPosition()).getFoodId(),
-                                    Common.currentRestaurant.getId())
-                                    .subscribeOn(Schedulers.io())
-                                    .observeOn(AndroidSchedulers.mainThread())
-                                    .subscribe(favoriteModel -> {
-                                        if (favoriteModel.isSuccess() && favoriteModel.getMessage().contains("Success")) {
-                                            if (Common.currentFav != null) {
-                                                Common.removeFav(favoritesList.get(getAdapterPosition()).getFoodId());
-                                            }
-                                            removeItem(getAdapterPosition());
-                                        }
-                                        dialogUtils.dismissProgress();
-                                    }, throwable -> {
-                                        dialogUtils.dismissProgress();
-                                    })
-                    );
+                    ImageView fav = (ImageView) v;
+                    getRestaurantId(getAdapterPosition(), v, fav);
                 }
             });
         }
+    }
+
+    private void getRestaurantId(int adapterPosition, View v, ImageView fav) {
+        compositeDisposable.add(
+                anNgonAPI.getRestaurantId(Common.API_KEY,
+                        favoritesList.get(adapterPosition).getFoodId())
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(restaurantIdModel -> {
+                            if (restaurantIdModel.isSuccess()) {
+                                int currentRestaurantId = restaurantIdModel.getResult().get(0).getRestaurantId();
+                                removeFavorite(adapterPosition, fav, currentRestaurantId);
+                            }
+                        }, throwable -> {
+                            dialogUtils.dismissProgress();
+                        }));
+    }
+
+    private void removeFavorite(int adapterPosition, ImageView fav, int currentRestaurantId) {
+        compositeDisposable.add(
+                anNgonAPI.removeFavorite(Common.API_KEY,
+                        Common.currentUser.getFbid(),
+                        favoritesList.get(adapterPosition).getFoodId(),
+                        currentRestaurantId)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(favoriteModel -> {
+                            if (favoriteModel.isSuccess() && favoriteModel.getMessage().contains("Success")) {
+                                fav.setImageResource(R.drawable.ic_favorite_gray);
+                                fav.setTag(false);
+                                if (Common.currentFav != null) {
+                                    Common.removeFav(favoritesList.get(adapterPosition).getFoodId());
+                                    favoritesList.remove(adapterPosition);
+                                    notifyItemRemoved(adapterPosition);
+                                }
+                            }
+                            dialogUtils.dismissProgress();
+                        }, throwable -> {
+
+                            dialogUtils.dismissProgress();
+                        })
+        );
     }
 
     public void removeItem(int position) {

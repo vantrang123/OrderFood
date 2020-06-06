@@ -37,7 +37,7 @@ public class Common {
     public static final String NOTIFI_TITLE = "title";
     public static final String NOTIFI_CONTENT = "content";
 
-    public static final String API_ANNGON_ENDPOINT = "http://192.168.137.1:3000";
+    public static final String API_ANNGON_ENDPOINT = "http://192.168.1.6:3000";
     //    public static final String API_ANNGON_ENDPOINT = "http://192.168.43.205:3000";
     public static Set<Addon> addonList = new HashSet<>();
     public static List<FavoriteOnlyId> currentFav;

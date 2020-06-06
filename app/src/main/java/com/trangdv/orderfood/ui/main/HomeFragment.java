@@ -96,23 +96,16 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
     RelativeLayout mRlIndicator;
     TextView mTvTitle;
     View layoutRestaurant, layoutNewFeed, layout_suggestion, layout_banner;
-    private boolean loaded = false;
     private int maxData = 0;
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        if (loaded) {
-            outState.putBoolean("loaded", true);
-        }
     }
 
     @Override
     public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
         super.onViewStateRestored(savedInstanceState);
-        if (savedInstanceState != null) {
-            loaded = savedInstanceState.getBoolean("loaded", false);
-        }
     }
 
     @Nullable
@@ -174,7 +167,6 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
                                         restaurantList.addAll(restaurantModel.getResult());
                                         restaurantAdapter.notifyDataSetChanged();
                                         layoutRestaurant.setVisibility(View.VISIBLE);
-                                        loaded = true;
                                     } else {
                                     }
 
@@ -216,11 +208,11 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
         suggestion = database.getReference("Suggestions");
 
         // token
-        FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(getActivity(),  new OnSuccessListener<InstanceIdResult>() {
+        FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(getActivity(), new OnSuccessListener<InstanceIdResult>() {
             @Override
             public void onSuccess(InstanceIdResult instanceIdResult) {
                 String newToken = instanceIdResult.getToken();
-                Log.e("newToken",newToken);
+                Log.e("newToken", newToken);
 
 //                updateTokenShipper(newToken);
             }
@@ -251,14 +243,10 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
         refreshLayout.post(new Runnable() {
             @Override
             public void run() {
-                if (!loaded) {
-                    fetchNearRestaurant();
-                    iHomePresenter.getNumOfFood();
-                    refreshLayout.setRefreshing(false);
-                    loadHotFood();
-                } else {
-                    showDataLoaded();
-                }
+                fetchNearRestaurant();
+                iHomePresenter.getNumOfFood();
+                refreshLayout.setRefreshing(false);
+                loadHotFood();
 
             }
         });
@@ -266,7 +254,7 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
 
     public void scrollToTop() {
         nestedScrollView.fullScroll(View.FOCUS_UP);
-        nestedScrollView.scrollTo(0,0);
+        nestedScrollView.scrollTo(0, 0);
     }
 
     private void showDataLoaded() {
@@ -285,19 +273,19 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
     }
 
     private void fetchNearRestaurant() {
-        if (!((MainActivity)getActivity()).isGPS) {
+        if (!((MainActivity) getActivity()).isGPS) {
             new GpsUtils(getContext()).turnGPSOn(new GpsUtils.onGpsListener() {
                 @Override
                 public void gpsStatus(boolean isGPSEnable) {
                     // turn on GPS
-                    ((MainActivity)getActivity()).isGPS = isGPSEnable;
-                    ((MainActivity)getActivity()).isContinue = false;
-                    ((MainActivity)getActivity()).getLocation();
+                    ((MainActivity) getActivity()).isGPS = isGPSEnable;
+                    ((MainActivity) getActivity()).isContinue = false;
+                    ((MainActivity) getActivity()).getLocation();
                 }
             });
         } else {
-            ((MainActivity)getActivity()).isContinue = false;
-            ((MainActivity)getActivity()).getLocation();
+            ((MainActivity) getActivity()).isContinue = false;
+            ((MainActivity) getActivity()).getLocation();
         }
     }
 
@@ -439,7 +427,6 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
                 foodList.addAll(newFeedAdapter.getOrderList());
             }
         }
-        loaded = true;
         layoutNewFeed.setVisibility(View.VISIBLE);
         newFeedAdapter.setLoaded();
     }

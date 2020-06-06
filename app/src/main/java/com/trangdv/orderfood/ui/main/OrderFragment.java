@@ -48,7 +48,6 @@ public class OrderFragment extends Fragment implements OrderAdapter.ItemListener
     List<Order> orderList = new ArrayList<>();
     private int maxData = 0;
     boolean isLoading = false;
-    boolean loaded = false;
     private int idItemSelected;
 
     LayoutAnimationController layoutAnimationController;
@@ -56,17 +55,11 @@ public class OrderFragment extends Fragment implements OrderAdapter.ItemListener
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        if (loaded) {
-            outState.putBoolean("loaded", true);
-        }
     }
 
     @Override
     public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
         super.onViewStateRestored(savedInstanceState);
-        if (savedInstanceState != null) {
-            loaded = savedInstanceState.getBoolean("loaded", false);
-        }
     }
 
     @Nullable
@@ -111,11 +104,7 @@ public class OrderFragment extends Fragment implements OrderAdapter.ItemListener
         refreshLayout.post(new Runnable() {
             @Override
             public void run() {
-                if (!loaded) {
-                    loadMaxOrder();
-                } else {
-                    showDataLoaded();
-                }
+                loadMaxOrder();
             }
         });
     }
@@ -190,7 +179,6 @@ public class OrderFragment extends Fragment implements OrderAdapter.ItemListener
                                         orderList.addAll(orderAdapter.getOrderList());
                                     }
                                 }
-                                loaded = true;
                             } else {
                                 orderAdapter.notifyItemRemoved(orderAdapter.getItemCount());
                             }

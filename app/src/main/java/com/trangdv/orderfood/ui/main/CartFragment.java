@@ -430,8 +430,29 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
         snackbar.show();
     }
 
-    public void removeItem(int position, String productId) {
-        changeStatus();
+    public void removeItem(int position) {
+//        changeStatus();
+        cartDataSource.deleteCart(cartItemList.get(position))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new SingleObserver<Integer>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onSuccess(Integer integer) {
+                        cartItemList.remove(integer-1);
+                        cartAdapter.notifyItemRemoved(integer-1);
+                        EventBus.getDefault().postSticky(new CaculatePriceEvent());
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+
+                    }
+                });
     }
 
     @Override

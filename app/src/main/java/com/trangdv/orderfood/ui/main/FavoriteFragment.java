@@ -46,22 +46,15 @@ public class FavoriteFragment extends Fragment implements FavoritesAdapter.ItemL
     RecyclerView.LayoutManager layoutManager;
     FavoritesAdapter favoritesAdapter;
     SwipeRefreshLayout refreshLayout;
-    boolean loaded = false;
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        if (loaded) {
-            outState.putBoolean("loaded", true);
-        }
     }
 
     @Override
     public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
         super.onViewStateRestored(savedInstanceState);
-        if (savedInstanceState != null) {
-            loaded = savedInstanceState.getBoolean("loaded", false);
-        }
     }
 
     @Nullable
@@ -91,11 +84,7 @@ public class FavoriteFragment extends Fragment implements FavoritesAdapter.ItemL
         refreshLayout.post(new Runnable() {
             @Override
             public void run() {
-                if (!loaded) {
-                    loadFavorite();
-                } else {
-                    showDataLoaded();
-                }
+                loadFavorite();
             }
         });
     }
@@ -133,7 +122,6 @@ public class FavoriteFragment extends Fragment implements FavoritesAdapter.ItemL
                             if (favoriteModel.isSuccess()) {
                                 favoriteList.addAll(favoriteModel.getResult());
                                 favoritesAdapter.notifyDataSetChanged();
-                                loaded = true;
                             } else {
                             }
                             dialogUtils.dismissProgress();
