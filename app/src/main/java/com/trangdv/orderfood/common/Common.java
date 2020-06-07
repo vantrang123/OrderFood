@@ -107,6 +107,7 @@ public class Common {
 
         builder.setContentTitle(title)
                 .setContentText(body)
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(body))
                 .setAutoCancel(true)
                 .setSmallIcon(R.mipmap.ic_launcher_round)
                 .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.app_icon));

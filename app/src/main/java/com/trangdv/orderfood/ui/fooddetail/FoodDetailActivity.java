@@ -59,7 +59,7 @@ public class FoodDetailActivity extends AppCompatActivity implements View.OnClic
     DialogUtils dialogUtils;
     Food selectedFood;
     private SlidrInterface slidr;
-    private TextView tvFoodName, tvFoodPrice, tvFoodDescription, tvTitle;
+    private TextView tvFoodName, tvFoodPrice, tvFoodDescription, tvTitle, tvShipFee;
     private ImageView ivCart, ivBack, ivLike, ivShare;
     ImageView imgFoodImage;
     RadioGroup radioGroup;
@@ -97,6 +97,7 @@ public class FoodDetailActivity extends AppCompatActivity implements View.OnClic
         tvTitle = findViewById(R.id.tvTitle);
         tvFoodName = findViewById(R.id.tv_food_name);
         tvFoodPrice = findViewById(R.id.tv_food_price);
+        tvShipFee = findViewById(R.id.tv_food_shipfee);
         tvFoodDescription = findViewById(R.id.tv_food_description);
         imgFoodImage = findViewById(R.id.iv_food_image);
         radioGroup = findViewById(R.id.rdi_group_size);
@@ -104,10 +105,6 @@ public class FoodDetailActivity extends AppCompatActivity implements View.OnClic
         appBarLayout = findViewById(R.id.appbar_fd);
         ivCart = findViewById(R.id.iv_add_cart);
         ivCart.setOnClickListener(this);
-        tvFoodDescription = findViewById(R.id.tv_food_description);
-        tvFoodName = findViewById(R.id.tv_food_name);
-        tvFoodPrice = findViewById(R.id.tv_food_price);
-        imgFoodImage = findViewById(R.id.iv_food_image);
         lnSize = findViewById(R.id.ln_size);
         lnAddon = findViewById(R.id.ln_addon);
     }
@@ -140,7 +137,8 @@ public class FoodDetailActivity extends AppCompatActivity implements View.OnClic
         tvTitle.setText(foodName);
         tvFoodName.setText(food.getName());
         originalPrice = food.getPrice();
-        tvFoodPrice.setText(String.valueOf(originalPrice));
+        tvFoodPrice.setText(new StringBuilder("Giá: ").append(originalPrice));
+        tvShipFee.setText(new StringBuilder("Phí vận chuyển: ").append(food.getDiscount()).append("/km"));
         tvFoodDescription.setText(food.getDescription());
 
         if (food.getBitmapImage() == null) {

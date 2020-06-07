@@ -361,8 +361,8 @@ public class PlaceOrderActivity extends AppCompatActivity implements View.OnClic
 
     private void sendNotificatonToRestaurant(int i) {
         Map<String, String> dataSend = new HashMap<>();
-        dataSend.put(Common.NOTIFI_TITLE, "New Order");
-        dataSend.put(Common.NOTIFI_CONTENT, "You have new order" /*+ createOrderModel.getResult().get(0)*/);
+        dataSend.put(Common.NOTIFI_TITLE, "Đơn hàng mới");
+        dataSend.put(Common.NOTIFI_CONTENT, "Bạn có đơn hàng mới" /*+ createOrderModel.getResult().get(0)*/);
 
         FCMSendData sendData = new FCMSendData(Common.createTopicSender(
                 Common.getTopicChannel(

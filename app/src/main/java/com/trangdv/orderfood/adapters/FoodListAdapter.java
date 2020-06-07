@@ -7,7 +7,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -23,7 +22,6 @@ import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.common.Common;
 import com.trangdv.orderfood.database.CartDataSource;
 import com.trangdv.orderfood.database.CartDatabase;
-import com.trangdv.orderfood.database.CartItem;
 import com.trangdv.orderfood.database.LocalCartDataSource;
 import com.trangdv.orderfood.model.FavoriteOnlyId;
 import com.trangdv.orderfood.model.Food;
@@ -84,9 +82,9 @@ public class FoodListAdapter extends RecyclerView.Adapter<FoodListAdapter.ViewHo
 //        int price = (Integer.parseInt(foods.get(position).getPrice()));
         double price = foods.get(position).getPrice();
 
-        holder.tvNameFood.setText("Name: " + foods.get(position).getName());
-        holder.tvPriceFood.setText("Price: " + fmt.format(price));
-        holder.tvDiscountFood.setText("Discount: " + foods.get(position).getDiscount());
+        holder.tvNameFood.setText("Tên món: " + foods.get(position).getName());
+        holder.tvPriceFood.setText(new StringBuilder("Giá: ").append(fmt.format(price)));
+        holder.tvDiscountFood.setText(new StringBuilder("Phí ship: ").append(fmt.format(foods.get(position).getDiscount())).append("/km"));
 
         if (foods.get(position).getBitmapImage() == null) {
             Glide.with(context)

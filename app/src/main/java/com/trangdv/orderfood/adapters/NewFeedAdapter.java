@@ -25,14 +25,12 @@ import com.trangdv.orderfood.R;
 import com.trangdv.orderfood.common.Common;
 import com.trangdv.orderfood.database.CartDataSource;
 import com.trangdv.orderfood.database.CartDatabase;
-import com.trangdv.orderfood.database.CartItem;
 import com.trangdv.orderfood.database.LocalCartDataSource;
 import com.trangdv.orderfood.listener.ILoadMore;
 import com.trangdv.orderfood.model.FavoriteOnlyId;
 import com.trangdv.orderfood.model.Food;
 import com.trangdv.orderfood.retrofit.IAnNgonAPI;
 import com.trangdv.orderfood.retrofit.RetrofitClient;
-import com.trangdv.orderfood.ui.main.MainActivity;
 import com.trangdv.orderfood.utils.DialogUtils;
 
 import java.text.NumberFormat;
@@ -40,7 +38,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import cn.pedant.SweetAlert.SweetAlertDialog;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
@@ -137,9 +134,9 @@ public class NewFeedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             ViewHolder viewHolder = (ViewHolder) holder;
             double price = foodList.get(position).getPrice();
 
-            viewHolder.tvNameFood.setText("Name: " + foodList.get(position).getName());
-            viewHolder.tvPriceFood.setText("Price: " + fmt.format(price));
-            viewHolder.tvDiscountFood.setText("Discount: " + foodList.get(position).getDiscount());
+            viewHolder.tvNameFood.setText("Tên món: " + foodList.get(position).getName());
+            viewHolder.tvPriceFood.setText(new StringBuilder("Giá: ").append(String.valueOf(fmt.format(price))));
+            viewHolder.tvDiscountFood.setText(new StringBuilder("Phí ship: ").append(fmt.format(foodList.get(position).getDiscount())).append("/km"));
 
             if (foodList.get(position).getBitmapImage() == null) {
                 Glide.with(context)

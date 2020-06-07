@@ -152,10 +152,8 @@
                     android:id="@+id/tv_food_price"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:drawableLeft="@drawable/ic_money"
-                    android:drawableTint="@color/grey_40"
                     android:drawablePadding="@dimen/dimens_5dp"
-                    android:textSize="17sp"
+                    android:textSize="14sp"
                     android:textStyle="bold"
                     tools:text="1,000" />
 
@@ -172,6 +170,17 @@
                     />-->
 
             </RelativeLayout>
+
+            <TextView
+                android:id="@+id/tv_food_shipfee"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawablePadding="@dimen/dimens_5dp"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:layout_marginTop="@dimen/dimens_10dp"
+                android:layout_marginHorizontal="@dimen/dimen_16dp"
+                tools:text="5,000" />
 
             <LinearLayout
                 android:id="@+id/ln_size"
