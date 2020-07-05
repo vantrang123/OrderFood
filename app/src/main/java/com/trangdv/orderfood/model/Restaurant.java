@@ -5,7 +5,7 @@ import android.graphics.Bitmap;
 public class Restaurant {
     private int id;
     private String name, address, phone, image, paymentUrl;
-    private Float lat, lng;
+    private Double lat, lng;
     private int userOwner;
 
     public Bitmap getBitmapImage() {
@@ -66,27 +66,27 @@ public class Restaurant {
         this.paymentUrl = paymentUrl;
     }
 
-    public Float getLat() {
-        return lat;
-    }
-
-    public void setLat(Float lat) {
-        this.lat = lat;
-    }
-
-    public Float getLng() {
-        return lng;
-    }
-
-    public void setLng(Float lng) {
-        this.lng = lng;
-    }
-
     public int getUserOwner() {
         return userOwner;
     }
 
     public void setUserOwner(int userOwner) {
         this.userOwner = userOwner;
+    }
+
+    public Double getLat() {
+        return lat;
+    }
+
+    public void setLat(Double lat) {
+        this.lat = lat;
+    }
+
+    public Double getLng() {
+        return lng;
+    }
+
+    public void setLng(Double lng) {
+        this.lng = lng;
     }
 }

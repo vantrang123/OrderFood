@@ -2,9 +2,7 @@ package com.trangdv.orderfood.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.text.format.DateUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.CheckBox;
@@ -82,7 +80,9 @@ public class PlaceOrderActivity extends AppCompatActivity implements View.OnClic
     public List<CartItem> cartItemList;
     private List<CreateOrder> createOrderList;
     private int cartItemSize;
-    private int count = 0;
+    private String foodId;
+    private int restaurantId;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -140,7 +140,6 @@ public class PlaceOrderActivity extends AppCompatActivity implements View.OnClic
                 setupDate();
                 break;
             case R.id.tv_proceed:
-                dialogUtils.showProgress(this);
                 setupProceed();
                 break;
             default:
@@ -150,35 +149,42 @@ public class PlaceOrderActivity extends AppCompatActivity implements View.OnClic
 
     private void setupProceed() {
         if (!isSelectedDate) {
+            new SweetAlertDialog(this)
+                    .setContentText("Bạn chưa chọn ngày nhận hàng!")
+                    .setTitleText("Opps..")
+                    .show();
             return;
-        }
-        if (!isAddNewAddress) {
-            if (!ckbDefaultAddress.isChecked()) {
-                return;
-            } else {
-                String dateString = edtDate.getText().toString();
-                DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
-                try {
-                    Date orderDate = dateFormat.parse(dateString);
-                    Calendar calendar = Calendar.getInstance();
-                    Date currentDate = dateFormat.parse(dateFormat.format(calendar.getTime()));
-                    if (!DateUtils.isToday(orderDate.getTime())) {
-                        if (orderDate.before(currentDate)) {
-                            Toast.makeText(this, getResources().getString(R.string.txt_noti_choise_date_valid), Toast.LENGTH_SHORT).show();
-                            dialogUtils.dismissProgress();
-                            return;
+        } else {
+            dialogUtils.showProgress(this);
+            if (!isAddNewAddress) {
+                if (!ckbDefaultAddress.isChecked()) {
+                    return;
+                } else {
+                    String dateString = edtDate.getText().toString();
+                    DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
+                    try {
+                        Date orderDate = dateFormat.parse(dateString);
+                        Calendar calendar = Calendar.getInstance();
+                        Date currentDate = dateFormat.parse(dateFormat.format(calendar.getTime()));
+                        if (!DateUtils.isToday(orderDate.getTime())) {
+                            if (orderDate.before(currentDate)) {
+                                Toast.makeText(this, getResources().getString(R.string.txt_noti_choise_date_valid), Toast.LENGTH_SHORT).show();
+                                dialogUtils.dismissProgress();
+                                return;
+                            }
                         }
+                    } catch (ParseException e) {
+                        e.printStackTrace();
                     }
-                } catch (ParseException e) {
-                    e.printStackTrace();
+                }
+                if (rdiCod.isChecked()) {
+                    getOrderNumber(false);
+                } else if (rdiOnlinePayment.isChecked()) {
+
                 }
             }
-            if (rdiCod.isChecked()) {
-                getOrderNumber(false);
-            } else if (rdiOnlinePayment.isChecked()) {
-
-            }
         }
+
     }
 
     private void setupDate() {
@@ -204,14 +210,14 @@ public class PlaceOrderActivity extends AppCompatActivity implements View.OnClic
             String address = ckbDefaultAddress.isChecked() ? tvUserAddress.getText().toString() : "???";
             String date = edtDate.getText().toString();
             Double totalPrice = Double.valueOf(tvPrice.getText().toString());
-            compositeDisposable.add(cartDataSource.getAllCart(Common.currentUser.getFbid())
+            /*compositeDisposable.add(cartDataSource.getAllCart(Common.currentUser.getFbid())
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(cartItems -> {
                         cartItemSize = cartItems.size();
                         restaurantIds = new ArrayList<>();
                         for (int i = 0; i < cartItems.size(); i++) {
-                            cartItemList = new ArrayList<>();
+
                             int restaurantId = cartItems.get(i).getRestaurantId();
                             if (!restaurantIds.contains(restaurantId)) {
                                 restaurantIds.add(restaurantId);
@@ -226,7 +232,19 @@ public class PlaceOrderActivity extends AppCompatActivity implements View.OnClic
                         }
                         }, throwable -> {
                         dialogUtils.dismissProgress();
-                    }));
+                    }));*/
+            compositeDisposable.add(cartDataSource.getItemInCart(foodId, Common.currentUser.getFbid(), restaurantId)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(cartItem -> {
+                                cartItemList = new ArrayList<>();
+                                cartItemList.add(cartItem);
+                                iPlaceOrderPresenter.createOrder(address, date, totalPrice, cartItemList, restaurantId);
+                                createOrder(address, date, totalPrice, cartItemList, restaurantId);
+                            },
+                            throwable -> {
+                                dialogUtils.dismissProgress();
+                            }));
         }
     }
 
@@ -252,6 +270,7 @@ public class PlaceOrderActivity extends AppCompatActivity implements View.OnClic
                                     }
                                 },
                                 throwable -> {
+                                    dialogUtils.dismissProgress();
                                 })
         );
     }
@@ -259,6 +278,8 @@ public class PlaceOrderActivity extends AppCompatActivity implements View.OnClic
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     public void displayPrice(SendTotalCashEvent event) {
         tvPrice.setText(event.getCash());
+        foodId = String.valueOf(event.getFoodId());
+        restaurantId = event.getRestaurauntId();
     }
 
     @Override
@@ -314,7 +335,7 @@ public class PlaceOrderActivity extends AppCompatActivity implements View.OnClic
                                     if (updateOrderModel.isSuccess()) {
                                         sendNotificatonToRestaurant(cartItems.get(0).getRestaurantId());
 
-                                        cartDataSource.cleanCart(Common.currentUser.getFbid())
+                                        cartDataSource.cleanCart(Common.currentUser.getFbid(), foodId)
                                                 .subscribeOn(Schedulers.io())
                                                 .observeOn(AndroidSchedulers.mainThread())
                                                 .subscribe(new SingleObserver<Integer>() {
@@ -325,11 +346,9 @@ public class PlaceOrderActivity extends AppCompatActivity implements View.OnClic
 
                                                     @Override
                                                     public void onSuccess(Integer integer) {
-                                                        count++;
-                                                        while (count == restaurantIds.size()) {
-                                                            Intent intent = new Intent(PlaceOrderActivity.this, MainActivity.class);
-                                                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                                            new SweetAlertDialog(PlaceOrderActivity.this, SweetAlertDialog.SUCCESS_TYPE)
+                                                        Intent intent = new Intent(PlaceOrderActivity.this, MainActivity.class);
+                                                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                                        new SweetAlertDialog(PlaceOrderActivity.this, SweetAlertDialog.SUCCESS_TYPE)
                                                                 .setTitleText(getResources().getString(R.string.title_dialog_order_success))
                                                                 .setContentText(getResources().getString(R.string.content_dialog_order_success))
                                                                 .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
@@ -340,8 +359,6 @@ public class PlaceOrderActivity extends AppCompatActivity implements View.OnClic
                                                                     }
                                                                 })
                                                                 .show();
-                                                            break;
-                                                        }
                                                     }
 
                                                     @Override

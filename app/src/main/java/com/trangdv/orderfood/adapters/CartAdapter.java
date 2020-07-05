@@ -53,6 +53,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> im
     CartDataSource cartDataSource;
 
     ItemListener listener;
+    private int itemSelected = -1;
 
     public CartAdapter(List<CartItem> cartItems, Context context, ItemListener listener) {
         this.cartItemList = cartItems;
@@ -71,7 +72,9 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> im
 
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
+//        if (itemSelected == -1) itemSelected = 0;
         holder.tvQuantity.setText(String.valueOf(cartItemList.get(position).getFoodQuantity()));
+        holder.bind(position);
 
         Locale locale = new Locale("vi", "VN");
         NumberFormat fmt = NumberFormat.getCurrencyInstance(locale);
@@ -138,27 +141,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> im
                             }
                         });
             } else {
-                cartDataSource.deleteCart(cartItemList.get(position))
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new SingleObserver<Integer>() {
-                            @Override
-                            public void onSubscribe(Disposable d) {
-
-                            }
-
-                            @Override
-                            public void onSuccess(Integer integer) {
-                                cartItemList.remove(integer-1);
-                                notifyItemRemoved(integer-1);
-                                EventBus.getDefault().postSticky(new CaculatePriceEvent());
-                            }
-
-                            @Override
-                            public void onError(Throwable e) {
-
-                            }
-                        });
+                listener.showDialogOptions(position);
             }
         }));
     }
@@ -185,11 +168,24 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> im
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
+        public View viewForeground;
         public TextView tvName, tvPrice, tvQuantity;
         public ImageView ivPlus, ivImage, ivSub, ivDelete;
         SwipeLayout swipeLayout;
 
-        public RelativeLayout viewBackground, viewForeground;
+        public void bind(int position) {
+            swipeLayout.getSurfaceView().setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+//                    listener.showDialogOptions(getAdapterPosition());
+                    itemSelected = position;
+                    notifyDataSetChanged();
+                    listener.enableButonOrder(true, position);
+                }
+            });
+
+            itemView.setSelected(itemSelected==position ? true : false);
+        }
 
         IOnImageViewAdapterClickListener onCaculatePriceListener;
 
@@ -211,13 +207,6 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> im
             ivSub.setOnClickListener(this);
             ivPlus.setOnClickListener(this);
             ivDelete.setOnClickListener(this);
-
-            swipeLayout.getSurfaceView().setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    listener.showDialogOptions(getAdapterPosition());
-                }
-            });
 
 
         }
@@ -254,5 +243,6 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> im
 
     public interface ItemListener {
         void showDialogOptions(int position);
+        void enableButonOrder(boolean isEnable, int position);
     }
 }

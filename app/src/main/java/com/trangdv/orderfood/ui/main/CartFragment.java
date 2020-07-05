@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -40,8 +41,8 @@ import com.trangdv.orderfood.database.LocalCartDataSource;
 import com.trangdv.orderfood.model.Order;
 import com.trangdv.orderfood.adapters.CartAdapter;
 import com.trangdv.orderfood.model.eventbus.CaculatePriceEvent;
+import com.trangdv.orderfood.model.eventbus.RestaurantLoadEvent;
 import com.trangdv.orderfood.model.eventbus.SendTotalCashEvent;
-import com.trangdv.orderfood.remote.IFCMService;
 import com.trangdv.orderfood.retrofit.IAnNgonAPI;
 import com.trangdv.orderfood.retrofit.RetrofitClient;
 import com.trangdv.orderfood.ui.PlaceOrderActivity;
@@ -63,7 +64,7 @@ import io.reactivex.schedulers.Schedulers;
 public class CartFragment extends Fragment implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener,
         CartAdapter.ItemListener {
-
+    private static final String TAG = "CartFragment";
 
     IAnNgonAPI anNgonAPI;
     CompositeDisposable compositeDisposable = new CompositeDisposable();
@@ -78,6 +79,7 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
     private static int UPDATE_INTERVAL = 1000;
     private static int FASTEST_INTERVAL = 5000;
     private static int DISPLACEMENT = 10;
+    private int position;
 
     private ConstraintLayout constraintLayout;
 
@@ -86,11 +88,14 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
     RecyclerView.LayoutManager layoutManager;
     CartAdapter cartAdapter;
     List<CartItem> cartItemList = new ArrayList<>();
+    public List<Integer> restaurantIds;
+    private int cartItemSize;
 
     TextView tvTotalPrice, tvOrder;
 
     String latitude = "16.000";
     String longitude = "108.000";
+    private double shipFee;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -139,6 +144,7 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
         recyclerView.setLayoutManager(layoutManager);
 //        loadListFood();
         getAllItemInCart();
+//        caculateShipFee();
     }
 
     @Override
@@ -160,13 +166,15 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
 
         tvTotalPrice = view.findViewById(R.id.tv_total);
         tvOrder = view.findViewById(R.id.tv_order);
+        tvOrder.setEnabled(false);
 
         tvOrder.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (cartItemList.size() > 0) {
-                    EventBus.getDefault().postSticky(new SendTotalCashEvent(tvTotalPrice.getText().toString()));
-//                    showAlertDialog();
+                if (tvOrder.isEnabled()) {
+                    CartItem cartItem = cartItemList.get(position);
+                    Double total = Double.valueOf(tvTotalPrice.getText().toString()) + Math.round(shipFee*100)/100;
+                    EventBus.getDefault().postSticky(new SendTotalCashEvent(total.toString(), cartItem.getFoodId(), cartItem.getRestaurantId()));
                     startActivity(new Intent(getContext(), PlaceOrderActivity.class));
                     getActivity().overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
                 } else {
@@ -190,8 +198,6 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
                                 cartItemList.clear();
                                 cartItemList.addAll(cartItems);
                                 cartAdapter.notifyDataSetChanged();
-
-                                caculateCartTotalPrice();
                             }
                         }, throwable -> {
 
@@ -199,7 +205,7 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
     }
 
     private void caculateCartTotalPrice() {
-        cartDataSource.sumPrice(Common.currentUser.getFbid())
+        cartDataSource.sumPrice(String.valueOf(cartItemList.get(position).getFoodId()))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new SingleObserver<Long>() {
@@ -211,9 +217,9 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
                     @Override
                     public void onSuccess(Long aLong) {
                         if (aLong ==0 ){
-                            tvOrder.setBackground(getResources().getDrawable(R.drawable.bg_button_cart_gray));
+//                            tvOrder.setBackground(getResources().getDrawable(R.drawable.bg_button_cart_gray));
                         } else {
-                            tvOrder.setBackground(getResources().getDrawable(R.drawable.bg_button_cart));
+//                            tvOrder.setBackground(getResources().getDrawable(R.drawable.bg_button_cart));
                         }
 
                         tvTotalPrice.setText(String.valueOf(aLong));
@@ -298,12 +304,61 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
 
     }
 
+//    private void caculateShipFee() {
+//        compositeDisposable.add(cartDataSource.getAllCart(Common.currentUser.getFbid())
+//                .subscribeOn(Schedulers.io())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(cartItems -> {
+//                    cartItemSize = cartItems.size();
+//                    restaurantIds = new ArrayList<>();
+//                    for (int i = 0; i < cartItems.size(); i++) {
+//                        cartItemList = new ArrayList<>();
+//                        int restaurantId = cartItems.get(i).getRestaurantId();
+//                        if (!restaurantIds.contains(restaurantId)) {
+//                            restaurantIds.add(restaurantId);
+//                            for (CartItem cartItem : cartItems) {
+//                                if (cartItem.getRestaurantId() == restaurantId)
+//                                    cartItemList.add(cartItem);
+//                            }
+////                               getRestaurantById(String.valueOf(restaurantId), cartItemList.get(0).getFoodDiscount());
+//                        }
+//
+//                    }
+//                }, throwable -> {
+//                    dialogUtils.dismissProgress();
+//                }));
+//    }
+
+//    private void getRestaurantById(String id, Double discount) {
+//        compositeDisposable.add(
+//                anNgonAPI.getRestaurantById(Common.API_KEY, id)
+//                        .subscribeOn(Schedulers.io())
+//                        .observeOn(AndroidSchedulers.mainThread())
+//                        .subscribe(restaurantModel -> {
+//                                    if (restaurantModel.isSuccess()) {
+//                                        Location restaurantLocation = new Location("");
+//                                        restaurantLocation.setLatitude(restaurantModel.getResult().get(0).getLat().doubleValue());
+//                                        restaurantLocation.setLongitude(restaurantModel.getResult().get(0).getLng().doubleValue());
+//                                        shipFee += Common.userLocation.distanceTo(restaurantLocation)*discount;
+//                                        Log.d(TAG, "getRestaurantById: "+ Math.round(shipFee*100)/100 + "||" +Common.userLocation.distanceTo(restaurantLocation));
+//                                    }
+//                                    dialogUtils.dismissProgress();
+//                                },
+//                                throwable -> {
+////                                    EventBus.getDefault().post(new RestaurantLoadEvent(false, throwable.getMessage()));
+//                                    dialogUtils.dismissProgress();
+//                                })
+//        );
+//    }
+
     @Override
     public void onResume() {
         super.onResume();
 //        ((MainActivity) getActivity()).navigationView.getMenu().getItem(1).setChecked(true);
 //        ((MainActivity) getActivity()).setScrollBar(0);
         checkPlayServices();
+        getAllItemInCart();
+//        caculateShipFee();
 //        loadListFood();
     }
 
@@ -408,6 +463,7 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
 
                 this.latitude = String.valueOf(latitude);
                 this.longitude = String.valueOf(longitude);
+                Common.userLocation = mLastLocation;
 
             } else {
                 //Toast.makeText(this,"Cannot retrieve the location!!",Toast.LENGTH_SHORT).show();
@@ -458,6 +514,13 @@ public class CartFragment extends Fragment implements GoogleApiClient.Connection
     @Override
     public void showDialogOptions(int position) {
         ((MainActivity) getActivity()).showBottomSheet(position, cartItemList.get(position).getFoodId());
+    }
+
+    @Override
+    public void enableButonOrder(boolean isEnable, int position) {
+        tvOrder.setEnabled(isEnable);
+        this.position = position;
+        caculateCartTotalPrice();
     }
 
     @Override

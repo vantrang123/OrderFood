@@ -39,6 +39,9 @@ public class CartItem {
     @ColumnInfo(name = "foodExtraPrice")
     private Double foodExtraPrice;
 
+    @ColumnInfo(name = "foodDiscount")
+    private Double foodDiscount;
+
     @ColumnInfo(name = "fbid")
     private String fbid;
 
@@ -52,6 +55,14 @@ public class CartItem {
 
     public CartItem() {
 
+    }
+
+    public Double getFoodDiscount() {
+        return foodDiscount;
+    }
+
+    public void setFoodDiscount(Double foodDiscount) {
+        this.foodDiscount = foodDiscount;
     }
 
     public int getFoodId() {

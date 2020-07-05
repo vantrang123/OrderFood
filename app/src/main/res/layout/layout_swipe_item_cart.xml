@@ -6,7 +6,7 @@
     android:layout_height="wrap_content"
     android:layout_marginTop="5dp"
     android:layout_marginHorizontal="@dimen/dimens_10dp"
-    android:background="@drawable/bg_bottom_line"
+    android:background="@drawable/bg_boder_selected"
     app:draggedItem="@id/drag_item"
     app:swipeDirection="left"
     app:isFreeDragAfterOpen="true"

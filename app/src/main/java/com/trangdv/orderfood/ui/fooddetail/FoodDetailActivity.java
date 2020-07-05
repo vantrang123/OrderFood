@@ -141,29 +141,25 @@ public class FoodDetailActivity extends AppCompatActivity implements View.OnClic
         tvShipFee.setText(new StringBuilder("Phí vận chuyển: ").append(food.getDiscount()).append("/km"));
         tvFoodDescription.setText(food.getDescription());
 
-        if (food.getBitmapImage() == null) {
-            Glide.with(this)
-                    .asBitmap()
-                    .load(food.getImage())
-                    .fitCenter()
-                    .centerCrop()
-                    .placeholder(R.drawable.image_default)
-                    .listener(new RequestListener<Bitmap>() {
-                        @Override
-                        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Bitmap> target, boolean isFirstResource) {
-                            return false;
-                        }
+        Glide.with(this)
+                .asBitmap()
+                .load(food.getImage())
+                .fitCenter()
+                .centerCrop()
+                .placeholder(R.drawable.image_default)
+                .listener(new RequestListener<Bitmap>() {
+                    @Override
+                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Bitmap> target, boolean isFirstResource) {
+                        return false;
+                    }
 
-                        @Override
-                        public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
-                            food.setBitmapImage(resource);
-                            return false;
-                        }
-                    })
-                    .into(imgFoodImage);
-        } else {
-            imgFoodImage.setImageBitmap(food.getBitmapImage());
-        }
+                    @Override
+                    public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
+                        food.setBitmapImage(resource);
+                        return false;
+                    }
+                })
+                .into(imgFoodImage);
 
         if (food.isSize() && food.isAddon()) {
             compositeDisposable.add(anNgonAPI.getSizeOfFood(Common.API_KEY, food.getId())
@@ -363,6 +359,7 @@ public class FoodDetailActivity extends AppCompatActivity implements View.OnClic
         cartItem.setFoodPrice(selectedFood.getPrice());
         cartItem.setFoodImage(selectedFood.getImage());
         cartItem.setFoodQuantity(1);
+        cartItem.setFoodDiscount(Double.valueOf(selectedFood.getDiscount()));
         cartItem.setUserPhone(Common.currentUser.getUserPhone());
         cartItem.setRestaurantId(restaurantId);
 

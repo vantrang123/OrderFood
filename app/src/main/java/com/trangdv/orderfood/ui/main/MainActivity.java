@@ -171,6 +171,7 @@ public class MainActivity extends AppCompatActivity
                         if (!isContinue) {
                             if (getFragmentCurrent() instanceof HomeFragment) {
                                 ((HomeFragment) getFragmentCurrent()).requestNearbyRestaurant(wayLatitude, wayLongitude, 10);
+                                Common.userLocation = location;
                             }
 
                         } else {
@@ -234,10 +235,12 @@ public class MainActivity extends AppCompatActivity
                     ((HomeFragment) getFragmentCurrent()).scrollToTop();
                 }
 
+
+
             }
         });
         mBottomNavigation.setMenuChangedListener(parent -> {
-            viewPager.setOffscreenPageLimit(4);
+//            viewPager.setOffscreenPageLimit(4);
             viewPager.setAdapter(new ViewPagerAdapter(MainActivity.this, parent.getMenuItemCount()));
             viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
                 @Override
@@ -337,8 +340,7 @@ public class MainActivity extends AppCompatActivity
                     @Override
                     public void onSuccess(Integer integer) {
                         if (!(getFragmentCurrent() instanceof CartFragment)) {
-                            if (integer != 0)
-                                provider.show(R.id.nav_cart, integer);
+                            if (integer != 0) provider.show(R.id.nav_cart, integer);
                         }
                     }
 

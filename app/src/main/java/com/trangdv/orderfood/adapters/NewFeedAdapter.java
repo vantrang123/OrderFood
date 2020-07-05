@@ -135,7 +135,7 @@ public class NewFeedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             double price = foodList.get(position).getPrice();
 
             viewHolder.tvNameFood.setText("Tên món: " + foodList.get(position).getName());
-            viewHolder.tvPriceFood.setText(new StringBuilder("Giá: ").append(String.valueOf(fmt.format(price))));
+            viewHolder.tvPriceFood.setText(new StringBuilder("Giá: ").append(fmt.format(price)));
             viewHolder.tvDiscountFood.setText(new StringBuilder("Phí ship: ").append(fmt.format(foodList.get(position).getDiscount())).append("/km"));
 
             if (foodList.get(position).getBitmapImage() == null) {

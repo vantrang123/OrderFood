@@ -29,5 +29,5 @@ public interface CartDataSource {
 
     Single<Integer> deleteCart(CartItem cart);
 
-    Single<Integer> cleanCart(String userPhone);
+    Single<Integer> cleanCart(String fbid, String foodId);
 }

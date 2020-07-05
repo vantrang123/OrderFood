@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.location.Location;
 
 import androidx.core.app.NotificationCompat;
 
@@ -36,9 +37,10 @@ public class Common {
     public static final String API_KEY_TAG = "API_KEY";
     public static final String NOTIFI_TITLE = "title";
     public static final String NOTIFI_CONTENT = "content";
+    public static Location userLocation = null;
 
-    public static final String API_ANNGON_ENDPOINT = "http://192.168.1.6:3000";
-    //    public static final String API_ANNGON_ENDPOINT = "http://192.168.43.205:3000";
+//    public static final String API_ANNGON_ENDPOINT = "http://192.168.43.205:3000";
+        public static final String API_ANNGON_ENDPOINT = "http://192.168.1.7:3000";
     public static Set<Addon> addonList = new HashSet<>();
     public static List<FavoriteOnlyId> currentFav;
     public static final String SAVE_LOCATION = "save location";

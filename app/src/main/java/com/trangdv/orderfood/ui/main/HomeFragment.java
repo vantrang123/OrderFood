@@ -337,7 +337,7 @@ public class HomeFragment extends Fragment implements SuggestionAdapter.ItemList
             layoutRestaurant.setVisibility(View.VISIBLE);
 
         } else {
-            Toast.makeText(getContext(), "[RESTAURANT LOAD]" + event.getMessage(), Toast.LENGTH_SHORT).show();
+//            Toast.makeText(getContext(), "[RESTAURANT LOAD]" + event.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 

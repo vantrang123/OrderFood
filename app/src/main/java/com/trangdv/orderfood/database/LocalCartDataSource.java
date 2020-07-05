@@ -29,13 +29,13 @@ public class LocalCartDataSource implements CartDataSource{
     }
 
     @Override
-    public Single<Long> sumPrice(String userPhone) {
-        return cartDAO.sumPrice(userPhone);
+    public Single<Long> sumPrice(String foodId) {
+        return cartDAO.sumPrice(foodId);
     }
 
     @Override
-    public Single<CartItem> getItemInCart(String foodId, String userPhone, int restaurantId) {
-        return cartDAO.getItemInCart(foodId, userPhone, restaurantId);
+    public Single<CartItem> getItemInCart(String foodId, String fbid, int restaurantId) {
+        return cartDAO.getItemInCart(foodId, fbid, restaurantId);
     }
 
     @Override
@@ -54,7 +54,7 @@ public class LocalCartDataSource implements CartDataSource{
     }
 
     @Override
-    public Single<Integer> cleanCart(String userPhone) {
-        return cartDAO.cleanCart(userPhone);
+    public Single<Integer> cleanCart(String fbid, String foodId) {
+        return cartDAO.cleanCart(fbid, foodId);
     }
 }

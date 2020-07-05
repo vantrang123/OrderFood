@@ -24,8 +24,8 @@ public interface CartDAO {
     @Query("SELECT COUNT(*) from Cart WHERE fbid=:fbid")
     Single<Integer> countCart(String fbid);
 
-    @Query("SELECT SUM(foodPrice*foodQuantity) + (foodExtraPrice*foodQuantity) from Cart where fbid=:fbid")
-    Single<Long> sumPrice(String fbid);
+    @Query("SELECT SUM(foodPrice*foodQuantity) + (foodExtraPrice*foodQuantity) from Cart where foodId=:foodId")
+    Single<Long> sumPrice(String foodId);
 
     @Query("SELECT * from Cart where foodId=:foodId AND fbid=:fbid AND restaurantId=:restaurantId")
     Single<CartItem> getItemInCart(String foodId, String fbid, int restaurantId);
@@ -39,6 +39,6 @@ public interface CartDAO {
     @Delete
     Single<Integer> deleteCart(CartItem cart);
 
-    @Query("DELETE FROM Cart WHERE fbid=:fbid")
-    Single<Integer> cleanCart(String fbid);
+    @Query("DELETE FROM Cart WHERE foodId=:foodId AND fbid=:fbid")
+    Single<Integer> cleanCart(String fbid, String foodId);
 }
