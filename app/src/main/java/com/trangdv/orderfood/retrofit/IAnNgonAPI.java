@@ -153,7 +153,9 @@ public interface IAnNgonAPI {
                                              @Field("cod") boolean cod,
                                              @Field("totalPrice") Double totalPrice,
                                              @Field("numOfItem") int numOfItem,
-                                             @Field("restaurantId") int restaurantId);
+                                             @Field("restaurantId") int restaurantId,
+                                             @Field("lat") String lat,
+                                             @Field("lng") String lng);
 
     @POST("updateOrder")
     @FormUrlEncoded

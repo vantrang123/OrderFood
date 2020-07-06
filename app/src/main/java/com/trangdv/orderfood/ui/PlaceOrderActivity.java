@@ -1,12 +1,11 @@
 package com.trangdv.orderfood.ui;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.format.DateUtils;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.CheckBox;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.TextView;
@@ -37,7 +36,6 @@ import com.trangdv.orderfood.retrofit.RetrofitFCMClient;
 import com.trangdv.orderfood.ui.main.MainActivity;
 import com.trangdv.orderfood.utils.DialogUtils;
 import com.trangdv.orderfood.view.IPlaceOrderView;
-import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -51,6 +49,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
@@ -60,7 +59,7 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-public class PlaceOrderActivity extends AppCompatActivity implements View.OnClickListener, DatePickerDialog.OnDateSetListener, IPlaceOrderView {
+public class PlaceOrderActivity extends AppCompatActivity implements View.OnClickListener, IPlaceOrderView {
     private static final String TAG = "PlaceOrderActivity";
     IAnNgonAPI anNgonAPI;
     CompositeDisposable compositeDisposable;
@@ -71,26 +70,21 @@ public class PlaceOrderActivity extends AppCompatActivity implements View.OnClic
 
     private SlidrInterface slidr;
     private ImageView ivBack;
-    private EditText edtDate;
-    private TextView tvProceed, tvPhone, tvPrice, tvUserAddress, tvAddNewAddress;
+    private TextView tvProceed, tvPhone, tvPrice, tvAddNewAddress, tvDate;
     private CheckBox ckbDefaultAddress;
-    private RadioButton rdiCod, rdiOnlinePayment;
-    boolean isSelectedDate = false, isAddNewAddress = false;
-    public List<Integer> restaurantIds;
+    private RadioButton rdiCod, rdiOnlinePayment, rdiUserAddress, rdiUserLocation;
     public List<CartItem> cartItemList;
-    private List<CreateOrder> createOrderList;
-    private int cartItemSize;
-    private String foodId;
+    private String foodId, lat = "", lng = "";
     private int restaurantId;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_place_order);
-
         findViewById();
         init();
         initView();
+        setupDate();
     }
 
     private void init() {
@@ -106,25 +100,24 @@ public class PlaceOrderActivity extends AppCompatActivity implements View.OnClic
     private void findViewById() {
         ivBack = findViewById(R.id.iv_back);
         ivBack.setOnClickListener(this);
-        edtDate = findViewById(R.id.edt_date);
-        edtDate.setOnClickListener(this);
+        tvDate = findViewById(R.id.tv_date);
         tvProceed = findViewById(R.id.tv_proceed);
         tvProceed.setOnClickListener(this);
         tvPhone = findViewById(R.id.tv_phone);
         tvPrice = findViewById(R.id.tv_price);
-        tvUserAddress = findViewById(R.id.tv_userAddress);
         tvAddNewAddress = findViewById(R.id.tv_add_new_address);
         tvAddNewAddress.setOnClickListener(this);
-        ckbDefaultAddress = findViewById(R.id.ckb_default_address);
         rdiCod = findViewById(R.id.rdi_cod);
         rdiOnlinePayment = findViewById(R.id.rdi_online_payment);
+        rdiUserAddress = findViewById(R.id.rdi_user_addrres);
+        rdiUserLocation = findViewById(R.id.rdi_user_location);
 
     }
 
 
     private void initView() {
         tvPhone.setText(Common.currentUser.getUserPhone());
-        tvUserAddress.setText(Common.currentUser.getAddress());
+        rdiUserAddress.setText(Common.currentUser.getAddress());
     }
 
     @Override
@@ -134,10 +127,7 @@ public class PlaceOrderActivity extends AppCompatActivity implements View.OnClic
                 onBackPressed();
                 break;
             case R.id.tv_add_new_address:
-//                setupCheckBox();
-                break;
-            case R.id.edt_date:
-                setupDate();
+                changeAddress();
                 break;
             case R.id.tv_proceed:
                 setupProceed();
@@ -148,67 +138,41 @@ public class PlaceOrderActivity extends AppCompatActivity implements View.OnClic
     }
 
     private void setupProceed() {
-        if (!isSelectedDate) {
+
+        dialogUtils.showProgress(this);
+        if (rdiUserLocation.isChecked()) {
+            lat = String.valueOf(Common.userLocation.getLatitude());
+            lng = String.valueOf(Common.userLocation.getLongitude());
+        } else if (rdiUserAddress.isChecked()) {
+            lat = "";
+            lng = "";
+        }
+        if (rdiCod.isChecked()) {
+            getOrderNumber(false);
+        } else if (rdiOnlinePayment.isChecked()) {
             new SweetAlertDialog(this)
-                    .setContentText("Bạn chưa chọn ngày nhận hàng!")
+                    .setContentText("Hiện tại chưa hỗ trợ thanh toán trực tuyến!")
                     .setTitleText("Opps..")
                     .show();
-            return;
-        } else {
-            dialogUtils.showProgress(this);
-            if (!isAddNewAddress) {
-                if (!ckbDefaultAddress.isChecked()) {
-                    return;
-                } else {
-                    String dateString = edtDate.getText().toString();
-                    DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
-                    try {
-                        Date orderDate = dateFormat.parse(dateString);
-                        Calendar calendar = Calendar.getInstance();
-                        Date currentDate = dateFormat.parse(dateFormat.format(calendar.getTime()));
-                        if (!DateUtils.isToday(orderDate.getTime())) {
-                            if (orderDate.before(currentDate)) {
-                                Toast.makeText(this, getResources().getString(R.string.txt_noti_choise_date_valid), Toast.LENGTH_SHORT).show();
-                                dialogUtils.dismissProgress();
-                                return;
-                            }
-                        }
-                    } catch (ParseException e) {
-                        e.printStackTrace();
-                    }
-                }
-                if (rdiCod.isChecked()) {
-                    getOrderNumber(false);
-                } else if (rdiOnlinePayment.isChecked()) {
-
-                }
-            }
         }
-
     }
 
     private void setupDate() {
         Calendar now = Calendar.getInstance();
-        DatePickerDialog datePickerDialog = DatePickerDialog.newInstance(PlaceOrderActivity.this,
-                now.get(Calendar.YEAR),
-                now.get(Calendar.MONTH),
-                now.get(Calendar.DAY_OF_MONTH));
-        datePickerDialog.show(getSupportFragmentManager(), "DatePickerDialog");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("'Ngày: 'MM/dd/yy' Lúc: 'HH:mm", Locale.getDefault());
+        tvDate.setText(dateFormat.format(now.getTime()));
     }
 
-    private void setupCheckBox() {
-        isAddNewAddress = true;
-        ckbDefaultAddress.setChecked(false);
-        View layout_add_new_address = LayoutInflater.from(this)
-                .inflate(R.layout.layout_add_new_address, null);
-        EditText edtNewAddress = layout_add_new_address.findViewById(R.id.edt_add_new_address);
+    private void changeAddress() {
+        startActivityForResult(new Intent(this, ProfileActivity.class), Common.REQUEST_CODE_CHANGE_ADDRESS);
+        overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
     }
 
     private void getOrderNumber(boolean isOnlinePayment) {
         dialogUtils.showProgress(this);
         if (!isOnlinePayment) {
-            String address = ckbDefaultAddress.isChecked() ? tvUserAddress.getText().toString() : "???";
-            String date = edtDate.getText().toString();
+            String address = rdiUserAddress.getText().toString();
+            String date = tvDate.getText().toString();
             Double totalPrice = Double.valueOf(tvPrice.getText().toString());
             /*compositeDisposable.add(cartDataSource.getAllCart(Common.currentUser.getFbid())
                     .subscribeOn(Schedulers.io())
@@ -233,14 +197,15 @@ public class PlaceOrderActivity extends AppCompatActivity implements View.OnClic
                         }, throwable -> {
                         dialogUtils.dismissProgress();
                     }));*/
+
             compositeDisposable.add(cartDataSource.getItemInCart(foodId, Common.currentUser.getFbid(), restaurantId)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(cartItem -> {
                                 cartItemList = new ArrayList<>();
                                 cartItemList.add(cartItem);
-                                iPlaceOrderPresenter.createOrder(address, date, totalPrice, cartItemList, restaurantId);
-                                createOrder(address, date, totalPrice, cartItemList, restaurantId);
+                                iPlaceOrderPresenter.createOrder(address, date, totalPrice, cartItemList, restaurantId, lat, lng);
+//                                createOrder(address, date, totalPrice, cartItemList, restaurantId);
                             },
                             throwable -> {
                                 dialogUtils.dismissProgress();
@@ -248,6 +213,7 @@ public class PlaceOrderActivity extends AppCompatActivity implements View.OnClic
         }
     }
 
+/*
     private void createOrder(String address, String date, Double totalPrice, List<CartItem> cartItemList, int restaurantId) {
         compositeDisposable.add(
                 anNgonAPI.createOrder(Common.API_KEY,
@@ -274,23 +240,13 @@ public class PlaceOrderActivity extends AppCompatActivity implements View.OnClic
                                 })
         );
     }
+*/
 
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     public void displayPrice(SendTotalCashEvent event) {
         tvPrice.setText(event.getCash());
         foodId = String.valueOf(event.getFoodId());
         restaurantId = event.getRestaurauntId();
-    }
-
-    @Override
-    public void onDateSet(DatePickerDialog view, int year, int monthOfYear, int dayOfMonth) {
-        isSelectedDate = true;
-        edtDate.setText(new StringBuilder()
-                .append(monthOfYear + 1)
-                .append("/")
-                .append(dayOfMonth)
-                .append("/")
-                .append(year));
     }
 
     @Override
@@ -316,11 +272,12 @@ public class PlaceOrderActivity extends AppCompatActivity implements View.OnClic
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        overridePendingTransition(0, R.anim.right_to_left);
+        overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
     }
 
     @Override
     public void onCreateOrderSuccess(CreateOrderModel createOrderModel, List<CartItem> cartItems) {
+        updateOrder(createOrderModel.getResult().get(0).getOrderNumber(), cartItemList);
     }
 
     private void updateOrder(int orderNumber, List<CartItem> cartItems) {
@@ -399,6 +356,14 @@ public class PlaceOrderActivity extends AppCompatActivity implements View.OnClic
 
     @Override
     public void onCreateOrderError(String message) {
+        dialogUtils.dismissProgress();
+    }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == Common.REQUEST_CODE_CHANGE_ADDRESS && resultCode == Activity.RESULT_OK && data != null) {
+            rdiUserAddress.setText(Common.currentUser.getAddress());
+        }
     }
 }

@@ -35,7 +35,7 @@ public class PlaceOrderPresenter implements IPlaceOrderPresenter{
     }
 
     @Override
-    public void createOrder(String address, String date, double totalPrice, List<CartItem> cartItems, int restaurantId) {
+    public void createOrder(String address, String date, double totalPrice, List<CartItem> cartItems, int restaurantId, String lat, String lng) {
         compositeDisposable.add(
                 anNgonAPI.createOrder(Common.API_KEY,
                         Common.currentUser.getFbid(),
@@ -47,7 +47,9 @@ public class PlaceOrderPresenter implements IPlaceOrderPresenter{
                         true,
                         totalPrice,
                         cartItems.size(),
-                        restaurantId
+                        restaurantId,
+                        lat,
+                        lng
                 )
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
@@ -57,6 +59,7 @@ public class PlaceOrderPresenter implements IPlaceOrderPresenter{
                                     }
                                 },
                                 throwable -> {
+                                    iPlaceOrderView.onCreateOrderError(throwable.getMessage());
                                 })
         );
     }

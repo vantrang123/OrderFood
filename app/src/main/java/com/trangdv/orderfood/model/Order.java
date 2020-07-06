@@ -8,10 +8,18 @@ import java.util.Date;
 
 public class Order {
     private String orderPhone, orderName, orderAddress, transactionId, orderFBID;
-    private Date orderDate;
+    private String orderDate;
     private boolean cod;
     private Double totalPrice;
     private int orderId, orderStatus, numOfItem, restaurantId;
+
+    public String getOrderDate() {
+        return orderDate;
+    }
+
+    public void setOrderDate(String orderDate) {
+        this.orderDate = orderDate;
+    }
 
     public String getOrderFBID() {
         return orderFBID;
@@ -51,14 +59,6 @@ public class Order {
 
     public void setTransactionId(String transactionId) {
         this.transactionId = transactionId;
-    }
-
-    public Date getOrderDate() {
-        return orderDate;
-    }
-
-    public void setOrderDate(Date orderDate) {
-        this.orderDate = orderDate;
     }
 
     public boolean isCod() {

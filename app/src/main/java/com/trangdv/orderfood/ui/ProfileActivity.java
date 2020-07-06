@@ -1,5 +1,6 @@
 package com.trangdv.orderfood.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
@@ -107,15 +108,24 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
                         .subscribe(updateUserModel -> {
                             if (updateUserModel.isSuccess()) {
                                 dialogUtils.dismissProgress();
-                                new SweetAlertDialog(this, SweetAlertDialog.SUCCESS_TYPE)
-                                        .setTitleText("Cập nhật thông tin")
-                                        .setContentText("Thành công")
-                                        .show();
                                 Common.currentUser.setName(name);
                                 Common.currentUser.setAddress(address);
                                 //save user in share pref
                                 SharedPrefs.getInstance().put(SAVE_USER, Common.currentUser);
                                 setData();
+                                new SweetAlertDialog(this, SweetAlertDialog.SUCCESS_TYPE)
+                                        .setTitleText("Cập nhật thông tin")
+                                        .setContentText("Thành công")
+                                        .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                                            @Override
+                                            public void onClick(SweetAlertDialog sweetAlertDialog) {
+                                                Intent intent = new Intent(ProfileActivity.this, PlaceOrderActivity.class);
+                                                setResult(RESULT_OK, intent);
+                                                overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
+                                                finish();
+                                            }
+                                        })
+                                        .show();
                             }
                         }, throwable -> {
                             dialogUtils.dismissProgress();

@@ -26,6 +26,7 @@ import java.util.Set;
 
 public class Common {
     public static final String API_KEY = "1234";
+    public static final int REQUEST_CODE_CHANGE_ADDRESS = 2002;
     public static User currentUser;
     public static Restaurant currentRestaurant;
     public static Order currentOrder;
@@ -38,6 +39,7 @@ public class Common {
     public static final String NOTIFI_TITLE = "title";
     public static final String NOTIFI_CONTENT = "content";
     public static Location userLocation = null;
+
 
 //    public static final String API_ANNGON_ENDPOINT = "http://192.168.43.205:3000";
         public static final String API_ANNGON_ENDPOINT = "http://192.168.1.7:3000";

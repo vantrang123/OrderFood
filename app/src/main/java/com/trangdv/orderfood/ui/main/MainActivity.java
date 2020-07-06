@@ -98,7 +98,7 @@ public class MainActivity extends AppCompatActivity
     private int subscreensOnTheStack = -1;
 
     private FusedLocationProviderClient mFusedLocationClient;
-    private double wayLatitude = 0.0, wayLongitude = 0.0;
+    public double wayLatitude = 0.0, wayLongitude = 0.0;
     private LocationRequest locationRequest;
     private LocationCallback locationCallback;
     public boolean isGPS = false;

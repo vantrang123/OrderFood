@@ -28,14 +28,12 @@ public class OrderAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     private List<Order> orderList = new ArrayList<>();
     Context context;
     ItemListener listener;
-    SimpleDateFormat simpleDateFormat;
 
     public OrderAdapter(Context context, List<Order> requests, ItemListener itemListener) {
         super();
         this.context = context;
         this.orderList = requests;
         listener = itemListener;
-        simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy");
     }
 
     public void addItem(List<Order> addedItems) {
@@ -82,20 +80,20 @@ public class OrderAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof ViewHolder) {
+            Order order = orderList.get(position);
             ViewHolder viewHolder = (ViewHolder) holder;
-            viewHolder.tvOrderNumOfItem.setText(new StringBuilder(String.valueOf(orderList.get(position).getNumOfItem())));
-            viewHolder.tvOrderAddres.setText(new StringBuilder(orderList.get(position).getOrderAddress()));
-            viewHolder.tvOrderPhone.setText(new StringBuilder(orderList.get(position).getOrderPhone()));
-            viewHolder.tvOrderPrice.setText(new StringBuilder(String.valueOf(orderList.get(position).getTotalPrice())));
-            viewHolder.tvOrerDate.setText(new StringBuilder(simpleDateFormat.format(orderList.get(position).getOrderDate())));
-//            viewHolder.tvOrderId.setText(new StringBuilder(String.valueOf(orderList.get(position).getOrderId())));
-            viewHolder.tvOrderId.setText(new StringBuilder("#").append(String.valueOf(orderList.get(position).getOrderId())));
-            viewHolder.tvOrderStatus.setText(Common.convertCodeToStatus(orderList.get(position).getOrderStatus()));
+            viewHolder.tvOrderNumOfItem.setText(new StringBuilder(String.valueOf(order.getNumOfItem())));
+            viewHolder.tvOrderAddres.setText(new StringBuilder(order.getOrderAddress()));
+            viewHolder.tvOrderPhone.setText(new StringBuilder(order.getOrderPhone()));
+            viewHolder.tvOrderPrice.setText(new StringBuilder(String.valueOf(order.getTotalPrice())));
+            viewHolder.tvOrerDate.setText(order.getOrderDate());
+            viewHolder.tvOrderId.setText(new StringBuilder("#").append(order.getOrderId()));
+            viewHolder.tvOrderStatus.setText(Common.convertCodeToStatus(order.getOrderStatus()));
 
             if (orderList.get(position).isCod()) {
-                viewHolder.tvOrderCod.setText(new StringBuilder("Cash On Delivery"));
+                viewHolder.tvOrderCod.setText(new StringBuilder("Thanh toán khi nhận hàng"));
             } else {
-                viewHolder.tvOrderCod.setText(new StringBuilder("TransID: ").append(orderList.get(position).getTransactionId()));
+                viewHolder.tvOrderCod.setText(new StringBuilder("TransID: ").append(order.getTransactionId()));
             }
         } else if (holder instanceof LoadingHolder) {
             LoadingHolder loadingHolder = (LoadingHolder) holder;
